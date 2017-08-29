@@ -5,15 +5,15 @@ EXTERN_C_START
 // Device context struct
 typedef struct _DEVICE_CONTEXT
 {
-	WDFUSBDEVICE						UsbDevice;
-	WDFUSBPIPE							InterruptPipe;
-	WDFUSBINTERFACE						UsbInterface;
+	WDFUSBDEVICE                UsbDevice;
+	WDFUSBPIPE                  InterruptPipe;
+	WDFUSBINTERFACE             UsbInterface;
 
-	USB_DEVICE_DESCRIPTOR				DeviceDescriptor;
+	USB_DEVICE_DESCRIPTOR       DeviceDescriptor;
 
-	const struct BCM5974_CONFIG			*DeviceInfo;
+	const struct BCM5974_CONFIG *DeviceInfo;
 
-	ULONG								UsbDeviceTraits;
+	ULONG                       UsbDeviceTraits;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
