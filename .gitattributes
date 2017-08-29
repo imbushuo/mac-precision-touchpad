@@ -3,6 +3,9 @@
 ###############################################################################
 * text=auto
 
+*.c linguist-language=C
+*.h linguist-language=C
+
 ###############################################################################
 # Set default behavior for command prompt diff.
 #
