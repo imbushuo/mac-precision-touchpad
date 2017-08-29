@@ -5,7 +5,7 @@
 // 4a5064e5-7d39-41d1-a0e4-81097edce967
 //
 DEFINE_GUID(GUID_DEVINTERFACE_MagicTrackpad2PtpDevice,
-    0x4a5064e5,0x7d39,0x41d1,0xa0,0xe4,0x81,0x09,0x7e,0xdc,0xe9,0x67);
+	0x4a5064e5, 0x7d39, 0x41d1, 0xa0, 0xe4, 0x81, 0x09, 0x7e, 0xdc, 0xe9, 0x67);
 
 //
 // Define the tracing flags.
@@ -32,7 +32,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_MagicTrackpad2PtpDevice,
 
 #define WPP_LEVEL_FLAGS_LOGGER(lvl,flags) \
            WPP_LEVEL_LOGGER(flags)
-               
+
 #define WPP_LEVEL_FLAGS_ENABLED(lvl, flags) \
            (WPP_LEVEL_ENABLED(flags) && WPP_CONTROL(WPP_BIT_ ## flags).Level >= lvl)
 

@@ -5,12 +5,12 @@ EXTERN_C_START
 // Device context struct
 typedef struct _DEVICE_CONTEXT
 {
-    WDFUSBDEVICE						UsbDevice;
+	WDFUSBDEVICE						UsbDevice;
 	WDFUSBPIPE							InterruptPipe;
 	WDFUSBINTERFACE						UsbInterface;
 
 	USB_DEVICE_DESCRIPTOR				DeviceDescriptor;
-	
+
 	const struct BCM5974_CONFIG			*DeviceInfo;
 
 	ULONG								UsbDeviceTraits;
@@ -30,8 +30,8 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 NTSTATUS
 MagicTrackpad2PtpDeviceCreateDevice(
 	_In_    WDFDRIVER       Driver,
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    );
+	_Inout_ PWDFDEVICE_INIT DeviceInit
+);
 
 //
 // Function to select the device's USB configuration and get a WDFUSBDEVICE

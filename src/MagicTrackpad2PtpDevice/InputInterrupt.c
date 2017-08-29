@@ -44,8 +44,8 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 	UNREFERENCED_PARAMETER(Pipe);
 
 	WDFDEVICE       device;
-	PDEVICE_CONTEXT pDeviceContext	= Context;
-	UCHAR*			szBuffer		= NULL;
+	PDEVICE_CONTEXT pDeviceContext = Context;
+	UCHAR*			szBuffer = NULL;
 
 	device = WdfObjectContextGetObject(pDeviceContext);
 
@@ -55,12 +55,12 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 	u16 pressure = 0;
 
 	size_t raw_n, i = 0;
-	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
-	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
+	size_t headerSize = (unsigned int)pDeviceContext->DeviceInfo->tp_header;
+	size_t fingerprintSize = (unsigned int)pDeviceContext->DeviceInfo->tp_fsize;
 
 	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0)
 	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, 
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
 			"Malformed input received. Length = %llu\n", NumBytesTransferred);
 	}
 	else
@@ -68,7 +68,7 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 		// Iterations to read
 		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
 		szBuffer = WdfMemoryGetBuffer(Buffer, NULL);
-		for (i = 0; i < raw_n; i++) 
+		for (i = 0; i < raw_n; i++)
 		{
 			u8 *f_base = szBuffer + headerSize + pDeviceContext->DeviceInfo->tp_delta;
 			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);

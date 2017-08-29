@@ -25,15 +25,15 @@ MagicTrackpad2GetConfig(
 NTSTATUS
 MagicTrackpad2PtpDeviceCreateDevice(
 	_In_    WDFDRIVER       Driver,
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+	_Inout_ PWDFDEVICE_INIT DeviceInit
+)
 {
-    WDF_PNPPOWER_EVENT_CALLBACKS		pnpPowerCallbacks;
+	WDF_PNPPOWER_EVENT_CALLBACKS		pnpPowerCallbacks;
 	WDF_DEVICE_PNP_CAPABILITIES         pnpCaps;
-    WDF_OBJECT_ATTRIBUTES				deviceAttributes;
-    PDEVICE_CONTEXT						deviceContext;
-    WDFDEVICE							device;
-    NTSTATUS							status;
+	WDF_OBJECT_ATTRIBUTES				deviceAttributes;
+	PDEVICE_CONTEXT						deviceContext;
+	WDFDEVICE							device;
+	NTSTATUS							status;
 
 	UNREFERENCED_PARAMETER(Driver);
 	PAGED_CODE();
@@ -41,18 +41,18 @@ MagicTrackpad2PtpDeviceCreateDevice(
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
 	// Initialize Power Callback
-    WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
-    
+	WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
+
 	// Initialize PNP power event callbacks
 	pnpPowerCallbacks.EvtDevicePrepareHardware = MagicTrackpad2PtpDeviceEvtDevicePrepareHardware;
 	pnpPowerCallbacks.EvtDeviceD0Entry = MagicTrackpad2PtpDeviceEvtDeviceD0Entry;
 	pnpPowerCallbacks.EvtDeviceD0Exit = MagicTrackpad2PtpDeviceEvtDeviceD0Exit;
-    WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
+	WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
 	// Create WDF device object
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
+	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
 
-    status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
+	status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER,
 			"WdfDeviceCreate failed with Status code %!STATUS!\n", status);
@@ -98,33 +98,33 @@ MagicTrackpad2PtpDeviceCreateDevice(
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
-    return status;
+	return status;
 }
 
 NTSTATUS
 MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
-    _In_ WDFDEVICE Device,
-    _In_ WDFCMRESLIST ResourceList,
-    _In_ WDFCMRESLIST ResourceListTranslated
-    )
+	_In_ WDFDEVICE Device,
+	_In_ WDFCMRESLIST ResourceList,
+	_In_ WDFCMRESLIST ResourceListTranslated
+)
 {
-    NTSTATUS								status;
-    PDEVICE_CONTEXT							pDeviceContext;
+	NTSTATUS								status;
+	PDEVICE_CONTEXT							pDeviceContext;
 	ULONG									waitWakeEnable;
 	WDF_USB_DEVICE_INFORMATION				deviceInfo;
 
 	waitWakeEnable = FALSE;
-	
-    UNREFERENCED_PARAMETER(ResourceList);
-    UNREFERENCED_PARAMETER(ResourceListTranslated);
+
+	UNREFERENCED_PARAMETER(ResourceList);
+	UNREFERENCED_PARAMETER(ResourceListTranslated);
 	PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-    status = STATUS_SUCCESS;
-    pDeviceContext = DeviceGetContext(Device);
+	status = STATUS_SUCCESS;
+	pDeviceContext = DeviceGetContext(Device);
 
-    if (pDeviceContext->UsbDevice == NULL) {
+	if (pDeviceContext->UsbDevice == NULL) {
 		status = WdfUsbTargetDeviceCreate(Device,
 			WDF_NO_OBJECT_ATTRIBUTES,
 			&pDeviceContext->UsbDevice);
@@ -133,7 +133,7 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 				"WdfUsbTargetDeviceCreate failed with Status code %!STATUS!\n", status);
 			return status;
 		}
-    }
+	}
 
 	// Retrieve device information
 	WdfUsbTargetDeviceGetDeviceDescriptor(pDeviceContext->UsbDevice, &pDeviceContext->DeviceDescriptor);
@@ -153,7 +153,7 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 	WDF_USB_DEVICE_INFORMATION_INIT(&deviceInfo);
 	status = WdfUsbTargetDeviceRetrieveInformation(pDeviceContext->UsbDevice, &deviceInfo);
 
-	if (NT_SUCCESS(status)) 
+	if (NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "IsDeviceHighSpeed: %s\n",
 			(deviceInfo.Traits & WDF_USB_DEVICE_TRAIT_AT_HIGH_SPEED) ? "TRUE" : "FALSE");
@@ -172,8 +172,8 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 		// Save these for use later.
 		//
 		pDeviceContext->UsbDeviceTraits = deviceInfo.Traits;
-	} 
-	else 
+	}
+	else
 	{
 		pDeviceContext->UsbDeviceTraits = 0;
 	}
@@ -210,8 +210,8 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 		return status;
 	}
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
-    return status;
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	return status;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -242,27 +242,27 @@ MagicTrackpad2PtpDeviceSetWellspringMode(
 
 	WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&memoryDescriptor, buffer, sizeof(DeviceContext->DeviceInfo->um_size));
 
-	WDF_USB_CONTROL_SETUP_PACKET_INIT(&setupPacket, BmRequestDeviceToHost, BmRequestToInterface, 
+	WDF_USB_CONTROL_SETUP_PACKET_INIT(&setupPacket, BmRequestDeviceToHost, BmRequestToInterface,
 		BCM5974_WELLSPRING_MODE_READ_REQUEST_ID,
-		(USHORT) DeviceContext->DeviceInfo->um_req_val, (USHORT) DeviceContext->DeviceInfo->um_req_idx);
+		(USHORT)DeviceContext->DeviceInfo->um_req_val, (USHORT)DeviceContext->DeviceInfo->um_req_idx);
 
 	// Set stuffs right
 	setupPacket.Packet.bm.Request.Type = BmRequestClass;
 
 	status = WdfUsbTargetDeviceSendControlTransferSynchronously(DeviceContext->UsbDevice, WDF_NO_HANDLE, NULL, &setupPacket, &memoryDescriptor, &cbTransferred);
-	if (!NT_SUCCESS(status) || cbTransferred != (ULONG) DeviceContext->DeviceInfo->um_size) {
+	if (!NT_SUCCESS(status) || cbTransferred != (ULONG)DeviceContext->DeviceInfo->um_size) {
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfUsbTargetDeviceSendControlTransferSynchronously (Read) failed 0x%x\n", status);
 		goto cleanup;
 	}
 
 	// Apply the mode switch
-	buffer[DeviceContext->DeviceInfo->um_switch_idx] = IsWellspringModeOn ? 
-		(unsigned char) DeviceContext->DeviceInfo->um_switch_on : (unsigned char) DeviceContext->DeviceInfo->um_switch_off;
-	
+	buffer[DeviceContext->DeviceInfo->um_switch_idx] = IsWellspringModeOn ?
+		(unsigned char)DeviceContext->DeviceInfo->um_switch_on : (unsigned char)DeviceContext->DeviceInfo->um_switch_off;
+
 	// Write configuration
 	WDF_USB_CONTROL_SETUP_PACKET_INIT(&setupPacket, BmRequestHostToDevice, BmRequestToInterface,
 		BCM5974_WELLSPRING_MODE_WRITE_REQUEST_ID,
-		(USHORT) DeviceContext->DeviceInfo->um_req_val, (USHORT) DeviceContext->DeviceInfo->um_req_idx);
+		(USHORT)DeviceContext->DeviceInfo->um_req_val, (USHORT)DeviceContext->DeviceInfo->um_req_idx);
 
 	// Set stuffs right
 	setupPacket.Packet.bm.Request.Type = BmRequestClass;

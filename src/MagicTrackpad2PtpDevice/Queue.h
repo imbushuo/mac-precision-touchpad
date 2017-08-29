@@ -16,8 +16,8 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(QUEUE_CONTEXT, QueueGetContext)
 
 NTSTATUS
 MagicTrackpad2PtpDeviceQueueInitialize(
-    _In_ WDFDEVICE Device
-    );
+	_In_ WDFDEVICE Device
+);
 
 //
 // Events from the IoQueue object
