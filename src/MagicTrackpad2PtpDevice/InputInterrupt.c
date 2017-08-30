@@ -51,12 +51,37 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 
 	const struct TRACKPAD_FINGER *f;
 	const struct TRACKPAD_FINGER_TYPE5 *f_type5;
+	const struct TRACKPAD_EMULATED_MOUSE *f_mouse;
 	s32 x, y = 0;
 	u16 pressure = 0;
 
 	size_t raw_n, i = 0;
-	size_t headerSize = (unsigned int)pDeviceContext->DeviceInfo->tp_header;
-	size_t fingerprintSize = (unsigned int)pDeviceContext->DeviceInfo->tp_fsize;
+	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
+	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
+
+	if (!pDeviceContext->IsWellspringModeOn && NumBytesTransferred == BCM5974_MOUSE_SIZE)
+	{
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Received regular payload length = %llu\n", NumBytesTransferred);
+		szBuffer = WdfMemoryGetBuffer(Buffer, NULL);
+		f_mouse = (const struct TRACKPAD_EMULATED_MOUSE*) szBuffer;
+
+		// Attempt to parse some data
+		if (f_mouse->buttons & 0x01) {
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Button 1 clicked.\n");
+		}
+
+		if (f_mouse->buttons & 0x02) {
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Button 2 clicked.\n");
+		}
+
+		if (f_mouse->buttons & 0x03) {
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Button 3 clicked.\n");
+		}
+
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "X = %d, Y = %d\n", f_mouse->x, f_mouse->y);
+		
+		return;
+	}
 
 	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0)
 	{

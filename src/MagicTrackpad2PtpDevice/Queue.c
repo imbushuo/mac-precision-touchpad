@@ -70,12 +70,49 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 	_In_ ULONG IoControlCode
 )
 {
+	
+	NTSTATUS status = STATUS_SUCCESS;
+	WDFDEVICE device = WdfIoQueueGetDevice(Queue);
+	PDEVICE_CONTEXT devContext = DeviceGetContext(device);
+
+	UNREFERENCED_PARAMETER(device);
+	UNREFERENCED_PARAMETER(devContext);
+
 	TraceEvents(TRACE_LEVEL_INFORMATION,
 		TRACE_QUEUE,
 		"%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d",
 		Queue, Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
 
-	WdfRequestComplete(Request, STATUS_SUCCESS);
+	switch (IoControlCode)
+	{
+		case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
+			break;
+		case IOCTL_HID_GET_DEVICE_ATTRIBUTES:
+			break;
+		case IOCTL_HID_GET_REPORT_DESCRIPTOR:
+			break;
+		case IOCTL_HID_GET_STRING:
+			break;
+		case IOCTL_HID_WRITE_REPORT:
+		case IOCTL_HID_SET_OUTPUT_REPORT:
+			break;
+		case IOCTL_HID_READ_REPORT:
+		case IOCTL_HID_GET_INPUT_REPORT:
+			break;
+		case IOCTL_HID_SET_FEATURE:
+			break;
+		case IOCTL_HID_GET_FEATURE:
+			break;
+		case IOCTL_HID_ACTIVATE_DEVICE:
+			break;
+		case IOCTL_HID_DEACTIVATE_DEVICE:
+			break;
+		default:
+			status = STATUS_NOT_SUPPORTED;
+			break;
+	}
+
+	WdfRequestComplete(Request, status);
 
 	return;
 }

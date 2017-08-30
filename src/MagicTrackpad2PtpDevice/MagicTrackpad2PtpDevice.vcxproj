@@ -44,6 +44,7 @@
     <ClInclude Include="AppleDefinition.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="Hid.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
@@ -139,6 +140,7 @@
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(Platform)\$(ConfigurationName)\</IntDir>
+    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>

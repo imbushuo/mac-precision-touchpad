@@ -204,11 +204,11 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 	}
 
 	// Set up wellspring mode
-	status = MagicTrackpad2PtpDeviceSetWellspringMode(pDeviceContext, TRUE);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "MagicTrackpad2PtpDeviceSetWellspringMode failed 0x%x\n", status);
-		return status;
-	}
+	// status = MagicTrackpad2PtpDeviceSetWellspringMode(pDeviceContext, TRUE);
+	// if (!NT_SUCCESS(status)) {
+	// 	TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "MagicTrackpad2PtpDeviceSetWellspringMode failed 0x%x\n", status);
+	//	return status;
+	// }
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
@@ -271,6 +271,9 @@ MagicTrackpad2PtpDeviceSetWellspringMode(
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfUsbTargetDeviceSendControlTransferSynchronously (Write) failed 0x%x\n", status);
 		goto cleanup;
 	}
+
+	// Set status
+	DeviceContext->IsWellspringModeOn = IsWellspringModeOn;
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: exit");
 

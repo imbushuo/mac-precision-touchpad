@@ -15,6 +15,8 @@ typedef struct _DEVICE_CONTEXT
 
 	ULONG                       UsbDeviceTraits;
 
+	BOOL                        IsWellspringModeOn;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //

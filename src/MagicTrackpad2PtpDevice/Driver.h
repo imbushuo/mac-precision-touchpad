@@ -5,6 +5,7 @@
 #include <usb.h>
 #include <wdfusb.h>
 #include <initguid.h>
+#include <hidport.h>
 
 #include "Types.h"
 #include "AppleDefinition.h"

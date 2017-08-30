@@ -122,6 +122,8 @@ enum TRACKPAD_TYPE {
 #define MAX_FINGERS		16
 #define MAX_FINGER_ORIENTATION	16384
 
+#define BCM5974_MOUSE_SIZE 8
+
 /* trackpad finger structure, le16-aligned */
 __declspec(align(2)) struct TRACKPAD_FINGER {
 	__le16 origin;		/* zero when switching track finger */
@@ -149,6 +151,14 @@ __declspec(align(2)) struct TRACKPAD_FINGER_TYPE5 {
 	u8 size;			/* tool area, size */
 	u8 pressure;		/* pressure on forcetouch touchpad */
 	u8 orientation_origin;	/* orientation and id */
+};
+
+struct TRACKPAD_EMULATED_MOUSE {
+	char reportId;		/* Expected 0x02 */
+	char buttons;
+	char x;
+	char y;
+	int padding;
 };
 
 /* device-specific parameters */
