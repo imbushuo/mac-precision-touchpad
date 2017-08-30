@@ -73,9 +73,6 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 	
 	NTSTATUS status = STATUS_SUCCESS;
 	WDFDEVICE device = WdfIoQueueGetDevice(Queue);
-	PDEVICE_CONTEXT devContext = DeviceGetContext(device);
-
-	UNREFERENCED_PARAMETER(devContext);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION,
 		TRACE_QUEUE,
