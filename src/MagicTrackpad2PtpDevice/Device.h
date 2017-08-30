@@ -99,4 +99,36 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptReadersFailed(
 	_In_ USBD_STATUS UsbdStatus
 );
 
+///
+/// HID sections
+///
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetHidDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetDeviceAttribs(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetReportDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetStrings(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
 EXTERN_C_END

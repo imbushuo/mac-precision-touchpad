@@ -1,6 +1,11 @@
 // Hid.h: Device-related HID definitions
 #pragma once
 
+#include <hidport.h>
+#include "Types.h"
+
+#define DEVICE_VERSION 0x01
+
 #define REPORTID_MTOUCH 0x01
 #define REPORTID_FEATURE 0x02
 #define REPORTID_MOUSE 0x03
@@ -52,3 +57,20 @@
 			INPUT, 0x01, /* INPUT: (Const, Arr, Abs) */ \
 		END_COLLECTION,       /* END COLLECTION */ \
 	END_COLLECTION		/* END COLLECTION */
+
+HID_REPORT_DESCRIPTOR AAPLMagicTrackpad2ReportDescriptor[] = {
+	// Only report Mouse at this moment
+	AAPL_MAGIC_TRACKPAD2_MOUSE_TLC
+};
+
+CONST HID_DESCRIPTOR AAPLMagicTrackpad2DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+	{ 
+		0x22,                                         // bDescriptorType
+		sizeof(AAPLMagicTrackpad2ReportDescriptor)    // bDescriptorLength
+	}
+};

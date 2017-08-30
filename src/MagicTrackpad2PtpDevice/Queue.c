@@ -75,7 +75,6 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 	WDFDEVICE device = WdfIoQueueGetDevice(Queue);
 	PDEVICE_CONTEXT devContext = DeviceGetContext(device);
 
-	UNREFERENCED_PARAMETER(device);
 	UNREFERENCED_PARAMETER(devContext);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -86,12 +85,16 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 	switch (IoControlCode)
 	{
 		case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
+			status = MagicTrackpad2GetHidDescriptor(device, Request);
 			break;
 		case IOCTL_HID_GET_DEVICE_ATTRIBUTES:
+			status = MagicTrackpad2GetDeviceAttribs(device, Request);
 			break;
 		case IOCTL_HID_GET_REPORT_DESCRIPTOR:
+			status = MagicTrackpad2GetReportDescriptor(device, Request);
 			break;
 		case IOCTL_HID_GET_STRING:
+			status = MagicTrackpad2GetStrings(device, Request);
 			break;
 		case IOCTL_HID_WRITE_REPORT:
 		case IOCTL_HID_SET_OUTPUT_REPORT:

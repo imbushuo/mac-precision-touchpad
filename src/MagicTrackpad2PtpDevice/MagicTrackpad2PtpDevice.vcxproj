@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
+    <ClCompile Include="Hid.c" />
     <ClCompile Include="InputInterrupt.c" />
     <ClCompile Include="Queue.c" />
   </ItemGroup>
