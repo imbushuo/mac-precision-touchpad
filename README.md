@@ -13,7 +13,9 @@ It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Developm
 - [x] Touchpad Device Power Management
 - [x] Touchpad Protocol Stack Implementation
 - [x] Touchpad Raw Input Output (in Driver Trace)
-- [ ] HID Protocol Implementation
+- [x] HID Protocol Implementation (Mouse)
+- [ ] HID Protocol Implementation (PTP Touch)
+- [ ] HID Protocol Implementation (Configuration)
 - [ ] Device Test
 
 ## Acknowledgements
