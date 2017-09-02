@@ -55,12 +55,6 @@ SelectInterruptInterface(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2PtpDeviceSetPowerPolicy(
-	_In_ WDFDEVICE Device
-);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS
 MagicTrackpad2PtpDeviceSetWellspringMode(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ BOOL IsWellspringModeOn

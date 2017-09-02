@@ -185,17 +185,6 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 		return status;
 	}
 
-	//
-	// Enable wait-wake and idle timeout if the device supports it
-	//
-	if (waitWakeEnable) {
-		status = MagicTrackpad2PtpDeviceSetPowerPolicy(Device);
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "MagicTrackpad2PtpDeviceSetPowerPolicy failed  %!STATUS!\n", status);
-			return status;
-		}
-	}
-
 	// Set up interrupt
 	status = MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint(pDeviceContext);
 	if (!NT_SUCCESS(status)) {
@@ -345,44 +334,6 @@ MagicTrackpad2PtpDeviceEvtDeviceD0Exit(
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "<--MagicTrackpad2PtpDeviceEvtDeviceD0Exit\n");
 
 	return STATUS_SUCCESS;
-}
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS
-MagicTrackpad2PtpDeviceSetPowerPolicy(
-	_In_ WDFDEVICE Device
-)
-{
-	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS idleSettings;
-	WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS wakeSettings;
-	NTSTATUS    status = STATUS_SUCCESS;
-
-	PAGED_CODE();
-
-	//
-	// Init the idle policy structure.
-	//
-	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS_INIT(&idleSettings, IdleUsbSelectiveSuspend);
-	idleSettings.IdleTimeout = 10000; // 10-sec
-
-	status = WdfDeviceAssignS0IdleSettings(Device, &idleSettings);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfDeviceSetPowerPolicyS0IdlePolicy failed %x\n", status);
-		return status;
-	}
-
-	//
-	// Init wait-wake policy structure.
-	//
-	WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS_INIT(&wakeSettings);
-
-	status = WdfDeviceAssignSxWakeSettings(Device, &wakeSettings);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfDeviceAssignSxWakeSettings failed %x\n", status);
-		return status;
-	}
-
-	return status;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
