@@ -147,56 +147,52 @@ MagicTrackpad2GetStrings(
 {
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-	NTSTATUS               status         = STATUS_SUCCESS;
-	PWSTR                  pwstrID;
-	size_t                 lenID;
+	NTSTATUS               status = STATUS_SUCCESS;
 	WDF_REQUEST_PARAMETERS params;
-	PDEVICE_CONTEXT        pContext       = DeviceGetContext(Device);
+	PDEVICE_CONTEXT        pContext = DeviceGetContext(Device);
 	void                   *pStringBuffer = NULL;
+	WDFMEMORY              memHandle;
+	USHORT                 wcharCount;
+	size_t                 actualSize;
+	UCHAR                  strIndex;
 
 	WDF_REQUEST_PARAMETERS_INIT(&params);
 	WdfRequestGetParameters(Request, &params);
 
-	if (pContext->DeviceDescriptor.idProduct != USB_DEVICE_ID_APPLE_MAGICTRACKPAD2)
-	{
-		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "Device HID registry is not found\n");
-		status = STATUS_INVALID_DEVICE_STATE;
-		return status;
-	}
-
 	switch ((ULONG_PTR) params.Parameters.DeviceIoControl.Type3InputBuffer & 0xFFFF)
 	{
 		case HID_STRING_ID_IMANUFACTURER:
-			pwstrID = L"Apple Inc.\0";
+			strIndex = pContext->DeviceDescriptor.iManufacturer;
 			break;
 		case HID_STRING_ID_IPRODUCT:
-			pwstrID = L"Apple Magic Trackpad 2\0";
+			strIndex = pContext->DeviceDescriptor.iProduct;
 			break;
 		case HID_STRING_ID_ISERIALNUMBER:
-			pwstrID = L"CC27272033DJ2XQAG\0";
+			strIndex = pContext->DeviceDescriptor.iSerialNumber;
 			break;
 		default:
-			pwstrID = NULL;
-			break;
+			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC! gets invalid string type\n");
+			status = STATUS_INVALID_PARAMETER;
+			return status;
 	}
 
-	lenID = pwstrID ? wcslen(pwstrID) * sizeof(WCHAR) + sizeof(UNICODE_NULL) : 0;
-	if (pwstrID == NULL)
+	status = WdfUsbTargetDeviceAllocAndQueryString(pContext->UsbDevice, 
+		WDF_NO_OBJECT_ATTRIBUTES, &memHandle, &wcharCount, strIndex, 0x409);
+	if (!NT_SUCCESS(status))
 	{
-		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC! gets invalid string type\n");
-		status = STATUS_INVALID_PARAMETER;
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!", status);
 		return status;
 	}
 
-	status = WdfRequestRetrieveOutputBuffer(Request, lenID, &pStringBuffer, &lenID);
+	status = WdfRequestRetrieveOutputBuffer(Request, wcharCount * sizeof(WCHAR), &pStringBuffer, &actualSize);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
 		return status;
 	}
 
-	RtlCopyMemory(pStringBuffer, pwstrID, lenID);
-	WdfRequestSetInformation(Request, lenID);
+	WdfMemoryCopyToBuffer(memHandle, 0, &pStringBuffer, actualSize);
+	WdfRequestSetInformation(Request, actualSize);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
