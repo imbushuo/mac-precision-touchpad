@@ -1,8 +1,6 @@
 // InputInterrupt.c: Handles device input event
 
 #include "Driver.h"
-#include "Types.h"
-#include "AppleDefinition.h"
 #include "InputInterrupt.tmh"
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -46,12 +44,13 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 	WDFDEVICE       device;
 	PDEVICE_CONTEXT pDeviceContext = Context;
 	UCHAR*			szBuffer = NULL;
+	NTSTATUS        status;
 
 	device = WdfObjectContextGetObject(pDeviceContext);
 
 	const struct TRACKPAD_FINGER *f;
 	const struct TRACKPAD_FINGER_TYPE5 *f_type5;
-	const struct TRACKPAD_EMULATED_MOUSE *f_mouse;
+
 	s32 x, y = 0;
 	u16 pressure = 0;
 
@@ -61,25 +60,16 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 
 	if (!pDeviceContext->IsWellspringModeOn && NumBytesTransferred == BCM5974_MOUSE_SIZE)
 	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Received regular payload length = %llu\n", NumBytesTransferred);
+
 		szBuffer = WdfMemoryGetBuffer(Buffer, NULL);
-		f_mouse = (const struct TRACKPAD_EMULATED_MOUSE*) szBuffer;
 
-		// Attempt to parse some data
-		if (f_mouse->buttons & 0x01) {
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Button 1 clicked.\n");
+		// Dispatch to mouse routine
+		status = AmtPtpServiceMouseInputInterrupt(pDeviceContext, szBuffer, NumBytesTransferred);
+		if (!NT_SUCCESS(status))
+		{
+			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: AmtPtpServiceMouseInputInterrupt failed with %!STATUS!", status);
 		}
 
-		if (f_mouse->buttons & 0x02) {
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Button 2 clicked.\n");
-		}
-
-		if (f_mouse->buttons & 0x03) {
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Button 3 clicked.\n");
-		}
-
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "X = %d, Y = %d\n", f_mouse->x, f_mouse->y);
-		
 		return;
 	}
 
@@ -143,4 +133,76 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptReadersFailed(
 	UNREFERENCED_PARAMETER(Status);
 
 	return TRUE;
+}
+
+NTSTATUS
+AmtPtpServiceMouseInputInterrupt(
+	_In_ PDEVICE_CONTEXT DeviceContext,
+	_In_ UCHAR* Buffer,
+	_In_ size_t NumBytesTransferred
+)
+{
+	NTSTATUS   status;
+	WDFREQUEST request;
+	WDFMEMORY  reqMemory;
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+	status   = STATUS_SUCCESS;
+	request  = NULL;
+
+	status = WdfIoQueueRetrieveNextRequest(
+		DeviceContext->MouseQueue,
+		&request);
+
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: No pending mouse request. Interrupt disposed.");
+		return status;
+	}
+
+	// Validate size
+	if (NumBytesTransferred != sizeof(HID_AAPL_MOUSE_REPORT) + 1)
+	{
+		status = STATUS_INVALID_BUFFER_SIZE;
+		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: Invalid mouse input");
+		return status;
+	}
+
+	// Simply forward input buffer to output. No other validation.
+	status = WdfRequestRetrieveOutputMemory(request, &reqMemory);
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
+		return status;
+	}
+
+	status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)Buffer, NumBytesTransferred);
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
+		return status;
+	}
+
+	// Set information
+	WdfRequestSetInformation(request, NumBytesTransferred);
+	// Set completion flag
+	WdfRequestComplete(request, status);
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	return status;
+}
+
+NTSTATUS
+AmtPtpServiceTouchInputInterrupt(
+	_In_ PDEVICE_CONTEXT DeviceContext,
+	_In_ UCHAR* Buffer,
+	_In_ size_t NumBytesTransferred
+)
+{
+	UNREFERENCED_PARAMETER(DeviceContext);
+	UNREFERENCED_PARAMETER(Buffer);
+	UNREFERENCED_PARAMETER(NumBytesTransferred);
+
+	return STATUS_NOT_IMPLEMENTED;
 }

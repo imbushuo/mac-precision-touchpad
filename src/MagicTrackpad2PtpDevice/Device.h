@@ -8,6 +8,8 @@ typedef struct _DEVICE_CONTEXT
 	WDFUSBDEVICE                UsbDevice;
 	WDFUSBPIPE                  InterruptPipe;
 	WDFUSBINTERFACE             UsbInterface;
+	WDFQUEUE                    MouseQueue;
+	WDFQUEUE                    TouchQueue;
 
 	USB_DEVICE_DESCRIPTOR       DeviceDescriptor;
 
@@ -91,6 +93,20 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
 	_In_ NTSTATUS Status,
 	_In_ USBD_STATUS UsbdStatus
+);
+
+NTSTATUS
+AmtPtpServiceMouseInputInterrupt(
+	_In_ PDEVICE_CONTEXT DeviceContext,
+	_In_ UCHAR* Buffer,
+	_In_ size_t NumBytesTransferred
+);
+
+NTSTATUS
+AmtPtpServiceTouchInputInterrupt(
+	_In_ PDEVICE_CONTEXT DeviceContext,
+	_In_ UCHAR* Buffer,
+	_In_ size_t NumBytesTransferred
 );
 
 ///

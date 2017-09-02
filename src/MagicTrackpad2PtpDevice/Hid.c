@@ -1,8 +1,29 @@
 // Hid.c: HID-related routine
 
 #include "Driver.h"
-#include "Hid.h"
 #include "Hid.tmh"
+
+#ifndef _AAPL_HID_DESCRIPTOR_H_
+#define _AAPL_HID_DESCRIPTOR_H_
+
+HID_REPORT_DESCRIPTOR AAPLMagicTrackpad2ReportDescriptor[] = {
+	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
+	AAPL_PTP_CONFIGURATION_TLC,
+	AAPL_MAGIC_TRACKPAD2_MOUSE_TLC
+};
+
+CONST HID_DESCRIPTOR AAPLMagicTrackpad2DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+	{
+		0x22,                                         // bDescriptorType
+		sizeof(AAPLMagicTrackpad2ReportDescriptor)    // bDescriptorLength
+	}
+};
+#endif
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS

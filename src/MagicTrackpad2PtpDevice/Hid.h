@@ -1,9 +1,15 @@
 // Hid.h: Device-related HID definitions
 #pragma once
 
-#include <hidport.h>
 #include "AppleDefinition.h"
-#include "Types.h"
+#include <hidport.h>
+
+//
+// This is the default report descriptor for the Hid device provided
+// by the mini driver in response to IOCTL_HID_GET_REPORT_DESCRIPTOR.
+// 
+
+typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 
 #define DEVICE_VERSION 0x01
 
@@ -235,20 +241,21 @@
 		FEATURE, 0x02, \
 	END_COLLECTION /* End Collection */
 
-HID_REPORT_DESCRIPTOR AAPLMagicTrackpad2ReportDescriptor[] = {
-	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
-	AAPL_PTP_CONFIGURATION_TLC,
-	AAPL_MAGIC_TRACKPAD2_MOUSE_TLC
-};
+typedef struct _HID_AAPL_MOUSE_REPORT {
+	struct
+	{
+		UCHAR  bButtons;
+		UCHAR  wXData;
+		UCHAR  wYData;
+		UINT   Padding;
+	} InputReport;
+} HID_AAPL_MOUSE_REPORT, *PHID_AAPL_MOUSE_REPORT;
 
-CONST HID_DESCRIPTOR AAPLMagicTrackpad2DefaultHidDescriptor = {
-	0x09,   // bLength
-	0x21,   // bDescriptorType
-	0x0100, // bcdHID
-	0x00,   // bCountryCode
-	0x01,   // bNumDescriptors
-	{ 
-		0x22,                                         // bDescriptorType
-		sizeof(AAPLMagicTrackpad2ReportDescriptor)    // bDescriptorLength
-	}
-};
+typedef struct _HID_INPUT_REPORT
+{
+	UCHAR ReportID;
+	union
+	{
+		HID_AAPL_MOUSE_REPORT MouseReport;
+	};
+} HID_INPUT_REPORT, *PHID_INPUT_REPORT;

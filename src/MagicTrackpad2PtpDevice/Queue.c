@@ -32,6 +32,9 @@ Return Value:
 	WDFQUEUE queue;
 	NTSTATUS status;
 	WDF_IO_QUEUE_CONFIG    queueConfig;
+	PDEVICE_CONTEXT	       deviceContext;
+
+	deviceContext = DeviceGetContext(Device);
 
 	//
 	// Configure a default queue so that requests that are not
@@ -54,7 +57,36 @@ Return Value:
 	);
 
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Primary) failed %!STATUS!", status);
+		return status;
+	}
+
+	//
+	// Create secondary queues for touch and mouse read requests.
+	// 
+
+	WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchManual);
+	queueConfig.PowerManaged = WdfFalse;
+
+	status = WdfIoQueueCreate(
+		Device,
+		&queueConfig,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&deviceContext->MouseQueue);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Mouse) failed %!STATUS!", status);
+		return status;
+	}
+
+	status = WdfIoQueueCreate(
+		Device,
+		&queueConfig,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&deviceContext->TouchQueue);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Touch) failed %!STATUS!", status);
 		return status;
 	}
 
@@ -73,6 +105,7 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 	
 	NTSTATUS status = STATUS_SUCCESS;
 	WDFDEVICE device = WdfIoQueueGetDevice(Queue);
+	BOOLEAN requestPending = FALSE;
 
 	TraceEvents(TRACE_LEVEL_INFORMATION,
 		TRACE_QUEUE,
@@ -93,32 +126,26 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 		case IOCTL_HID_GET_STRING:
 			status = MagicTrackpad2GetStrings(device, Request);
 			break;
-		case IOCTL_HID_WRITE_REPORT:
-		case IOCTL_HID_SET_OUTPUT_REPORT:
-			status = STATUS_NOT_IMPLEMENTED;
-			break;
 		case IOCTL_HID_READ_REPORT:
-		case IOCTL_HID_GET_INPUT_REPORT:
-			status = STATUS_NOT_IMPLEMENTED;
+			status = AmtPtpDispatchReadReportRequests(device, Request, &requestPending);
 			break;
-		case IOCTL_HID_SET_FEATURE:
-			status = STATUS_NOT_IMPLEMENTED;
-			break;
-		case IOCTL_HID_GET_FEATURE:
-			status = STATUS_NOT_IMPLEMENTED;
-			break;
+		case IOCTL_HID_WRITE_REPORT:
+		case IOCTL_UMDF_HID_GET_INPUT_REPORT:
+		case IOCTL_UMDF_HID_SET_OUTPUT_REPORT:
+		case IOCTL_UMDF_HID_GET_FEATURE:
+		case IOCTL_UMDF_HID_SET_FEATURE:
 		case IOCTL_HID_ACTIVATE_DEVICE:
-			status = STATUS_NOT_IMPLEMENTED;
-			break;
 		case IOCTL_HID_DEACTIVATE_DEVICE:
-			status = STATUS_NOT_IMPLEMENTED;
-			break;
+		case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:
 		default:
 			status = STATUS_NOT_SUPPORTED;
 			break;
 	}
 
-	WdfRequestComplete(Request, status);
+	if (requestPending != TRUE)
+	{
+		WdfRequestComplete(Request, status);
+	}
 
 	return;
 }
@@ -182,4 +209,34 @@ Return Value:
 	//
 
 	return;
+}
+
+NTSTATUS
+AmtPtpDispatchReadReportRequests(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request,
+	_Out_ BOOLEAN *Pending
+)
+{
+	NTSTATUS status;
+	PDEVICE_CONTEXT devContext;
+
+	status = STATUS_SUCCESS;
+	devContext = DeviceGetContext(Device);
+
+	status = WdfRequestForwardToIoQueue(Request,
+		(devContext->IsWellspringModeOn)? devContext->TouchQueue : devContext->MouseQueue);
+
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestForwardToIoQueue failed with %!STATUS!", status);
+		return status;
+	}
+
+	if (NULL != Pending)
+	{
+		*Pending = TRUE;
+	}
+
+	return status;
 }
