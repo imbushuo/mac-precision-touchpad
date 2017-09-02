@@ -95,17 +95,23 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 			break;
 		case IOCTL_HID_WRITE_REPORT:
 		case IOCTL_HID_SET_OUTPUT_REPORT:
+			status = STATUS_NOT_IMPLEMENTED;
 			break;
 		case IOCTL_HID_READ_REPORT:
 		case IOCTL_HID_GET_INPUT_REPORT:
+			status = STATUS_NOT_IMPLEMENTED;
 			break;
 		case IOCTL_HID_SET_FEATURE:
+			status = STATUS_NOT_IMPLEMENTED;
 			break;
 		case IOCTL_HID_GET_FEATURE:
+			status = STATUS_NOT_IMPLEMENTED;
 			break;
 		case IOCTL_HID_ACTIVATE_DEVICE:
+			status = STATUS_NOT_IMPLEMENTED;
 			break;
 		case IOCTL_HID_DEACTIVATE_DEVICE:
+			status = STATUS_NOT_IMPLEMENTED;
 			break;
 		default:
 			status = STATUS_NOT_SUPPORTED;
