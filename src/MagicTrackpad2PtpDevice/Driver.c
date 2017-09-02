@@ -59,6 +59,10 @@ MagicTrackpad2PtpDeviceEvtDeviceAdd(
 	NTSTATUS status = STATUS_SUCCESS;
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Set FDO driver filter\n");
+	WdfFdoInitSetFilter(DeviceInit);
+
 	status = MagicTrackpad2PtpDeviceCreateDevice(Driver, DeviceInit);
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");

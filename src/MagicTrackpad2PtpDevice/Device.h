@@ -8,12 +8,16 @@ typedef struct _DEVICE_CONTEXT
 	WDFUSBDEVICE                UsbDevice;
 	WDFUSBPIPE                  InterruptPipe;
 	WDFUSBINTERFACE             UsbInterface;
+	WDFQUEUE                    MouseQueue;
+	WDFQUEUE                    TouchQueue;
 
 	USB_DEVICE_DESCRIPTOR       DeviceDescriptor;
 
 	const struct BCM5974_CONFIG *DeviceInfo;
 
 	ULONG                       UsbDeviceTraits;
+
+	BOOL                        IsWellspringModeOn;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -48,12 +52,6 @@ MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint(
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 SelectInterruptInterface(
-	_In_ WDFDEVICE Device
-);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS
-MagicTrackpad2PtpDeviceSetPowerPolicy(
 	_In_ WDFDEVICE Device
 );
 
@@ -95,6 +93,52 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
 	_In_ NTSTATUS Status,
 	_In_ USBD_STATUS UsbdStatus
+);
+
+NTSTATUS
+AmtPtpServiceMouseInputInterrupt(
+	_In_ PDEVICE_CONTEXT DeviceContext,
+	_In_ UCHAR* Buffer,
+	_In_ size_t NumBytesTransferred
+);
+
+NTSTATUS
+AmtPtpServiceTouchInputInterrupt(
+	_In_ PDEVICE_CONTEXT DeviceContext,
+	_In_ UCHAR* Buffer,
+	_In_ size_t NumBytesTransferred
+);
+
+///
+/// HID sections
+///
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetHidDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetDeviceAttribs(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetReportDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+MagicTrackpad2GetStrings(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
 );
 
 EXTERN_C_END

@@ -5,9 +5,10 @@
 #include <usb.h>
 #include <wdfusb.h>
 #include <initguid.h>
+#include <hidport.h>
 
-#include "Types.h"
 #include "AppleDefinition.h"
+#include "Hid.h"
 #include "device.h"
 #include "queue.h"
 #include "trace.h"
