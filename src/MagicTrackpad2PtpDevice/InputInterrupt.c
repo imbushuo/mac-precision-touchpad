@@ -158,15 +158,16 @@ AmtPtpServiceMouseInputInterrupt(
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: No pending mouse request. Interrupt disposed.");
-		return status;
+		goto exit;
 	}
 
 	// Validate size
-	if (NumBytesTransferred != sizeof(HID_AAPL_MOUSE_REPORT) + 1)
+	if (NumBytesTransferred * sizeof(BYTE) != sizeof(HID_AAPL_MOUSE_REPORT))
 	{
 		status = STATUS_INVALID_BUFFER_SIZE;
-		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: Invalid mouse input");
-		return status;
+		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: Invalid mouse input. NumBytesTransferred = %llu, required size = %llu",
+			NumBytesTransferred * sizeof(BYTE), sizeof(HID_AAPL_MOUSE_REPORT));
+		goto exit;
 	}
 
 	// Simply forward input buffer to output. No other validation.
@@ -174,22 +175,23 @@ AmtPtpServiceMouseInputInterrupt(
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
-		return status;
+		goto exit;
 	}
 
 	status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)Buffer, NumBytesTransferred);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
-		return status;
+		goto exit;
 	}
 
 	// Set information
 	WdfRequestSetInformation(request, NumBytesTransferred);
+
+exit:
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	// Set completion flag
 	WdfRequestComplete(request, status);
-
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
 }
 
