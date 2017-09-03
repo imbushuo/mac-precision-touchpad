@@ -15,7 +15,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 
 #define REPORTID_STANDARDMOUSE 0x02
 #define REPORTID_MULTITOUCH 0x03
-#define REPORTID_FEATURE 0x04
+#define REPORTID_REPORTMODE 0x04
 #define REPORTID_PTPHQA 0x05
 #define REPORTID_FUNCSWITCH 0x06
 #define REPORTID_DEVICE_CAPS 0x07
@@ -86,7 +86,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 	USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 	USAGE, 0x0e, /* Usage: Configuration */ \
 	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
-		REPORT_ID, REPORTID_FEATURE, /* Report ID: Feature */ \
+		REPORT_ID, REPORTID_REPORTMODE, /* Report ID: Mode Selection */ \
 		USAGE, 0x22, /* Usage: Finger */ \
 		BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
 			USAGE, 0x52, /* Usage: Input Mode */ \
@@ -100,12 +100,10 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 			REPORT_ID, REPORTID_FUNCSWITCH, /* Report ID: Function Switch */ \
 			USAGE, BUTTON_SWITCH, /* Usage: Button Switch */ \
 			USAGE, SURFACE_SWITCH, /* Usage: Surface Switch */ \
-			REPORT_SIZE, 0x01, /* Report Size: 0x01 */ \
+			REPORT_SIZE, 0x08, /* Report Size: 0x08 */ \
 			REPORT_COUNT, 0x02, /* Report Count: 0x02 */ \
 			LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 0x01 */ \
 			FEATURE, 0x02, /* Feature: (Data, Var, Abs) */ \
-			REPORT_COUNT, 0x06, /* Report Count: 0x06 */ \
-			FEATURE, 0x03, /* Feature: (Const, Var, Abs) */ \
 		END_COLLECTION, /* End Collection */ \
 	END_COLLECTION /* End Collection */
 
@@ -268,6 +266,9 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 #define PTP_BUTTON_TYPE_CLICK_PAD 0
 #define PTP_BUTTON_TYPE_PRESSURE_PAD 1
 
+#define PTP_COLLECTION_MOUSE 0
+#define PTP_COLLECTION_WINDOWS 3
+
 typedef struct _HID_AAPL_MOUSE_REPORT {
 	struct
 	{
@@ -296,3 +297,16 @@ typedef struct _PTP_DEVICE_HQA_CERTIFICATION_REPORT
 	UCHAR ReportID;
 	UCHAR CertificationBlob[256];
 } PTP_DEVICE_HQA_CERTIFICATION_REPORT, *PPTP_DEVICE_HQA_CERTIFICATION_REPORT;
+
+typedef struct _PTP_DEVICE_INPUT_MODE_REPORT
+{
+	UCHAR ReportID;
+	UCHAR Mode;
+} PTP_DEVICE_INPUT_MODE_REPORT, *PPTP_DEVICE_INPUT_MODE_REPORT;
+
+typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT
+{
+	UCHAR ReportID;
+	UCHAR ButtonReport;
+	UCHAR SurfaceReport;
+} PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT, *PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT;

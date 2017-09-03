@@ -171,10 +171,12 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 		case IOCTL_UMDF_HID_GET_FEATURE:
 			status = AmtPtpReportFeatures(device, Request);
 			break;
+		case IOCTL_UMDF_HID_SET_FEATURE:
+			status = AmtPtpSetFeatures(device, Request);
+			break;
 		case IOCTL_HID_WRITE_REPORT:
 		case IOCTL_UMDF_HID_SET_OUTPUT_REPORT:
 		case IOCTL_UMDF_HID_GET_INPUT_REPORT:
-		case IOCTL_UMDF_HID_SET_FEATURE:
 		case IOCTL_HID_ACTIVATE_DEVICE:
 		case IOCTL_HID_DEACTIVATE_DEVICE:
 		case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:

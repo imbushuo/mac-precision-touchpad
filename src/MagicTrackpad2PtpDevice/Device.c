@@ -192,12 +192,9 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 		return status;
 	}
 
-	// Set up wellspring mode
-	// status = MagicTrackpad2PtpDeviceSetWellspringMode(pDeviceContext, TRUE);
-	// if (!NT_SUCCESS(status)) {
-	// 	TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "MagicTrackpad2PtpDeviceSetWellspringMode failed 0x%x\n", status);
-	//	return status;
-	// }
+	// Set default settings
+	pDeviceContext->IsButtonReportOn = TRUE;
+	pDeviceContext->IsSurfaceReportOn = TRUE;
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
