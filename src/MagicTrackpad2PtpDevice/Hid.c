@@ -7,8 +7,8 @@
 #define _AAPL_HID_DESCRIPTOR_H_
 
 HID_REPORT_DESCRIPTOR AAPLMagicTrackpad2ReportDescriptor[] = {
-	// AAPL_MAGIC_TRACKPAD2_PTP_TLC,
-	// AAPL_PTP_CONFIGURATION_TLC,
+	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
+	AAPL_PTP_CONFIGURATION_TLC,
 	AAPL_MAGIC_TRACKPAD2_MOUSE_TLC
 };
 
@@ -169,7 +169,6 @@ MagicTrackpad2GetStrings(
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
 	NTSTATUS               status = STATUS_SUCCESS;
-	WDF_REQUEST_PARAMETERS params;
 	PDEVICE_CONTEXT        pContext = DeviceGetContext(Device);
 	void                   *pStringBuffer = NULL;
 	WDFMEMORY              memHandle;
@@ -177,28 +176,57 @@ MagicTrackpad2GetStrings(
 	size_t                 actualSize;
 	UCHAR                  strIndex;
 
-	WDF_REQUEST_PARAMETERS_INIT(&params);
-	WdfRequestGetParameters(Request, &params);
+	ULONG                  inputValue;
+	WDFMEMORY              inputMemory;
+	size_t                 inputBufferLength;
+	PVOID                  inputBuffer;
+	ULONG                  languageId, stringId;
 
-	switch ((ULONG_PTR) params.Parameters.DeviceIoControl.Type3InputBuffer & 0xFFFF)
+	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveInputMemory failed with status %!STATUS!", status);
+		return status;
+	}
+
+	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+
+	//
+	// make sure buffer is big enough.
+	//
+	if (inputBufferLength < sizeof(ULONG))
+	{
+		status = STATUS_INVALID_BUFFER_SIZE;
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! GetStringId: invalid input buffer. size %d, expect %d\n",
+			(int)inputBufferLength, (int)sizeof(ULONG));
+		return status;
+	}
+
+	inputValue = (*(PULONG)inputBuffer);
+	stringId = (inputValue & 0x0ffff);
+	languageId = (inputValue >> 16);
+
+	// Get actual string from USB device
+	switch (stringId)
 	{
 		case HID_STRING_ID_IMANUFACTURER:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_IMANUFACTURER is requested\n");
 			strIndex = pContext->DeviceDescriptor.iManufacturer;
 			break;
 		case HID_STRING_ID_IPRODUCT:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_IPRODUCT is requested\n");
 			strIndex = pContext->DeviceDescriptor.iProduct;
 			break;
 		case HID_STRING_ID_ISERIALNUMBER:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_ISERIALNUMBER is requested\n");
 			strIndex = pContext->DeviceDescriptor.iSerialNumber;
 			break;
 		default:
 			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC! gets invalid string type\n");
-			status = STATUS_INVALID_PARAMETER;
 			return status;
 	}
-
 	status = WdfUsbTargetDeviceAllocAndQueryString(pContext->UsbDevice, 
-		WDF_NO_OBJECT_ATTRIBUTES, &memHandle, &wcharCount, strIndex, 0x409);
+		WDF_NO_OBJECT_ATTRIBUTES, &memHandle, &wcharCount, strIndex, (USHORT) languageId);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!", status);
@@ -215,6 +243,146 @@ MagicTrackpad2GetStrings(
 	WdfMemoryCopyToBuffer(memHandle, 0, &pStringBuffer, actualSize);
 	WdfRequestSetInformation(Request, actualSize);
 
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	return status;
+}
+
+NTSTATUS
+RequestGetHidXferPacketToReadFromDevice(
+	_In_  WDFREQUEST        Request,
+	_Out_ HID_XFER_PACKET  *Packet
+)
+{
+	//
+	// Driver need to write to the output buffer (so that App can read from it)
+	//
+	//   Report Buffer: Output Buffer
+	//   Report Id    : Input Buffer
+	//
+
+	NTSTATUS                status;
+	WDFMEMORY               inputMemory;
+	WDFMEMORY               outputMemory;
+	size_t                  inputBufferLength;
+	size_t                  outputBufferLength;
+	PVOID                   inputBuffer;
+	PVOID                   outputBuffer;
+
+	//
+	// Get report Id from input buffer
+	//
+	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("WdfRequestRetrieveInputMemory failed 0x%x\n", status));
+		return status;
+	}
+	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+
+	if (inputBufferLength < sizeof(UCHAR)) {
+		status = STATUS_INVALID_BUFFER_SIZE;
+		KdPrint(("WdfRequestRetrieveInputMemory: invalid input buffer. size %d, expect %d\n",
+			(int)inputBufferLength, (int)sizeof(UCHAR)));
+		return status;
+	}
+
+	Packet->reportId = *(PUCHAR)inputBuffer;
+
+	//
+	// Get report buffer from output buffer
+	//
+	status = WdfRequestRetrieveOutputMemory(Request, &outputMemory);
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("WdfRequestRetrieveOutputMemory failed 0x%x\n", status));
+		return status;
+	}
+
+	outputBuffer = WdfMemoryGetBuffer(outputMemory, &outputBufferLength);
+
+	Packet->reportBuffer = (PUCHAR)outputBuffer;
+	Packet->reportBufferLen = (ULONG)outputBufferLength;
+
+	return status;
+}
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpReportFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+)
+{
+	NTSTATUS status;
+	PDEVICE_CONTEXT deviceContext;
+	HID_XFER_PACKET packet;
+	size_t reportSize;
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+	status = STATUS_SUCCESS;
+	deviceContext = DeviceGetContext(Device);
+
+	status = RequestGetHidXferPacketToReadFromDevice(Request, &packet);
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! RequestGetHidXferPacketToReadFromDevice failed with status %!STATUS!", status);
+		goto exit;
+	}
+
+	switch (packet.reportId)
+	{
+		case REPORTID_DEVICE_CAPS:
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is requested.\n");
+			reportSize = sizeof(PPTP_DEVICE_CAPS_FEATURE_REPORT) + sizeof(packet.reportId);
+			// Size sanity check
+			if (packet.reportBufferLen < reportSize) 
+			{
+				status = STATUS_INVALID_BUFFER_SIZE;
+				TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! Report buffer is too small.\n");
+				goto exit;
+			}
+
+			PPTP_DEVICE_CAPS_FEATURE_REPORT capsReport = (PPTP_DEVICE_CAPS_FEATURE_REPORT) packet.reportBuffer;
+
+			capsReport->MaximumContactPoints = PTP_MAX_CONTACT_POINTS;
+			capsReport->ButtonType = PTP_BUTTON_TYPE_CLICK_PAD;
+			capsReport->ReportID = REPORTID_DEVICE_CAPS;
+
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS has maximum contact points of %d.\n", 
+				capsReport->MaximumContactPoints);
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS has touchpad type %d.\n", 
+				capsReport->ButtonType);
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is fulfilled.\n");
+			WdfRequestSetInformation(Request, reportSize);
+			break;
+		}
+		case REPORTID_PTPHQA:
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_PTPHQA is requested.\n");
+			reportSize = sizeof(PPTP_DEVICE_HQA_CERTIFICATION_REPORT) + sizeof(packet.reportId);
+			// Size sanity check
+			if (packet.reportBufferLen < reportSize)
+			{
+				status = STATUS_INVALID_BUFFER_SIZE;
+				TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! Report buffer is too small.\n");
+				goto exit;
+			}
+
+			PPTP_DEVICE_HQA_CERTIFICATION_REPORT certReport = (PPTP_DEVICE_HQA_CERTIFICATION_REPORT) packet.reportBuffer;
+
+			*certReport->CertificationBlob = DEFAULT_PTP_HQA_BLOB;
+			certReport->ReportID = REPORTID_PTPHQA;
+
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_PTPHQA is fulfilled.\n");
+			WdfRequestSetInformation(Request, reportSize);
+			break;
+		}
+		default:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Unsupported type %d is requested.\n", packet.reportId);
+			status = STATUS_NOT_SUPPORTED;
+			goto exit;
+	}
+exit:
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
 }

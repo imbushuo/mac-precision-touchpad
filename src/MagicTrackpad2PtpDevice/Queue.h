@@ -14,6 +14,12 @@ typedef struct _QUEUE_CONTEXT {
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(QUEUE_CONTEXT, QueueGetContext)
 
+_IRQL_requires_(PASSIVE_LEVEL)
+PCHAR
+DbgIoControlGetString(
+	_In_ ULONG IoControlCode
+);
+
 NTSTATUS
 MagicTrackpad2PtpDeviceQueueInitialize(
 	_In_ WDFDEVICE Device
