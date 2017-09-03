@@ -342,10 +342,11 @@ AmtPtpReportFeatures(
 				goto exit;
 			}
 
-			PPTP_DEVICE_CAPS_FEATURE_REPORT capsReport = (PPTP_DEVICE_CAPS_FEATURE_REPORT) (packet.reportBuffer + sizeof(packet.reportId));
+			PPTP_DEVICE_CAPS_FEATURE_REPORT capsReport = (PPTP_DEVICE_CAPS_FEATURE_REPORT) packet.reportBuffer;
 
 			capsReport->MaximumContactPoints = PTP_MAX_CONTACT_POINTS;
 			capsReport->ButtonType = PTP_BUTTON_TYPE_CLICK_PAD;
+			capsReport->ReportID = REPORTID_DEVICE_CAPS;
 
 			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS has maximum contact points of %d.\n", 
 				capsReport->MaximumContactPoints);
@@ -367,10 +368,12 @@ AmtPtpReportFeatures(
 				goto exit;
 			}
 
-			PPTP_DEVICE_HQA_CERTIFICATION_REPORT certReport = (PPTP_DEVICE_HQA_CERTIFICATION_REPORT) (packet.reportBuffer + sizeof(packet.reportId));
-			*certReport->CertificationBlob = DEFAULT_PTP_HQA_BLOB;
+			PPTP_DEVICE_HQA_CERTIFICATION_REPORT certReport = (PPTP_DEVICE_HQA_CERTIFICATION_REPORT) packet.reportBuffer;
 
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is fulfilled.\n");
+			*certReport->CertificationBlob = DEFAULT_PTP_HQA_BLOB;
+			certReport->ReportID = REPORTID_PTPHQA;
+
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_PTPHQA is fulfilled.\n");
 			WdfRequestSetInformation(Request, reportSize);
 			break;
 		}
