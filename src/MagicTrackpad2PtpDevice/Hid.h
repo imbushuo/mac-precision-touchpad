@@ -109,7 +109,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 
 #define AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_1 \
 	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
-		LOGICAL_MAXIMUM, 0x01, /* Logical Maximun: 1 */ \
+		LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 1 */ \
 		USAGE, 0x47, /* Usage: Confidence */ \
 		USAGE, 0x42, /* Usage: Tip switch */ \
 		REPORT_COUNT, 0x02, /* Report Count: 2 */ \
@@ -198,7 +198,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		LOGICAL_MAXIMUM_3, 0xff, 0xff, 0x00, 0x00, \
 		USAGE, 0x56, /* Usage: Scan Time */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		USAGE, 0x54, /* Usage: Contact Time */ \
+		USAGE, 0x54, /* Usage: Contact Count */ \
 		LOGICAL_MAXIMUM, 0x7f, \
 		REPORT_SIZE, 0x08, \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \

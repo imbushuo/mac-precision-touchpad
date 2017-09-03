@@ -74,7 +74,7 @@ MagicTrackpad2GetHidDescriptor(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetDeviceAttribs(
+AmtPtpGetDeviceAttribs(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )
@@ -161,7 +161,7 @@ MagicTrackpad2GetReportDescriptor(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetStrings(
+AmtPtpGetStrings(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )
@@ -477,7 +477,7 @@ AmtPtpSetFeatures(
 			{
 			case PTP_COLLECTION_MOUSE:
 				TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input.\n");
-				status = MagicTrackpad2PtpDeviceSetWellspringMode(deviceContext, FALSE);
+				status = AmtPtpSetWellspringMode(deviceContext, FALSE);
 				if (!NT_SUCCESS(status))
 				{
 					TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", status);
@@ -486,7 +486,7 @@ AmtPtpSetFeatures(
 				break;
 			case PTP_COLLECTION_WINDOWS:
 				TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input.\n");
-				status = MagicTrackpad2PtpDeviceSetWellspringMode(deviceContext, TRUE);
+				status = AmtPtpSetWellspringMode(deviceContext, TRUE);
 				if (!NT_SUCCESS(status))
 				{
 					TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", status);

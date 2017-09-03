@@ -157,13 +157,13 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 			status = MagicTrackpad2GetHidDescriptor(device, Request);
 			break;
 		case IOCTL_HID_GET_DEVICE_ATTRIBUTES:
-			status = MagicTrackpad2GetDeviceAttribs(device, Request);
+			status = AmtPtpGetDeviceAttribs(device, Request);
 			break;
 		case IOCTL_HID_GET_REPORT_DESCRIPTOR:
 			status = MagicTrackpad2GetReportDescriptor(device, Request);
 			break;
 		case IOCTL_HID_GET_STRING:
-			status = MagicTrackpad2GetStrings(device, Request);
+			status = AmtPtpGetStrings(device, Request);
 			break;
 		case IOCTL_HID_READ_REPORT:
 			status = AmtPtpDispatchReadReportRequests(device, Request, &requestPending);
