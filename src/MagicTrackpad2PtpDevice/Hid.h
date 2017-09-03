@@ -285,11 +285,8 @@ typedef struct _HID_INPUT_REPORT
 
 typedef struct _PTP_DEVICE_CAPS_FEATURE_REPORT
 {
-	struct
-	{
-		UCHAR MaximumContactPoints;
-		UCHAR ButtonType;
-	} DeviceCaps;
+	UCHAR MaximumContactPoints;
+	UCHAR ButtonType;
 } PTP_DEVICE_CAPS_FEATURE_REPORT, *PPTP_DEVICE_CAPS_FEATURE_REPORT;
 
 typedef struct _PTP_DEVICE_HQA_CERTIFICATION_REPORT

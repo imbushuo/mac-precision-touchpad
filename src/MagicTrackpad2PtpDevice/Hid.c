@@ -169,7 +169,6 @@ MagicTrackpad2GetStrings(
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
 	NTSTATUS               status = STATUS_SUCCESS;
-	WDF_REQUEST_PARAMETERS params;
 	PDEVICE_CONTEXT        pContext = DeviceGetContext(Device);
 	void                   *pStringBuffer = NULL;
 	WDFMEMORY              memHandle;
@@ -177,29 +176,57 @@ MagicTrackpad2GetStrings(
 	size_t                 actualSize;
 	UCHAR                  strIndex;
 
-	WDF_REQUEST_PARAMETERS_INIT(&params);
-	WdfRequestGetParameters(Request, &params);
+	ULONG                  inputValue;
+	WDFMEMORY              inputMemory;
+	size_t                 inputBufferLength;
+	PVOID                  inputBuffer;
+	ULONG                  languageId, stringId;
 
-	switch ((ULONG_PTR) params.Parameters.DeviceIoControl.Type3InputBuffer & 0xFFFF)
+	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveInputMemory failed with status %!STATUS!", status);
+		return status;
+	}
+
+	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+
+	//
+	// make sure buffer is big enough.
+	//
+	if (inputBufferLength < sizeof(ULONG))
+	{
+		status = STATUS_INVALID_BUFFER_SIZE;
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! GetStringId: invalid input buffer. size %d, expect %d\n",
+			(int)inputBufferLength, (int)sizeof(ULONG));
+		return status;
+	}
+
+	inputValue = (*(PULONG)inputBuffer);
+	stringId = (inputValue & 0x0ffff);
+	languageId = (inputValue >> 16);
+
+	// Get actual string from USB device
+	switch (stringId)
 	{
 		case HID_STRING_ID_IMANUFACTURER:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_IMANUFACTURER is requested\n");
 			strIndex = pContext->DeviceDescriptor.iManufacturer;
 			break;
 		case HID_STRING_ID_IPRODUCT:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_IPRODUCT is requested\n");
 			strIndex = pContext->DeviceDescriptor.iProduct;
 			break;
 		case HID_STRING_ID_ISERIALNUMBER:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_ISERIALNUMBER is requested\n");
 			strIndex = pContext->DeviceDescriptor.iSerialNumber;
 			break;
 		default:
 			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC! gets invalid string type\n");
-			// Return product name as default
-			strIndex = pContext->DeviceDescriptor.iProduct;
 			return status;
 	}
-
 	status = WdfUsbTargetDeviceAllocAndQueryString(pContext->UsbDevice, 
-		WDF_NO_OBJECT_ATTRIBUTES, &memHandle, &wcharCount, strIndex, 0x409);
+		WDF_NO_OBJECT_ATTRIBUTES, &memHandle, &wcharCount, strIndex, (USHORT) languageId);
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!", status);
@@ -317,9 +344,13 @@ AmtPtpReportFeatures(
 
 			PPTP_DEVICE_CAPS_FEATURE_REPORT capsReport = (PPTP_DEVICE_CAPS_FEATURE_REPORT) (packet.reportBuffer + sizeof(packet.reportId));
 
-			capsReport->DeviceCaps.MaximumContactPoints = PTP_MAX_CONTACT_POINTS;
-			capsReport->DeviceCaps.ButtonType = PTP_BUTTON_TYPE_CLICK_PAD;
+			capsReport->MaximumContactPoints = PTP_MAX_CONTACT_POINTS;
+			capsReport->ButtonType = PTP_BUTTON_TYPE_CLICK_PAD;
 
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS has maximum contact points of %d.\n", 
+				capsReport->MaximumContactPoints);
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS has touchpad type %d.\n", 
+				capsReport->ButtonType);
 			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is fulfilled.\n");
 			WdfRequestSetInformation(Request, reportSize);
 			break;
