@@ -23,7 +23,7 @@ MagicTrackpad2GetConfig(
 }
 
 NTSTATUS
-MagicTrackpad2PtpDeviceCreateDevice(
+AmtPtpCreateDevice(
 	_In_    WDFDRIVER       Driver,
 	_Inout_ PWDFDEVICE_INIT DeviceInit
 )
@@ -44,9 +44,9 @@ MagicTrackpad2PtpDeviceCreateDevice(
 	WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
 
 	// Initialize PNP power event callbacks
-	pnpPowerCallbacks.EvtDevicePrepareHardware = MagicTrackpad2PtpDeviceEvtDevicePrepareHardware;
-	pnpPowerCallbacks.EvtDeviceD0Entry = MagicTrackpad2PtpDeviceEvtDeviceD0Entry;
-	pnpPowerCallbacks.EvtDeviceD0Exit = MagicTrackpad2PtpDeviceEvtDeviceD0Exit;
+	pnpPowerCallbacks.EvtDevicePrepareHardware = AmtPtpEvtDevicePrepareHardware;
+	pnpPowerCallbacks.EvtDeviceD0Entry = AmtPtpEvtDeviceD0Entry;
+	pnpPowerCallbacks.EvtDeviceD0Exit = AmtPtpEvtDeviceD0Exit;
 	WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
 	// Create WDF device object
@@ -102,7 +102,7 @@ MagicTrackpad2PtpDeviceCreateDevice(
 }
 
 NTSTATUS
-MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
+AmtPtpEvtDevicePrepareHardware(
 	_In_ WDFDEVICE Device,
 	_In_ WDFCMRESLIST ResourceList,
 	_In_ WDFCMRESLIST ResourceListTranslated
@@ -186,18 +186,15 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 	}
 
 	// Set up interrupt
-	status = MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint(pDeviceContext);
+	status = AmtPtpConfigContReaderForInterruptEndPoint(pDeviceContext);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint failed 0x%x\n", status);
 		return status;
 	}
 
-	// Set up wellspring mode
-	// status = MagicTrackpad2PtpDeviceSetWellspringMode(pDeviceContext, TRUE);
-	// if (!NT_SUCCESS(status)) {
-	// 	TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "MagicTrackpad2PtpDeviceSetWellspringMode failed 0x%x\n", status);
-	//	return status;
-	// }
+	// Set default settings
+	pDeviceContext->IsButtonReportOn = TRUE;
+	pDeviceContext->IsSurfaceReportOn = TRUE;
 
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
@@ -205,7 +202,7 @@ MagicTrackpad2PtpDeviceEvtDevicePrepareHardware(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2PtpDeviceSetWellspringMode(
+AmtPtpSetWellspringMode(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ BOOL IsWellspringModeOn
 )
@@ -273,7 +270,7 @@ cleanup:
 
 // D0 Entry & Exit
 NTSTATUS
-MagicTrackpad2PtpDeviceEvtDeviceD0Entry(
+AmtPtpEvtDeviceD0Entry(
 	WDFDEVICE Device,
 	WDF_POWER_DEVICE_STATE PreviousState
 )
@@ -318,7 +315,7 @@ End:
 }
 
 NTSTATUS
-MagicTrackpad2PtpDeviceEvtDeviceD0Exit(
+AmtPtpEvtDeviceD0Exit(
 	WDFDEVICE Device,
 	WDF_POWER_DEVICE_STATE TargetState
 )

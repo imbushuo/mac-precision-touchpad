@@ -74,7 +74,7 @@ MagicTrackpad2GetHidDescriptor(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetDeviceAttribs(
+AmtPtpGetDeviceAttribs(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )
@@ -161,7 +161,7 @@ MagicTrackpad2GetReportDescriptor(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetStrings(
+AmtPtpGetStrings(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )
@@ -247,6 +247,7 @@ MagicTrackpad2GetStrings(
 	return status;
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 RequestGetHidXferPacketToReadFromDevice(
 	_In_  WDFREQUEST        Request,
@@ -300,6 +301,61 @@ RequestGetHidXferPacketToReadFromDevice(
 
 	Packet->reportBuffer = (PUCHAR)outputBuffer;
 	Packet->reportBufferLen = (ULONG)outputBufferLength;
+
+	return status;
+}
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+RequestGetHidXferPacketToWriteToDevice(
+	_In_  WDFREQUEST        Request,
+	_Out_ HID_XFER_PACKET  *Packet
+)
+{
+	//
+	// Driver need to read from the input buffer (which was written by App)
+	//
+	//   Report Buffer: Input Buffer
+	//   Report Id    : Output Buffer Length
+	//
+	// Note that the report id is not stored inside the output buffer, as the
+	// driver has no read-access right to the output buffer, and trying to read
+	// from the buffer will cause an access violation error.
+	//
+	// The workaround is to store the report id in the OutputBufferLength field,
+	// to which the driver does have read-access right.
+	//
+
+	NTSTATUS                status;
+	WDFMEMORY               inputMemory;
+	WDFMEMORY               outputMemory;
+	size_t                  inputBufferLength;
+	size_t                  outputBufferLength;
+	PVOID                   inputBuffer;
+
+	//
+	// Get report Id from output buffer length
+	//
+	status = WdfRequestRetrieveOutputMemory(Request, &outputMemory);
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("WdfRequestRetrieveOutputMemory failed 0x%x\n", status));
+		return status;
+	}
+	WdfMemoryGetBuffer(outputMemory, &outputBufferLength);
+	Packet->reportId = (UCHAR)outputBufferLength;
+
+	//
+	// Get report buffer from input buffer
+	//
+	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("WdfRequestRetrieveInputMemory failed 0x%x\n", status));
+		return status;
+	}
+	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+
+	Packet->reportBuffer = (PUCHAR)inputBuffer;
+	Packet->reportBufferLen = (ULONG)inputBufferLength;
 
 	return status;
 }
@@ -385,4 +441,85 @@ AmtPtpReportFeatures(
 exit:
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
+}
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpSetFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+)
+{
+	NTSTATUS        status;
+	HID_XFER_PACKET packet;
+	PDEVICE_CONTEXT deviceContext;
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+	status = STATUS_SUCCESS;
+	deviceContext = DeviceGetContext(Device);
+
+	status = RequestGetHidXferPacketToWriteToDevice(Request, &packet);
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! RequestGetHidXferPacketToWriteToDevice failed with status %!STATUS!", status);
+		goto exit;
+	}
+
+	switch (packet.reportId)
+	{
+		case REPORTID_REPORTMODE:
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE is requested.\n");
+			PPTP_DEVICE_INPUT_MODE_REPORT devInputMode = (PPTP_DEVICE_INPUT_MODE_REPORT) packet.reportBuffer;
+
+			switch (devInputMode->Mode)
+			{
+			case PTP_COLLECTION_MOUSE:
+				TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input.\n");
+				status = AmtPtpSetWellspringMode(deviceContext, FALSE);
+				if (!NT_SUCCESS(status))
+				{
+					TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", status);
+					goto exit;
+				}
+				break;
+			case PTP_COLLECTION_WINDOWS:
+				TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input.\n");
+				status = AmtPtpSetWellspringMode(deviceContext, TRUE);
+				if (!NT_SUCCESS(status))
+				{
+					TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", status);
+					goto exit;
+				}
+				break;
+			}
+
+			WdfRequestSetInformation(Request, sizeof(PTP_DEVICE_INPUT_MODE_REPORT));
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE is fulfilled.\n");
+			break;
+		}
+		case REPORTID_FUNCSWITCH:
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_FUNCSWITCH is requested.\n");
+			PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT secInput = (PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT) packet.reportBuffer;
+
+			deviceContext->IsButtonReportOn = secInput->ButtonReport;
+			deviceContext->IsSurfaceReportOn = secInput->SurfaceReport;
+
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_FUNCSWITCH requested Button = %d, Surface = %d.\n",
+				secInput->ButtonReport, secInput->SurfaceReport);
+			WdfRequestSetInformation(Request, sizeof(PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT));
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_FUNCSWITCH is fulfilled.\n");
+			break;
+		}
+		default:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Unsupported type %d is requested.\n", packet.reportId);
+			status = STATUS_NOT_SUPPORTED;
+			goto exit;
+	}
+
+exit:
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	return STATUS_SUCCESS;
 }

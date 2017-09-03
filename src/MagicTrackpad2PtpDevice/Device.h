@@ -18,6 +18,8 @@ typedef struct _DEVICE_CONTEXT
 	ULONG                       UsbDeviceTraits;
 
 	BOOL                        IsWellspringModeOn;
+	BOOL                        IsSurfaceReportOn;
+	BOOL                        IsButtonReportOn;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -32,7 +34,7 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 // Function to initialize the device's queues and callbacks
 //
 NTSTATUS
-MagicTrackpad2PtpDeviceCreateDevice(
+AmtPtpCreateDevice(
 	_In_    WDFDRIVER       Driver,
 	_Inout_ PWDFDEVICE_INIT DeviceInit
 );
@@ -41,11 +43,11 @@ MagicTrackpad2PtpDeviceCreateDevice(
 // Function to select the device's USB configuration and get a WDFUSBDEVICE
 // handle
 //
-EVT_WDF_DEVICE_PREPARE_HARDWARE MagicTrackpad2PtpDeviceEvtDevicePrepareHardware;
+EVT_WDF_DEVICE_PREPARE_HARDWARE AmtPtpEvtDevicePrepareHardware;
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint(
+AmtPtpConfigContReaderForInterruptEndPoint(
 	_In_ PDEVICE_CONTEXT DeviceContext
 );
 
@@ -57,7 +59,7 @@ SelectInterruptInterface(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2PtpDeviceSetWellspringMode(
+AmtPtpSetWellspringMode(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ BOOL IsWellspringModeOn
 );
@@ -69,19 +71,19 @@ DbgDevicePowerString(
 );
 
 NTSTATUS
-MagicTrackpad2PtpDeviceEvtDeviceD0Entry(
+AmtPtpEvtDeviceD0Entry(
 	WDFDEVICE Device,
 	WDF_POWER_DEVICE_STATE PreviousState
 );
 
 NTSTATUS
-MagicTrackpad2PtpDeviceEvtDeviceD0Exit(
+AmtPtpEvtDeviceD0Exit(
 	WDFDEVICE Device,
 	WDF_POWER_DEVICE_STATE TargetState
 );
 
 VOID
-MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
+AmtPtpEvtUsbInterruptPipeReadComplete(
 	WDFUSBPIPE  Pipe,
 	WDFMEMORY   Buffer,
 	size_t      NumBytesTransferred,
@@ -89,7 +91,7 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 );
 
 BOOLEAN
-MagicTrackpad2PtpDeviceEvtUsbInterruptReadersFailed(
+AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
 	_In_ NTSTATUS Status,
 	_In_ USBD_STATUS UsbdStatus
@@ -122,7 +124,7 @@ MagicTrackpad2GetHidDescriptor(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetDeviceAttribs(
+AmtPtpGetDeviceAttribs(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
@@ -136,7 +138,7 @@ MagicTrackpad2GetReportDescriptor(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetStrings(
+AmtPtpGetStrings(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
@@ -146,6 +148,31 @@ NTSTATUS
 AmtPtpReportFeatures(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpSetFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+//
+// Utils
+//
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+RequestGetHidXferPacketToReadFromDevice(
+	_In_  WDFREQUEST        Request,
+	_Out_ HID_XFER_PACKET  *Packet
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+RequestGetHidXferPacketToWriteToDevice(
+	_In_  WDFREQUEST        Request,
+	_Out_ HID_XFER_PACKET  *Packet
 );
 
 EXTERN_C_END

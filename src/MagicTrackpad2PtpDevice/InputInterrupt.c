@@ -5,7 +5,7 @@
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint(
+AmtPtpConfigContReaderForInterruptEndPoint(
 	_In_ PDEVICE_CONTEXT DeviceContext
 )
 {
@@ -13,11 +13,11 @@ MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint(
 	NTSTATUS status;
 
 	WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
-		MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete,
+		AmtPtpEvtUsbInterruptPipeReadComplete,
 		DeviceContext,    // Context
 		HEADER_TYPE5 + FSIZE_TYPE5 * MAX_FINGERS);   // TransferLength
 
-	contReaderConfig.EvtUsbTargetPipeReadersFailed = MagicTrackpad2PtpDeviceEvtUsbInterruptReadersFailed;
+	contReaderConfig.EvtUsbTargetPipeReadersFailed = AmtPtpEvtUsbInterruptReadersFailed;
 
 	// Remember to turn it on in D0 entry
 	status = WdfUsbTargetPipeConfigContinuousReader(DeviceContext->InterruptPipe,
@@ -32,7 +32,7 @@ MagicTrackpad2PtpDeviceConfigContReaderForInterruptEndPoint(
 }
 
 VOID
-MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
+AmtPtpEvtUsbInterruptPipeReadComplete(
 	WDFUSBPIPE  Pipe,
 	WDFMEMORY   Buffer,
 	size_t      NumBytesTransferred,
@@ -101,7 +101,7 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 				u32 tmp_y;
 				f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
 				if (f_type5->pressure == 0) continue;
-
+				
 				// Modern Windows machines are all little-endian
 
 				tmp_x = (*((__le16*)f_type5)) & 0x1fff;
@@ -119,7 +119,7 @@ MagicTrackpad2PtpDeviceEvtUsbInterruptPipeReadComplete(
 }
 
 BOOLEAN
-MagicTrackpad2PtpDeviceEvtUsbInterruptReadersFailed(
+AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
 	_In_ NTSTATUS Status,
 	_In_ USBD_STATUS UsbdStatus
