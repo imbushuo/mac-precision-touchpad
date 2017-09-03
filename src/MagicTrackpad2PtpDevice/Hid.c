@@ -7,8 +7,8 @@
 #define _AAPL_HID_DESCRIPTOR_H_
 
 HID_REPORT_DESCRIPTOR AAPLMagicTrackpad2ReportDescriptor[] = {
-	// AAPL_MAGIC_TRACKPAD2_PTP_TLC,
-	// AAPL_PTP_CONFIGURATION_TLC,
+	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
+	AAPL_PTP_CONFIGURATION_TLC,
 	AAPL_MAGIC_TRACKPAD2_MOUSE_TLC
 };
 
@@ -193,7 +193,8 @@ MagicTrackpad2GetStrings(
 			break;
 		default:
 			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC! gets invalid string type\n");
-			status = STATUS_INVALID_PARAMETER;
+			// Return product name as default
+			strIndex = pContext->DeviceDescriptor.iProduct;
 			return status;
 	}
 
@@ -215,6 +216,139 @@ MagicTrackpad2GetStrings(
 	WdfMemoryCopyToBuffer(memHandle, 0, &pStringBuffer, actualSize);
 	WdfRequestSetInformation(Request, actualSize);
 
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	return status;
+}
+
+NTSTATUS
+RequestGetHidXferPacketToReadFromDevice(
+	_In_  WDFREQUEST        Request,
+	_Out_ HID_XFER_PACKET  *Packet
+)
+{
+	//
+	// Driver need to write to the output buffer (so that App can read from it)
+	//
+	//   Report Buffer: Output Buffer
+	//   Report Id    : Input Buffer
+	//
+
+	NTSTATUS                status;
+	WDFMEMORY               inputMemory;
+	WDFMEMORY               outputMemory;
+	size_t                  inputBufferLength;
+	size_t                  outputBufferLength;
+	PVOID                   inputBuffer;
+	PVOID                   outputBuffer;
+
+	//
+	// Get report Id from input buffer
+	//
+	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("WdfRequestRetrieveInputMemory failed 0x%x\n", status));
+		return status;
+	}
+	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+
+	if (inputBufferLength < sizeof(UCHAR)) {
+		status = STATUS_INVALID_BUFFER_SIZE;
+		KdPrint(("WdfRequestRetrieveInputMemory: invalid input buffer. size %d, expect %d\n",
+			(int)inputBufferLength, (int)sizeof(UCHAR)));
+		return status;
+	}
+
+	Packet->reportId = *(PUCHAR)inputBuffer;
+
+	//
+	// Get report buffer from output buffer
+	//
+	status = WdfRequestRetrieveOutputMemory(Request, &outputMemory);
+	if (!NT_SUCCESS(status)) {
+		KdPrint(("WdfRequestRetrieveOutputMemory failed 0x%x\n", status));
+		return status;
+	}
+
+	outputBuffer = WdfMemoryGetBuffer(outputMemory, &outputBufferLength);
+
+	Packet->reportBuffer = (PUCHAR)outputBuffer;
+	Packet->reportBufferLen = (ULONG)outputBufferLength;
+
+	return status;
+}
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpReportFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+)
+{
+	NTSTATUS status;
+	PDEVICE_CONTEXT deviceContext;
+	HID_XFER_PACKET packet;
+	size_t reportSize;
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+	status = STATUS_SUCCESS;
+	deviceContext = DeviceGetContext(Device);
+
+	status = RequestGetHidXferPacketToReadFromDevice(Request, &packet);
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! RequestGetHidXferPacketToReadFromDevice failed with status %!STATUS!", status);
+		goto exit;
+	}
+
+	switch (packet.reportId)
+	{
+		case REPORTID_DEVICE_CAPS:
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is requested.\n");
+			reportSize = sizeof(PPTP_DEVICE_CAPS_FEATURE_REPORT) + sizeof(packet.reportId);
+			// Size sanity check
+			if (packet.reportBufferLen < reportSize) 
+			{
+				status = STATUS_INVALID_BUFFER_SIZE;
+				TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! Report buffer is too small.\n");
+				goto exit;
+			}
+
+			PPTP_DEVICE_CAPS_FEATURE_REPORT capsReport = (PPTP_DEVICE_CAPS_FEATURE_REPORT) (packet.reportBuffer + sizeof(packet.reportId));
+
+			capsReport->DeviceCaps.MaximumContactPoints = PTP_MAX_CONTACT_POINTS;
+			capsReport->DeviceCaps.ButtonType = PTP_BUTTON_TYPE_CLICK_PAD;
+
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is fulfilled.\n");
+			WdfRequestSetInformation(Request, reportSize);
+			break;
+		}
+		case REPORTID_PTPHQA:
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_PTPHQA is requested.\n");
+			reportSize = sizeof(PPTP_DEVICE_HQA_CERTIFICATION_REPORT) + sizeof(packet.reportId);
+			// Size sanity check
+			if (packet.reportBufferLen < reportSize)
+			{
+				status = STATUS_INVALID_BUFFER_SIZE;
+				TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! Report buffer is too small.\n");
+				goto exit;
+			}
+
+			PPTP_DEVICE_HQA_CERTIFICATION_REPORT certReport = (PPTP_DEVICE_HQA_CERTIFICATION_REPORT) (packet.reportBuffer + sizeof(packet.reportId));
+			*certReport->CertificationBlob = DEFAULT_PTP_HQA_BLOB;
+
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is fulfilled.\n");
+			WdfRequestSetInformation(Request, reportSize);
+			break;
+		}
+		default:
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Unsupported type %d is requested.\n", packet.reportId);
+			status = STATUS_NOT_SUPPORTED;
+			goto exit;
+	}
+exit:
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
 }
