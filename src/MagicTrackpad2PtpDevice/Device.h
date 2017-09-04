@@ -8,8 +8,7 @@ typedef struct _DEVICE_CONTEXT
 	WDFUSBDEVICE                UsbDevice;
 	WDFUSBPIPE                  InterruptPipe;
 	WDFUSBINTERFACE             UsbInterface;
-	WDFQUEUE                    MouseQueue;
-	WDFQUEUE                    TouchQueue;
+	WDFQUEUE                    InputQueue;
 
 	USB_DEVICE_DESCRIPTOR       DeviceDescriptor;
 
@@ -70,26 +69,30 @@ DbgDevicePowerString(
 	_In_ WDF_POWER_DEVICE_STATE Type
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDeviceD0Entry(
-	WDFDEVICE Device,
-	WDF_POWER_DEVICE_STATE PreviousState
+	_In_ WDFDEVICE Device,
+	_In_ WDF_POWER_DEVICE_STATE PreviousState
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDeviceD0Exit(
-	WDFDEVICE Device,
-	WDF_POWER_DEVICE_STATE TargetState
+	_In_ WDFDEVICE Device,
+	_In_ WDF_POWER_DEVICE_STATE TargetState
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
 VOID
 AmtPtpEvtUsbInterruptPipeReadComplete(
-	WDFUSBPIPE  Pipe,
-	WDFMEMORY   Buffer,
-	size_t      NumBytesTransferred,
-	WDFCONTEXT  Context
+	_In_ WDFUSBPIPE  Pipe,
+	_In_ WDFMEMORY   Buffer,
+	_In_ size_t      NumBytesTransferred,
+	_In_ WDFCONTEXT  Context
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
 BOOLEAN
 AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
@@ -97,6 +100,7 @@ AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ USBD_STATUS UsbdStatus
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpServiceMouseInputInterrupt(
 	_In_ PDEVICE_CONTEXT DeviceContext,
@@ -104,8 +108,9 @@ AmtPtpServiceMouseInputInterrupt(
 	_In_ size_t NumBytesTransferred
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-AmtPtpServiceTouchInputInterrupt(
+AmtPtpServiceTouchInputInterruptType5(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ UCHAR* Buffer,
 	_In_ size_t NumBytesTransferred

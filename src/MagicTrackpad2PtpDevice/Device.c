@@ -3,6 +3,7 @@
 #include "driver.h"
 #include "device.tmh"
 
+_IRQL_requires_(PASSIVE_LEVEL)
 static const struct BCM5974_CONFIG*
 MagicTrackpad2GetConfig(
 	_In_ USB_DEVICE_DESCRIPTOR deviceInfo
@@ -101,6 +102,7 @@ AmtPtpCreateDevice(
 	return status;
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDevicePrepareHardware(
 	_In_ WDFDEVICE Device,
@@ -269,10 +271,11 @@ cleanup:
 }
 
 // D0 Entry & Exit
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDeviceD0Entry(
-	WDFDEVICE Device,
-	WDF_POWER_DEVICE_STATE PreviousState
+	_In_ WDFDEVICE Device,
+	_In_ WDF_POWER_DEVICE_STATE PreviousState
 )
 {
 	PDEVICE_CONTEXT         pDeviceContext;
@@ -314,10 +317,11 @@ End:
 	return status;
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDeviceD0Exit(
-	WDFDEVICE Device,
-	WDF_POWER_DEVICE_STATE TargetState
+	_In_ WDFDEVICE Device,
+	_In_ WDF_POWER_DEVICE_STATE TargetState
 )
 {
 	PDEVICE_CONTEXT         pDeviceContext;
