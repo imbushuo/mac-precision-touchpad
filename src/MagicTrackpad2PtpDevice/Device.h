@@ -105,7 +105,7 @@ AmtPtpServiceMouseInputInterrupt(
 );
 
 NTSTATUS
-AmtPtpServiceTouchInputInterrupt(
+AmtPtpServiceTouchInputInterruptType5(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ UCHAR* Buffer,
 	_In_ size_t NumBytesTransferred

@@ -48,13 +48,6 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 
 	device = WdfObjectContextGetObject(pDeviceContext);
 
-	const struct TRACKPAD_FINGER *f;
-	const struct TRACKPAD_FINGER_TYPE5 *f_type5;
-
-	s32 x, y = 0;
-	u16 pressure = 0;
-
-	size_t raw_n, i = 0;
 	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
 	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
 
@@ -73,47 +66,26 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 		return;
 	}
 
+	if (pDeviceContext->DeviceInfo->tp_type != TYPE5)
+	{
+		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: Mode not yet supported\n");
+		return;
+	}
+
 	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0)
 	{
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"Malformed input received. Length = %llu\n", NumBytesTransferred);
+			"%!FUNC!: Malformed input received. Length = %llu\n", NumBytesTransferred);
 	}
 	else
 	{
-		// Iterations to read
-		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
+		// Dispatch to touch routine
 		szBuffer = WdfMemoryGetBuffer(Buffer, NULL);
-		for (i = 0; i < raw_n; i++)
+		status = AmtPtpServiceTouchInputInterruptType5(pDeviceContext, szBuffer, NumBytesTransferred);
+		if (!NT_SUCCESS(status))
 		{
-			u8 *f_base = szBuffer + headerSize + pDeviceContext->DeviceInfo->tp_delta;
-			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
-
-			if (pDeviceContext->DeviceInfo->tp_type != TYPE5)
-			{
-				if (f->touch_major == 0) continue;
-				x = f->abs_x;
-				y = pDeviceContext->DeviceInfo->y.min + pDeviceContext->DeviceInfo->y.max - f->abs_y;
-				pressure = f->pressure;
-			}
-			else
-			{
-				u16 tmp_x;
-				u32 tmp_y;
-				f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
-				if (f_type5->pressure == 0) continue;
-				
-				// Modern Windows machines are all little-endian
-
-				tmp_x = (*((__le16*)f_type5)) & 0x1fff;
-				tmp_y = (s32)(*((__le32*)f_type5));
-
-				x = (s16)(tmp_x << 3) >> 3;
-				y = -(s32)(tmp_y << 6) >> 19;
-				pressure = f_type5->pressure;
-			}
-
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-				"Finger %llu, x: %d, y: %d, pressure: %d\n", i, x, y, pressure);
+			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, 
+				"%!FUNC!: AmtPtpServiceTouchInputInterrupt failed with %!STATUS!", status);
 		}
 	}
 }
@@ -196,15 +168,115 @@ exit:
 }
 
 NTSTATUS
-AmtPtpServiceTouchInputInterrupt(
+AmtPtpServiceTouchInputInterruptType5(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ UCHAR* Buffer,
 	_In_ size_t NumBytesTransferred
 )
 {
-	UNREFERENCED_PARAMETER(DeviceContext);
-	UNREFERENCED_PARAMETER(Buffer);
-	UNREFERENCED_PARAMETER(NumBytesTransferred);
+	NTSTATUS   status;
+	WDFREQUEST request;
+	WDFMEMORY  reqMemory;
+	PTP_REPORT report;
 
-	return STATUS_NOT_IMPLEMENTED;
+	const struct TRACKPAD_FINGER *f;
+	const struct TRACKPAD_FINGER_TYPE5 *f_type5;
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+	status = STATUS_SUCCESS;
+	s32 x, y = 0;
+	u16 pressure = 0;
+
+	size_t raw_n, i = 0;
+	size_t headerSize = (unsigned int)DeviceContext->DeviceInfo->tp_header;
+	size_t fingerprintSize = (unsigned int)DeviceContext->DeviceInfo->tp_fsize;
+
+	status = WdfIoQueueRetrieveNextRequest(
+		DeviceContext->TouchQueue,
+		&request);
+
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: No pending PTP request. Interrupt disposed.");
+		goto exit;
+	}
+
+	status = WdfRequestRetrieveOutputMemory(request, &reqMemory);
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
+		goto exit;
+	}
+
+	// Iterations to read
+	raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
+	// Set header information
+	report.ContactCount = (UCHAR) raw_n;
+	report.ReportID = REPORTID_MULTITOUCH;
+	report.ScanTime = 39000;
+	if (Buffer[DeviceContext->DeviceInfo->tp_button])
+	{
+		report.IsButtonClicked = TRUE;
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: Trackpad button clicked\n");
+	}
+
+	// Fingers
+	for (i = 0; i < raw_n; i++)
+	{
+		u8 *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
+		f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
+
+		u16 tmp_x;
+		u32 tmp_y;
+		f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
+
+		tmp_x = (*((__le16*)f_type5)) & 0x1fff;
+		tmp_y = (s32)(*((__le32*)f_type5));
+
+		x = (s16)(tmp_x << 3) >> 3;
+		y = -(s32)(tmp_y << 6) >> 19;
+		pressure = f_type5->pressure;
+
+		// Set ID.
+		report.Contacts[i].ContactID = (UCHAR) i;
+
+		// Adjust position. Apple uses different coordinate system.
+		report.Contacts[i].X = (USHORT) (x - DeviceContext->DeviceInfo->x.min);
+		report.Contacts[i].Y = (USHORT) (y - DeviceContext->DeviceInfo->y.min);
+
+		// Don't know a better way to set this...
+		if (pressure == 0)
+		{
+			report.Contacts[i].ContactStatus = 0;
+		}
+		else if (pressure > PRESSURE_LOWER_THRESHOLD)
+		{
+			report.Contacts[i].ContactStatus = PTP_CONTACT_CONFIDENCE_BIT | PTP_CONTACT_TIPSWITCH_BIT;
+		}
+		else
+		{
+			report.Contacts[i].ContactStatus = PTP_CONTACT_CONFIDENCE_BIT;
+		}
+
+		report.Contacts[i].Pressure = pressure;
+
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+			"%!FUNC!: Finger %llu, x: %d, y: %d, pressure: %d\n", i, x, y, pressure);
+	}
+
+	// Write output
+	status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)&report, sizeof(PTP_REPORT));
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
+		goto exit;
+	}
+
+	// Set result
+	WdfRequestSetInformation(request, sizeof(PTP_REPORT));
+
+exit:
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	return status;
 }

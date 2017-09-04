@@ -169,6 +169,8 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		PHYSICAL_MAXIMUM_3, 0xff, 0xff, 0x00, 0x00, \
 		LOGICAL_MAXIMUM_3, 0xff, 0xff, 0x00, 0x00, \
 		USAGE, 0x56, /* Usage: Scan Time */ \
+		REPORT_SIZE, 0x10, /* Report Size: 0x10 */ \
+		REPORT_COUNT, 0x01, /* Report Count: 0x01 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		USAGE, 0x54, /* Usage: Contact Count */ \
 		LOGICAL_MAXIMUM, 0x7f, \
@@ -241,6 +243,9 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 #define PTP_COLLECTION_MOUSE 0
 #define PTP_COLLECTION_WINDOWS 3
 
+#define PTP_CONTACT_CONFIDENCE_BIT   1
+#define PTP_CONTACT_TIPSWITCH_BIT    2
+
 typedef struct _HID_AAPL_MOUSE_REPORT {
 	struct
 	{
@@ -282,3 +287,22 @@ typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT
 	UCHAR ButtonReport;
 	UCHAR SurfaceReport;
 } PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT, *PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT;
+
+#pragma pack(1)
+typedef struct _PTP_CONTACT
+{
+	UCHAR	  ContactStatus;
+	UCHAR	  ContactID;
+	USHORT    X;
+	USHORT    Y;
+	USHORT	  Pressure;
+} PTP_CONTACT, *PPTP_CONTACT;
+
+typedef struct _PTP_REPORT
+{
+	UCHAR       ReportID;
+	PTP_CONTACT Contacts[5];
+	USHORT      ScanTime;
+	UCHAR       ContactCount;
+	UCHAR       IsButtonClicked;
+} PTP_REPORT, *PPTP_REPORT;
