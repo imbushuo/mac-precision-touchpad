@@ -72,21 +72,10 @@ Return Value:
 		Device,
 		&queueConfig,
 		WDF_NO_OBJECT_ATTRIBUTES,
-		&deviceContext->MouseQueue);
+		&deviceContext->InputQueue);
 
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Mouse) failed %!STATUS!", status);
-		return status;
-	}
-
-	status = WdfIoQueueCreate(
-		Device,
-		&queueConfig,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&deviceContext->TouchQueue);
-
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Touch) failed %!STATUS!", status);
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Input) failed %!STATUS!", status);
 		return status;
 	}
 
@@ -268,8 +257,7 @@ AmtPtpDispatchReadReportRequests(
 	status = STATUS_SUCCESS;
 	devContext = DeviceGetContext(Device);
 
-	status = WdfRequestForwardToIoQueue(Request,
-	 	(devContext->IsWellspringModeOn)? devContext->TouchQueue : devContext->MouseQueue);
+	status = WdfRequestForwardToIoQueue(Request, devContext->InputQueue);
 	
 
 	if (!NT_SUCCESS(status))
@@ -280,7 +268,7 @@ AmtPtpDispatchReadReportRequests(
 	else
 	{
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"%!FUNC!: A report has been forwarded to %s queue.", (devContext->IsWellspringModeOn) ? "Touch" : "Mouse");
+			"%!FUNC!: A report has been forwarded to input queue.\n");
 	}
 
 	if (NULL != Pending)

@@ -127,7 +127,7 @@ AmtPtpServiceMouseInputInterrupt(
 	request  = NULL;
 
 	status = WdfIoQueueRetrieveNextRequest(
-		DeviceContext->MouseQueue,
+		DeviceContext->InputQueue,
 		&request);
 
 	if (!NT_SUCCESS(status))
@@ -197,7 +197,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	size_t fingerprintSize = (unsigned int)DeviceContext->DeviceInfo->tp_fsize;
 
 	status = WdfIoQueueRetrieveNextRequest(
-		DeviceContext->TouchQueue,
+		DeviceContext->InputQueue,
 		&request);
 
 	if (!NT_SUCCESS(status))
@@ -218,7 +218,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	// Set header information
 	report.ContactCount = (UCHAR) raw_n;
 	report.ReportID = REPORTID_MULTITOUCH;
-	report.ScanTime = 15000;
+	report.ScanTime = 14500;
 
 	if (Buffer[DeviceContext->DeviceInfo->tp_button])
 	{
@@ -253,24 +253,25 @@ AmtPtpServiceTouchInputInterruptType5(
 		// Don't know a better way to set this...
 		if (pressure == 0)
 		{
-			report.Contacts[i].ContactStatus = 0;
+			report.Contacts[i].Confidence = 0;
+			report.Contacts[i].TipSwitch = 0;
 		}
 		else if (pressure > PRESSURE_LOWER_THRESHOLD)
 		{
-			report.Contacts[i].ContactStatus = PTP_CONTACT_CONFIDENCE_BIT | PTP_CONTACT_TIPSWITCH_BIT;
+			report.Contacts[i].Confidence = 1;
+			report.Contacts[i].TipSwitch = 1;
 		}
 		else
 		{
-			report.Contacts[i].ContactStatus = PTP_CONTACT_CONFIDENCE_BIT;
+			report.Contacts[i].Confidence = 1;
 		}
 
-		report.Contacts[i].Pressure = pressure;
-
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"%!FUNC!: Finger %llu, x: %d, y: %d, pressure: %d\n", i, x, y, pressure);
+			"%!FUNC!: Finger %llu, x: %d, y: %d, pressure: %d\n", i, report.Contacts[i].X, report.Contacts[i].Y, pressure);
 	}
 
 	// Write output
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! With %d fingers.\n", report.ContactCount);
 	status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)&report, sizeof(PTP_REPORT));
 	if (!NT_SUCCESS(status))
 	{
@@ -280,6 +281,8 @@ AmtPtpServiceTouchInputInterruptType5(
 
 	// Set result
 	WdfRequestSetInformation(request, sizeof(PTP_REPORT));
+	// Set completion flag
+	WdfRequestComplete(request, status);
 
 exit:
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");

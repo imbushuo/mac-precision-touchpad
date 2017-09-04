@@ -8,8 +8,7 @@ typedef struct _DEVICE_CONTEXT
 	WDFUSBDEVICE                UsbDevice;
 	WDFUSBPIPE                  InterruptPipe;
 	WDFUSBINTERFACE             UsbInterface;
-	WDFQUEUE                    MouseQueue;
-	WDFQUEUE                    TouchQueue;
+	WDFQUEUE                    InputQueue;
 
 	USB_DEVICE_DESCRIPTOR       DeviceDescriptor;
 

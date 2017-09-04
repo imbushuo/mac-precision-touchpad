@@ -209,7 +209,7 @@ struct BCM5974_CONFIG {
 #define SN_COORD	250		/* coordinate signal-to-noise ratio */
 #define SN_ORIENT	10		/* orientation signal-to-noise ratio */
 
-#define PRESSURE_LOWER_THRESHOLD 25
+#define PRESSURE_LOWER_THRESHOLD 5
 #define PRESSURE_UPPER_THRESHOLD 150
 
 /* device constants */
