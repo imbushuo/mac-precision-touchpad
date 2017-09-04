@@ -52,18 +52,8 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
 	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
 
-	if (!pDeviceContext->IsWellspringModeOn && NumBytesTransferred == BCM5974_MOUSE_SIZE)
+	if (!pDeviceContext->IsWellspringModeOn) 
 	{
-
-		szBuffer = WdfMemoryGetBuffer(Buffer, NULL);
-
-		// Dispatch to mouse routine
-		status = AmtPtpServiceMouseInputInterrupt(pDeviceContext, szBuffer, NumBytesTransferred);
-		if (!NT_SUCCESS(status))
-		{
-			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: AmtPtpServiceMouseInputInterrupt failed with %!STATUS!", status);
-		}
-
 		return;
 	}
 
@@ -107,67 +97,6 @@ AmtPtpEvtUsbInterruptReadersFailed(
 	UNREFERENCED_PARAMETER(Status);
 
 	return TRUE;
-}
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS
-AmtPtpServiceMouseInputInterrupt(
-	_In_ PDEVICE_CONTEXT DeviceContext,
-	_In_ UCHAR* Buffer,
-	_In_ size_t NumBytesTransferred
-)
-{
-	NTSTATUS   status;
-	WDFREQUEST request;
-	WDFMEMORY  reqMemory;
-
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-
-	status   = STATUS_SUCCESS;
-	request  = NULL;
-
-	status = WdfIoQueueRetrieveNextRequest(
-		DeviceContext->InputQueue,
-		&request);
-
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: No pending mouse request. Interrupt disposed.");
-		goto exit;
-	}
-
-	// Validate size
-	if (NumBytesTransferred * sizeof(BYTE) != sizeof(HID_AAPL_MOUSE_REPORT))
-	{
-		status = STATUS_INVALID_BUFFER_SIZE;
-		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: Invalid mouse input. NumBytesTransferred = %llu, required size = %llu",
-			NumBytesTransferred * sizeof(BYTE), sizeof(HID_AAPL_MOUSE_REPORT));
-		goto exit;
-	}
-
-	// Simply forward input buffer to output. No other validation.
-	status = WdfRequestRetrieveOutputMemory(request, &reqMemory);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
-		goto exit;
-	}
-
-	status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)Buffer, NumBytesTransferred);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
-		goto exit;
-	}
-
-	// Set information
-	WdfRequestSetInformation(request, NumBytesTransferred);
-
-exit:
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
-	// Set completion flag
-	WdfRequestComplete(request, status);
-	return status;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
