@@ -107,69 +107,49 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		END_COLLECTION, /* End Collection */ \
 	END_COLLECTION /* End Collection */
 
-#define AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_1 \
+#define AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION \
 	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
+		/* Begin a byte */ \
 		LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 1 */ \
 		USAGE, 0x47, /* Usage: Confidence */ \
 		USAGE, 0x42, /* Usage: Tip switch */ \
 		REPORT_COUNT, 0x02, /* Report Count: 2 */ \
 		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
+		REPORT_COUNT, 0x06, /* Report Count: 6 */ \
+		REPORT_SIZE, 0x01, /* Report Size: 1*/ \
+		INPUT, 0x03, /* Input: (Const, Var, Abs) */ \
+		/* End of a byte */ \
+		/* Begin a byte */ \
 		REPORT_COUNT, 0x01, /* Report Count: 1 */ \
 		REPORT_SIZE, 0x03, /* Report Size: 3 */ \
-		LOGICAL_MAXIMUM, 0x03, /* Logical Maximun: 3 */ \
+		LOGICAL_MAXIMUM, 0x03, /* Logical Maximum: 3 */ \
 		USAGE, 0x51, /* Usage: Contract Identifier */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
-		REPORT_COUNT, 0x03, /* Report Count: 3 */ \
+		REPORT_COUNT, 0x05, /* Report Count: 3 */ \
 		INPUT, 0x03, /* Input: (Const, Var, Abs) */ \
+		/* End of a byte */ \
+		/* Begin of 6 bytes */ \
+		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xa4, 0x07, /* Logical Maximum: 1956 */ \
-		REPORT_SIZE, 0x10, /* Report Size: 0x10 */ \
+		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0xd2, 0x03, /* Physical Maximum: 978 */ \
+		LOGICAL_MAXIMUM_2, 0xbc, 0x10, /* Logical Maximum: 7612 (See defintion) */ \
+		PHYSICAL_MAXIMUM_2, 0x40, 0x06, /* Physical Maximum: 1600 (See Apple Spec) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0xf2, 0x01, /* Physical Maximum: 498 */ \
-		LOGICAL_MAXIMUM_2, 0xe5, 0x03, /* Logical Maximum: 997 */ \
+		PHYSICAL_MAXIMUM_2, 0x7d, 0x04, /* Physical Maximum: 1149 (See Apple Spec) */ \
+		LOGICAL_MAXIMUM_2, 0xc9, 0x13, /* Logical Maximum: 5065 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM, 0x00, /* Physical Maximum: 0 */ \
-		UNIT_EXPONENT, 0x00, /* Unit exponent: 0 */ \
-		UNIT, 0x00, /* Unit: None */ \
-	END_COLLECTION /* End Collection */ \
-
-#define AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_2 \
-	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
-		LOGICAL_MAXIMUM, 0x01, /* Logical Maximun: 1 */ \
-		USAGE, 0x47, /* Usage: Confidence */ \
-		USAGE, 0x42, /* Usage: Tip switch */ \
-		REPORT_COUNT, 0x02, /* Report Count: 2 */ \
-		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
+		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+		LOGICAL_MAXIMUM_2, 0x2c, 0x01, /* Logical Maximum: 300 */ \
+		USAGE, 0x30, /* Usage: Tip Pressure */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		REPORT_COUNT, 0x01, /* Report Count: 1 */ \
-		REPORT_SIZE, 0x03, /* Report Size: 3 */ \
-		LOGICAL_MAXIMUM, 0x03, /* Logical Maximun: 3 */ \
-		USAGE, 0x51, /* Usage: Contract Identifier */ \
-		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
-		REPORT_COUNT, 0x03, /* Report Count: 3 */ \
-		INPUT, 0x03, /* Input: (Const, Var, Abs) */ \
-		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xa4, 0x07, /* Logical Maximum: 1956 */ \
-		REPORT_SIZE, 0x10, /* Report Size: 0x10 */ \
-		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
-		UNIT, 0x11, /* Unit: SI Length (cm) */ \
-		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0xd2, 0x03, /* Physical Maximum: 978 */ \
-		REPORT_COUNT, 0x01, /* Report count: 1 */ \
-		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0xf2, 0x01, /* Physical Maximum: 498 */ \
-		LOGICAL_MAXIMUM_2, 0xe5, 0x03, /* Logical Maximum: 997 */ \
-		USAGE, 0x31, /* Usage: Y */ \
-		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
+		/* End of 6 bytes */ \
 	END_COLLECTION /* End Collection */ \
 
 #define AAPL_MAGIC_TRACKPAD2_PTP_TLC \
@@ -178,19 +158,11 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
 		REPORT_ID, REPORTID_MULTITOUCH, /* Report ID: Multi-touch */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_1, /* 1 */ \
-		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
-		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_1, /* 2 */ \
-		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
-		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_2, /* 3 */ \
-		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
-		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_1, /* 4 */ \
-		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
-		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_2, /* 5 */ \
+		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION, /* 1 */ \
+		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION, /* 2 */ \
+		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION, /* 3 */ \
+		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION, /* 4 */ \
+		AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION, /* 5 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		UNIT_EXPONENT, 0x0c, /* Unit exponent: -4 */ \
 		UNIT_2, 0x01, 0x10, /* Time: Second */ \
