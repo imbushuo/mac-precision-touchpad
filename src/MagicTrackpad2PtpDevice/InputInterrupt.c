@@ -31,12 +31,13 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 	return STATUS_SUCCESS;
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 VOID
 AmtPtpEvtUsbInterruptPipeReadComplete(
-	WDFUSBPIPE  Pipe,
-	WDFMEMORY   Buffer,
-	size_t      NumBytesTransferred,
-	WDFCONTEXT  Context
+	_In_ WDFUSBPIPE  Pipe,
+	_In_ WDFMEMORY   Buffer,
+	_In_ size_t      NumBytesTransferred,
+	_In_ WDFCONTEXT  Context
 )
 {
 	UNREFERENCED_PARAMETER(Pipe);
@@ -90,6 +91,7 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	}
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 BOOLEAN
 AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
@@ -107,6 +109,7 @@ AmtPtpEvtUsbInterruptReadersFailed(
 	return TRUE;
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpServiceMouseInputInterrupt(
 	_In_ PDEVICE_CONTEXT DeviceContext,
@@ -167,6 +170,7 @@ exit:
 	return status;
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpServiceTouchInputInterruptType5(
 	_In_ PDEVICE_CONTEXT DeviceContext,
@@ -214,7 +218,8 @@ AmtPtpServiceTouchInputInterruptType5(
 	// Set header information
 	report.ContactCount = (UCHAR) raw_n;
 	report.ReportID = REPORTID_MULTITOUCH;
-	report.ScanTime = 39000;
+	report.ScanTime = 15000;
+
 	if (Buffer[DeviceContext->DeviceInfo->tp_button])
 	{
 		report.IsButtonClicked = TRUE;

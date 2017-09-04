@@ -100,10 +100,12 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 			REPORT_ID, REPORTID_FUNCSWITCH, /* Report ID: Function Switch */ \
 			USAGE, BUTTON_SWITCH, /* Usage: Button Switch */ \
 			USAGE, SURFACE_SWITCH, /* Usage: Surface Switch */ \
-			REPORT_SIZE, 0x08, /* Report Size: 0x08 */ \
+			REPORT_SIZE, 0x01, /* Report Size: 0x01 */ \
 			REPORT_COUNT, 0x02, /* Report Count: 0x02 */ \
 			LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 0x01 */ \
 			FEATURE, 0x02, /* Feature: (Data, Var, Abs) */ \
+			REPORT_COUNT, 0x06, /* Report Count: 0x06 */ \
+			FEATURE, 0x03, /* Feature: (Const, Var, Abs) */ \
 		END_COLLECTION, /* End Collection */ \
 	END_COLLECTION /* End Collection */
 
@@ -281,11 +283,13 @@ typedef struct _PTP_DEVICE_INPUT_MODE_REPORT
 	UCHAR Mode;
 } PTP_DEVICE_INPUT_MODE_REPORT, *PPTP_DEVICE_INPUT_MODE_REPORT;
 
+#pragma pack(1)
 typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT
 {
 	UCHAR ReportID;
-	UCHAR ButtonReport;
-	UCHAR SurfaceReport;
+	UCHAR ButtonReport : 1;
+	UCHAR SurfaceReport : 1;
+	UCHAR Padding : 6;
 } PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT, *PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT;
 
 #pragma pack(1)
@@ -295,7 +299,7 @@ typedef struct _PTP_CONTACT
 	UCHAR	  ContactID;
 	USHORT    X;
 	USHORT    Y;
-	USHORT	  Pressure;
+	USHORT    Pressure;
 } PTP_CONTACT, *PPTP_CONTACT;
 
 typedef struct _PTP_REPORT

@@ -269,12 +269,18 @@ AmtPtpDispatchReadReportRequests(
 	devContext = DeviceGetContext(Device);
 
 	status = WdfRequestForwardToIoQueue(Request,
-		(devContext->IsWellspringModeOn)? devContext->TouchQueue : devContext->MouseQueue);
+	 	(devContext->IsWellspringModeOn)? devContext->TouchQueue : devContext->MouseQueue);
+	
 
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestForwardToIoQueue failed with %!STATUS!", status);
 		return status;
+	}
+	else
+	{
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+			"%!FUNC!: A report has been forwarded to %s queue.", (devContext->IsWellspringModeOn) ? "Touch" : "Mouse");
 	}
 
 	if (NULL != Pending)
