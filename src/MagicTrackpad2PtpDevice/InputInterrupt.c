@@ -124,6 +124,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	size_t raw_n, i = 0;
 	size_t headerSize = (unsigned int)DeviceContext->DeviceInfo->tp_header;
 	size_t fingerprintSize = (unsigned int)DeviceContext->DeviceInfo->tp_fsize;
+	UCHAR actualFingers = 0;
 
 	status = WdfIoQueueRetrieveNextRequest(
 		DeviceContext->InputQueue,
@@ -144,10 +145,7 @@ AmtPtpServiceTouchInputInterruptType5(
 
 	// Iterations to read
 	raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
-	// Set header information
-	report.ContactCount = (UCHAR) raw_n;
-	report.ReportID = REPORTID_MULTITOUCH;
-	report.ScanTime = 14500;
+	if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 
 	if (Buffer[DeviceContext->DeviceInfo->tp_button])
 	{
@@ -180,24 +178,19 @@ AmtPtpServiceTouchInputInterruptType5(
 		report.Contacts[i].Y = (USHORT) (y - DeviceContext->DeviceInfo->y.min);
 
 		// Don't know a better way to set this...
-		if (pressure == 0)
-		{
-			report.Contacts[i].Confidence = 0;
-			report.Contacts[i].TipSwitch = 0;
-		}
-		else if (pressure > PRESSURE_LOWER_THRESHOLD)
-		{
-			report.Contacts[i].Confidence = 1;
-			report.Contacts[i].TipSwitch = 1;
-		}
-		else
-		{
-			report.Contacts[i].Confidence = 1;
-		}
+		report.Contacts[i].Confidence = 1;
+		report.Contacts[i].TipSwitch = 1;
 
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
 			"%!FUNC!: Finger %llu, x: %d, y: %d, pressure: %d\n", i, report.Contacts[i].X, report.Contacts[i].Y, pressure);
+
+		actualFingers++;
 	}
+
+	// Set header information
+	report.ContactCount = actualFingers;
+	report.ReportID = REPORTID_MULTITOUCH;
+	report.ScanTime = 14005;
 
 	// Write output
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! With %d fingers.\n", report.ContactCount);
