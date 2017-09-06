@@ -147,6 +147,8 @@ AmtPtpServiceTouchInputInterruptType5(
 	size_t headerSize = (unsigned int) DeviceContext->DeviceInfo->tp_header;
 	size_t fingerprintSize = (unsigned int) DeviceContext->DeviceInfo->tp_fsize;
 	UCHAR actualFingers = 0;
+	UCHAR muTotalPressure = 0;
+	UCHAR muTotalSize = 0;
 
 	status = WdfIoQueueRetrieveNextRequest(
 		DeviceContext->InputQueue,
@@ -257,6 +259,22 @@ AmtPtpServiceTouchInputInterruptType5(
 			} else {
 				// Save the information
 				// Use size to determine confidence in MU scenario
+				if (raw_n == 2) {
+					report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
+					report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD;
+				}
+				else {
+					if (DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD) {
+						report.Contacts[i].TipSwitch = 1;
+						muTotalPressure += DeviceContext->ContactRepository[i].Pressure;
+					}
+
+					if (DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD) {
+						report.Contacts[i].Confidence = 1;
+						muTotalSize += DeviceContext->ContactRepository[i].Size;
+					}
+				}
+
 				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
 				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD;
 
@@ -275,6 +293,30 @@ AmtPtpServiceTouchInputInterruptType5(
 			}
 		
 			actualFingers++;
+		}
+
+		if (actualFingers > 2) {
+			if (muTotalPressure > PRESSURE_MU_QUALIFICATION_THRESHOLD_TOTAL) {
+				TraceEvents(
+					TRACE_LEVEL_INFORMATION,
+					TRACE_INPUT,
+					"(MU) Perform finger tip switch bit correction."
+				);
+				for (i = 0; i < actualFingers; i++) {
+					report.Contacts[i].TipSwitch = 1;
+				}
+
+				if (muTotalSize > SIZE_MU_QUALIFICATION_THRESHOLD_TOTAL) {
+					TraceEvents(
+						TRACE_LEVEL_INFORMATION,
+						TRACE_INPUT,
+						"(MU) Perform finger confidence bit correction."
+					);
+					for (i = 0; i < actualFingers; i++) {
+						report.Contacts[i].Confidence = 1;
+					}
+				}
+			}
 		}
 
 		// Set header information
