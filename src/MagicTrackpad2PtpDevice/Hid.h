@@ -307,6 +307,16 @@ typedef struct _PTP_CONTACT
 	USHORT    Y;
 } PTP_CONTACT, *PPTP_CONTACT;
 
+// Used for defuzz - not report
+typedef struct _PTP_CONTACT_RAW
+{
+	USHORT    X;
+	USHORT    Y;
+	UCHAR     Pressure;
+	UCHAR     Size;
+	UCHAR     ContactId;
+} PTP_CONTACT_RAW, *PPTP_CONTACT_RAW;
+
 typedef struct _PTP_REPORT
 {
 	UCHAR       ReportID;

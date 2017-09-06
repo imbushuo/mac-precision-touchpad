@@ -119,7 +119,6 @@ AmtPtpServiceTouchInputInterruptType5(
 
 	status = STATUS_SUCCESS;
 	s32 x, y = 0;
-	u16 pressure = 0;
 
 	size_t raw_n, i = 0;
 	size_t headerSize = (unsigned int)DeviceContext->DeviceInfo->tp_header;
@@ -147,50 +146,97 @@ AmtPtpServiceTouchInputInterruptType5(
 	raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
 	if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 
-	if (Buffer[DeviceContext->DeviceInfo->tp_button])
-	{
-		report.IsButtonClicked = TRUE;
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: Trackpad button clicked\n");
-	}
-
 	// Fingers
 	for (i = 0; i < raw_n; i++)
 	{
 		u8 *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
 		f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
+		f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
 
 		u16 tmp_x;
 		u32 tmp_y;
-		f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
-
 		tmp_x = (*((__le16*)f_type5)) & 0x1fff;
 		tmp_y = (s32)(*((__le32*)f_type5));
 
 		x = (s16)(tmp_x << 3) >> 3;
 		y = -(s32)(tmp_y << 6) >> 19;
-		pressure = f_type5->pressure;
+
+		// We need to defuzz input
+		if (DeviceContext->ContactRepository[i].ContactId == f_type5->ContactIdentifier.Id)
+		{
+			DeviceContext->ContactRepository[i].X = (USHORT)AmtPtpDefuzzInput(
+				x, DeviceContext->ContactRepository[i].X, DeviceContext->HorizonalFuzz);
+			DeviceContext->ContactRepository[i].Y = (USHORT)AmtPtpDefuzzInput(
+				y, DeviceContext->ContactRepository[i].Y, DeviceContext->VerticalFuzz);
+			DeviceContext->ContactRepository[i].Pressure = (UCHAR)AmtPtpDefuzzInput(
+				f_type5->Pressure, DeviceContext->ContactRepository[i].Pressure, DeviceContext->PressureFuzz);
+			DeviceContext->ContactRepository[i].Size = (UCHAR)AmtPtpDefuzzInput(
+				f_type5->Size, DeviceContext->ContactRepository[i].Size, DeviceContext->WidthFuzz);
+		}
+		else
+		{
+			DeviceContext->ContactRepository[i].ContactId = f_type5->ContactIdentifier.Id;
+			DeviceContext->ContactRepository[i].X = (USHORT)x;
+			DeviceContext->ContactRepository[i].Y = (USHORT)y;
+			DeviceContext->ContactRepository[i].Pressure = f_type5->Pressure;
+			DeviceContext->ContactRepository[i].Size = f_type5->Size;
+		}
 
 		// Set ID.
-		report.Contacts[i].ContactID = (UCHAR) i;
+		report.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
 
 		// Adjust position. Apple uses different coordinate system.
-		report.Contacts[i].X = (USHORT) (x - DeviceContext->DeviceInfo->x.min);
-		report.Contacts[i].Y = (USHORT) (y - DeviceContext->DeviceInfo->y.min);
+		report.Contacts[i].X = (USHORT)(DeviceContext->ContactRepository[i].X - DeviceContext->DeviceInfo->x.min);
+		report.Contacts[i].Y = (USHORT)(DeviceContext->ContactRepository[i].Y - DeviceContext->DeviceInfo->y.min);
 
-		// Don't know a better way to set this...
-		report.Contacts[i].Confidence = 1;
-		report.Contacts[i].TipSwitch = 1;
+		// Set flags (by cases)
+		if (raw_n == 1)
+		{
+			report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
+			report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_QUALIFICATION_THRESHOLD;
 
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"%!FUNC!: Finger %llu, x: %d, y: %d, pressure: %d\n", i, report.Contacts[i].X, report.Contacts[i].Y, pressure);
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+				"(SG) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
+				f_type5->ContactIdentifier.Id,
+				report.Contacts[i].X,
+				report.Contacts[i].Y,
+				DeviceContext->ContactRepository[i].Pressure,
+				DeviceContext->ContactRepository[i].Size,
+				report.Contacts[i].TipSwitch,
+				report.Contacts[i].Confidence);
+		}
+		else
+		{
+			// Save the information
+			// Use size to determine confidence in MU scenario
+			report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
+			report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD;
 
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+				"(MU) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
+				f_type5->ContactIdentifier.Id,
+				report.Contacts[i].X,
+				report.Contacts[i].Y,
+				DeviceContext->ContactRepository[i].Pressure,
+				DeviceContext->ContactRepository[i].Size,
+				report.Contacts[i].TipSwitch,
+				report.Contacts[i].Confidence);
+		}
+		
 		actualFingers++;
 	}
 
 	// Set header information
 	report.ContactCount = actualFingers;
 	report.ReportID = REPORTID_MULTITOUCH;
-	report.ScanTime = 14005;
+	report.ScanTime = 10000;
+
+	// Button
+	if (Buffer[DeviceContext->DeviceInfo->tp_button] && actualFingers < 2)
+	{
+		report.IsButtonClicked = TRUE;
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: Trackpad button clicked\n");
+	}
 
 	// Write output
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! With %d fingers.\n", report.ContactCount);
@@ -209,4 +255,27 @@ AmtPtpServiceTouchInputInterruptType5(
 exit:
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
+}
+
+// Debuzz function from Linux Kernel: drivers/input/input.c
+_IRQL_requires_(PASSIVE_LEVEL)
+static INT AmtPtpDefuzzInput(
+	_In_ int NewValue,
+	_In_ int OldValue,
+	_In_ double Fuzz
+)
+{
+	if (Fuzz) 
+	{
+		if (NewValue > OldValue - Fuzz / 2 && NewValue < OldValue + Fuzz / 2)
+			return OldValue;
+
+		if (NewValue > OldValue - Fuzz && NewValue < OldValue + Fuzz)
+			return (OldValue * 3 + NewValue) / 4;
+
+		if (NewValue > OldValue - Fuzz * 2 && NewValue < OldValue + Fuzz * 2)
+			return (OldValue + NewValue) / 2;
+	}
+
+	return NewValue;
 }
