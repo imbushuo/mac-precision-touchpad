@@ -147,6 +147,8 @@ AmtPtpServiceTouchInputInterruptType5(
 	size_t headerSize = (unsigned int) DeviceContext->DeviceInfo->tp_header;
 	size_t fingerprintSize = (unsigned int) DeviceContext->DeviceInfo->tp_fsize;
 	UCHAR actualFingers = 0;
+	UCHAR muTotalPressure = 0;
+	UCHAR muTotalSize = 0;
 
 	status = WdfIoQueueRetrieveNextRequest(
 		DeviceContext->InputQueue,
@@ -179,6 +181,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	// First things
 	report.ReportID = REPORTID_MULTITOUCH;
 	report.ScanTime = 10000;
+	report.IsButtonClicked = 0;
 
 	// Check things to report
 	if (DeviceContext->IsSurfaceReportOn) {
@@ -239,8 +242,8 @@ AmtPtpServiceTouchInputInterruptType5(
 
 			// Set flags (by cases)
 			if (raw_n == 1) {
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
-				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_QUALIFICATION_THRESHOLD;
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->SgContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
@@ -255,10 +258,13 @@ AmtPtpServiceTouchInputInterruptType5(
 					report.Contacts[i].Confidence
 				);
 			} else {
+
 				// Save the information
 				// Use size to determine confidence in MU scenario
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
-				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD;
+				muTotalPressure += DeviceContext->ContactRepository[i].Pressure;
+				muTotalSize += DeviceContext->ContactRepository[i].Size;
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->MuContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
@@ -275,6 +281,30 @@ AmtPtpServiceTouchInputInterruptType5(
 			}
 		
 			actualFingers++;
+		}
+
+		if (actualFingers > 2) {
+			if (muTotalPressure > DeviceContext->PressureQualLevel * 2.15) {
+				TraceEvents(
+					TRACE_LEVEL_INFORMATION,
+					TRACE_INPUT,
+					"(MU) Perform finger tip switch bit correction."
+				);
+				for (i = 0; i < actualFingers; i++) {
+					report.Contacts[i].TipSwitch = 1;
+				}
+
+				if (muTotalSize > DeviceContext->MuContactSizeQualLevel * 2.15) {
+					TraceEvents(
+						TRACE_LEVEL_INFORMATION,
+						TRACE_INPUT,
+						"(MU) Perform finger confidence bit correction."
+					);
+					for (i = 0; i < actualFingers; i++) {
+						report.Contacts[i].Confidence = 1;
+					}
+				}
+			}
 		}
 
 		// Set header information
