@@ -17,9 +17,16 @@ DriverEntry(
 	//
 	// Initialize WPP Tracing
 	//
-	WPP_INIT_TRACING(DriverObject, RegistryPath);
+	WPP_INIT_TRACING(
+		DriverObject, 
+		RegistryPath
+	);
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
 
 	//
 	// Register a cleanup callback so that we can call WPP_CLEANUP when
@@ -40,12 +47,21 @@ DriverEntry(
 	);
 
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfDriverCreate failed %!STATUS!", 
+			status
+		);
 		WPP_CLEANUP(DriverObject);
 		return status;
 	}
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 
 	return status;
 }
@@ -58,15 +74,30 @@ MagicTrackpad2PtpDeviceEvtDeviceAdd(
 {
 	NTSTATUS status = STATUS_SUCCESS;
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Set FDO driver filter\n");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER, 
+		"%!FUNC! Set FDO driver filter"
+	);
+
 	WdfFdoInitSetFilter(DeviceInit);
 
-	status = AmtPtpCreateDevice(Driver, DeviceInit);
+	status = AmtPtpCreateDevice(
+		Driver, 
+		DeviceInit
+	);
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
-
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 	return status;
 }
 
@@ -79,7 +110,11 @@ MagicTrackpad2PtpDeviceEvtDriverContextCleanup(
 
 	UNREFERENCED_PARAMETER(DriverObject);
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
 
 	//
 	// Stop WPP Tracing

@@ -7,28 +7,8 @@ NTSTATUS
 MagicTrackpad2PtpDeviceQueueInitialize(
 	_In_ WDFDEVICE Device
 )
-/*++
-
-Routine Description:
-
-
-	 The I/O dispatch callbacks for the frameworks device object
-	 are configured in this function.
-
-	 A single default I/O Queue is configured for parallel request
-	 processing, and a driver context memory allocation is created
-	 to hold our structure QUEUE_CONTEXT.
-
-Arguments:
-
-	Device - Handle to a framework device object.
-
-Return Value:
-
-	VOID
-
---*/
 {
+
 	WDFQUEUE queue;
 	NTSTATUS status;
 	WDF_IO_QUEUE_CONFIG    queueConfig;
@@ -57,7 +37,12 @@ Return Value:
 	);
 
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Primary) failed %!STATUS!", status);
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_QUEUE, 
+			"%!FUNC! WdfIoQueueCreate (Primary) failed %!STATUS!", 
+			status
+		);
 		return status;
 	}
 
@@ -72,14 +57,21 @@ Return Value:
 		Device,
 		&queueConfig,
 		WDF_NO_OBJECT_ATTRIBUTES,
-		&deviceContext->InputQueue);
+		&deviceContext->InputQueue
+	);
 
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate (Input) failed %!STATUS!", status);
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_QUEUE, 
+			"%!FUNC! WdfIoQueueCreate (Input) failed %!STATUS!", 
+			status
+		);
 		return status;
 	}
 
 	return status;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -88,6 +80,7 @@ DbgIoControlGetString(
 	_In_ ULONG IoControlCode
 )
 {
+
 	switch (IoControlCode)
 	{
 	case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
@@ -119,6 +112,7 @@ DbgIoControlGetString(
 	default:
 		return "IOCTL_UNKNOWN";
 	}
+
 }
 
 VOID
@@ -135,33 +129,61 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 	WDFDEVICE device = WdfIoQueueGetDevice(Queue);
 	BOOLEAN requestPending = FALSE;
 
-	TraceEvents(TRACE_LEVEL_INFORMATION,
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
 		TRACE_QUEUE,
-		"%!FUNC!: Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d\n",
-		Queue, Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
+		"%!FUNC!: Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d",
+		Queue, 
+		Request, 
+		(int) OutputBufferLength, 
+		(int) InputBufferLength, 
+		IoControlCode
+	);
 
 	switch (IoControlCode)
 	{
 		case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
-			status = MagicTrackpad2GetHidDescriptor(device, Request);
+			status = MagicTrackpad2GetHidDescriptor(
+				device, 
+				Request
+			);
 			break;
 		case IOCTL_HID_GET_DEVICE_ATTRIBUTES:
-			status = AmtPtpGetDeviceAttribs(device, Request);
+			status = AmtPtpGetDeviceAttribs(
+				device, 
+				Request
+			);
 			break;
 		case IOCTL_HID_GET_REPORT_DESCRIPTOR:
-			status = MagicTrackpad2GetReportDescriptor(device, Request);
+			status = MagicTrackpad2GetReportDescriptor(
+				device, 
+				Request
+			);
 			break;
 		case IOCTL_HID_GET_STRING:
-			status = AmtPtpGetStrings(device, Request);
+			status = AmtPtpGetStrings(
+				device, 
+				Request
+			);
 			break;
 		case IOCTL_HID_READ_REPORT:
-			status = AmtPtpDispatchReadReportRequests(device, Request, &requestPending);
+			status = AmtPtpDispatchReadReportRequests(
+				device, 
+				Request, 
+				&requestPending
+			);
 			break;
 		case IOCTL_UMDF_HID_GET_FEATURE:
-			status = AmtPtpReportFeatures(device, Request);
+			status = AmtPtpReportFeatures(
+				device, 
+				Request
+			);
 			break;
 		case IOCTL_UMDF_HID_SET_FEATURE:
-			status = AmtPtpSetFeatures(device, Request);
+			status = AmtPtpSetFeatures(
+				device, 
+				Request
+			);
 			break;
 		case IOCTL_HID_WRITE_REPORT:
 		case IOCTL_UMDF_HID_SET_OUTPUT_REPORT:
@@ -171,13 +193,20 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 		case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:
 		default:
 			status = STATUS_NOT_SUPPORTED;
-			TraceEvents(TRACE_LEVEL_WARNING, TRACE_QUEUE, "%!FUNC!: %s is not yet implemented.\n", DbgIoControlGetString(IoControlCode));
+			TraceEvents(
+				TRACE_LEVEL_WARNING, 
+				TRACE_QUEUE, 
+				"%!FUNC!: %s is not yet implemented", 
+				DbgIoControlGetString(IoControlCode)
+			);
 			break;
 	}
 
-	if (requestPending != TRUE)
-	{
-		WdfRequestComplete(Request, status);
+	if (requestPending != TRUE) {
+		WdfRequestComplete(
+			Request, 
+			status
+		);
 	}
 
 	return;
@@ -189,33 +218,16 @@ MagicTrackpad2PtpDeviceEvtIoStop(
 	_In_ WDFREQUEST Request,
 	_In_ ULONG ActionFlags
 )
-/*++
-
-Routine Description:
-
-	This event is invoked for a power-managed queue before the device leaves the working state (D0).
-
-Arguments:
-
-	Queue -  Handle to the framework queue object that is associated with the
-			 I/O request.
-
-	Request - Handle to a framework request object.
-
-	ActionFlags - A bitwise OR of one or more WDF_REQUEST_STOP_ACTION_FLAGS-typed flags
-				  that identify the reason that the callback function is being called
-				  and whether the request is cancelable.
-
-Return Value:
-
-	VOID
-
---*/
 {
-	TraceEvents(TRACE_LEVEL_INFORMATION,
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
 		TRACE_QUEUE,
 		"%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d",
-		Queue, Request, ActionFlags);
+		Queue, 
+		Request, 
+		ActionFlags
+	);
 
 	//
 	// In most cases, the EvtIoStop callback function completes, cancels, or postpones
@@ -242,6 +254,7 @@ Return Value:
 	//
 
 	return;
+
 }
 
 NTSTATUS
@@ -251,30 +264,39 @@ AmtPtpDispatchReadReportRequests(
 	_Out_ BOOLEAN *Pending
 )
 {
+
 	NTSTATUS status;
 	PDEVICE_CONTEXT devContext;
 
 	status = STATUS_SUCCESS;
 	devContext = DeviceGetContext(Device);
 
-	status = WdfRequestForwardToIoQueue(Request, devContext->InputQueue);
+	status = WdfRequestForwardToIoQueue(
+		Request, 
+		devContext->InputQueue
+	);
 	
 
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestForwardToIoQueue failed with %!STATUS!", status);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestForwardToIoQueue failed with %!STATUS!", 
+			status
+		);
 		return status;
-	}
-	else
-	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"%!FUNC!: A report has been forwarded to input queue.\n");
+	} else {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, 
+			TRACE_DRIVER,
+			"%!FUNC! A report has been forwarded to input queue"
+		);
 	}
 
-	if (NULL != Pending)
-	{
+	if (NULL != Pending) {
 		*Pending = TRUE;
 	}
 
 	return status;
+
 }

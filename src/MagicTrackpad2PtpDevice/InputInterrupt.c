@@ -9,19 +9,24 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 	_In_ PDEVICE_CONTEXT DeviceContext
 )
 {
+
 	WDF_USB_CONTINUOUS_READER_CONFIG contReaderConfig;
 	NTSTATUS status;
 
-	WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
+	WDF_USB_CONTINUOUS_READER_CONFIG_INIT(
+		&contReaderConfig,
 		AmtPtpEvtUsbInterruptPipeReadComplete,
 		DeviceContext,    // Context
-		HEADER_TYPE5 + FSIZE_TYPE5 * MAX_FINGERS);   // TransferLength
+		HEADER_TYPE5 + FSIZE_TYPE5 * MAX_FINGERS
+	);   // TransferLength
 
 	contReaderConfig.EvtUsbTargetPipeReadersFailed = AmtPtpEvtUsbInterruptReadersFailed;
 
 	// Remember to turn it on in D0 entry
-	status = WdfUsbTargetPipeConfigContinuousReader(DeviceContext->InterruptPipe,
-		&contReaderConfig);
+	status = WdfUsbTargetPipeConfigContinuousReader(
+		DeviceContext->InterruptPipe,
+		&contReaderConfig
+	);
 
 	if (!NT_SUCCESS(status)) {
 		// TODO: Trace
@@ -29,6 +34,7 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 	}
 
 	return STATUS_SUCCESS;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -40,6 +46,7 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	_In_ WDFCONTEXT  Context
 )
 {
+
 	UNREFERENCED_PARAMETER(Pipe);
 
 	WDFDEVICE       device;
@@ -52,33 +59,45 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
 	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
 
-	if (!pDeviceContext->IsWellspringModeOn) 
-	{
+	if (!pDeviceContext->IsWellspringModeOn) return;
+
+	if (pDeviceContext->DeviceInfo->tp_type != TYPE5) {
+		TraceEvents(
+			TRACE_LEVEL_WARNING, 
+			TRACE_DRIVER, 
+			"%!FUNC! Mode not yet supported"
+		);
 		return;
 	}
 
-	if (pDeviceContext->DeviceInfo->tp_type != TYPE5)
-	{
-		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC!: Mode not yet supported\n");
-		return;
-	}
+	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, 
+			TRACE_DRIVER,
+			"%!FUNC! Malformed input received. Length = %llu", 
+			NumBytesTransferred
+		);
+	} else {
+		szBuffer = WdfMemoryGetBuffer(
+			Buffer, 
+			NULL
+		);
+		status = AmtPtpServiceTouchInputInterruptType5(
+			pDeviceContext, 
+			szBuffer, 
+			NumBytesTransferred
+		);
 
-	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0)
-	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"%!FUNC!: Malformed input received. Length = %llu\n", NumBytesTransferred);
-	}
-	else
-	{
-		// Dispatch to touch routine
-		szBuffer = WdfMemoryGetBuffer(Buffer, NULL);
-		status = AmtPtpServiceTouchInputInterruptType5(pDeviceContext, szBuffer, NumBytesTransferred);
-		if (!NT_SUCCESS(status))
-		{
-			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, 
-				"%!FUNC!: AmtPtpServiceTouchInputInterrupt failed with %!STATUS!", status);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(
+				TRACE_LEVEL_WARNING, 
+				TRACE_DRIVER, 
+				"%!FUNC! AmtPtpServiceTouchInputInterrupt failed with %!STATUS!", 
+				status
+			);
 		}
 	}
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -90,7 +109,6 @@ AmtPtpEvtUsbInterruptReadersFailed(
 )
 {
 	WDFDEVICE device = WdfIoTargetGetDevice(WdfUsbTargetPipeGetIoTarget(Pipe));
-	// PDEVICE_CONTEXT pDeviceContext = GetDeviceContext(device);
 
 	UNREFERENCED_PARAMETER(device);
 	UNREFERENCED_PARAMETER(UsbdStatus);
@@ -107,6 +125,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	_In_ size_t NumBytesTransferred
 )
 {
+
 	NTSTATUS   status;
 	WDFREQUEST request;
 	WDFMEMORY  reqMemory;
@@ -115,30 +134,45 @@ AmtPtpServiceTouchInputInterruptType5(
 	const struct TRACKPAD_FINGER *f;
 	const struct TRACKPAD_FINGER_TYPE5 *f_type5;
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
 
 	status = STATUS_SUCCESS;
 	s32 x, y = 0;
 
 	size_t raw_n, i = 0;
-	size_t headerSize = (unsigned int)DeviceContext->DeviceInfo->tp_header;
-	size_t fingerprintSize = (unsigned int)DeviceContext->DeviceInfo->tp_fsize;
+	size_t headerSize = (unsigned int) DeviceContext->DeviceInfo->tp_header;
+	size_t fingerprintSize = (unsigned int) DeviceContext->DeviceInfo->tp_fsize;
 	UCHAR actualFingers = 0;
 
 	status = WdfIoQueueRetrieveNextRequest(
 		DeviceContext->InputQueue,
-		&request);
+		&request
+	);
 
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: No pending PTP request. Interrupt disposed.");
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, 
+			TRACE_DRIVER, 
+			"%!FUNC! No pending PTP request. Interrupt disposed"
+		);
 		goto exit;
 	}
 
-	status = WdfRequestRetrieveOutputMemory(request, &reqMemory);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
+	status = WdfRequestRetrieveOutputMemory(
+		request, 
+		&reqMemory
+	);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!", 
+			status
+		);
 		goto exit;
 	}
 
@@ -147,8 +181,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 
 	// Fingers
-	for (i = 0; i < raw_n; i++)
-	{
+	for (i = 0; i < raw_n; i++) {
 		u8 *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
 		f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
 		f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
@@ -156,28 +189,37 @@ AmtPtpServiceTouchInputInterruptType5(
 		u16 tmp_x;
 		u32 tmp_y;
 		tmp_x = (*((__le16*)f_type5)) & 0x1fff;
-		tmp_y = (s32)(*((__le32*)f_type5));
+		tmp_y = (s32) (*((__le32*)f_type5));
 
-		x = (s16)(tmp_x << 3) >> 3;
-		y = -(s32)(tmp_y << 6) >> 19;
+		x = (s16) (tmp_x << 3) >> 3;
+		y = -(s32) (tmp_y << 6) >> 19;
 
 		// We need to defuzz input
-		if (DeviceContext->ContactRepository[i].ContactId == f_type5->ContactIdentifier.Id)
-		{
-			DeviceContext->ContactRepository[i].X = (USHORT)AmtPtpDefuzzInput(
-				x, DeviceContext->ContactRepository[i].X, DeviceContext->HorizonalFuzz);
-			DeviceContext->ContactRepository[i].Y = (USHORT)AmtPtpDefuzzInput(
-				y, DeviceContext->ContactRepository[i].Y, DeviceContext->VerticalFuzz);
-			DeviceContext->ContactRepository[i].Pressure = (UCHAR)AmtPtpDefuzzInput(
-				f_type5->Pressure, DeviceContext->ContactRepository[i].Pressure, DeviceContext->PressureFuzz);
-			DeviceContext->ContactRepository[i].Size = (UCHAR)AmtPtpDefuzzInput(
-				f_type5->Size, DeviceContext->ContactRepository[i].Size, DeviceContext->WidthFuzz);
-		}
-		else
-		{
+		if (DeviceContext->ContactRepository[i].ContactId == f_type5->ContactIdentifier.Id) {
+			DeviceContext->ContactRepository[i].X = (USHORT) AmtPtpDefuzzInput(
+				x, 
+				DeviceContext->ContactRepository[i].X, 
+				DeviceContext->HorizonalFuzz
+			);
+			DeviceContext->ContactRepository[i].Y = (USHORT) AmtPtpDefuzzInput(
+				y, 
+				DeviceContext->ContactRepository[i].Y, 
+				DeviceContext->VerticalFuzz
+			);
+			DeviceContext->ContactRepository[i].Pressure = (UCHAR) AmtPtpDefuzzInput(
+				f_type5->Pressure, 
+				DeviceContext->ContactRepository[i].Pressure, 
+				DeviceContext->PressureFuzz
+			);
+			DeviceContext->ContactRepository[i].Size = (UCHAR) AmtPtpDefuzzInput(
+				f_type5->Size, 
+				DeviceContext->ContactRepository[i].Size, 
+				DeviceContext->WidthFuzz
+			);
+		} else {
 			DeviceContext->ContactRepository[i].ContactId = f_type5->ContactIdentifier.Id;
-			DeviceContext->ContactRepository[i].X = (USHORT)x;
-			DeviceContext->ContactRepository[i].Y = (USHORT)y;
+			DeviceContext->ContactRepository[i].X = (USHORT) x;
+			DeviceContext->ContactRepository[i].Y = (USHORT) y;
 			DeviceContext->ContactRepository[i].Pressure = f_type5->Pressure;
 			DeviceContext->ContactRepository[i].Size = f_type5->Size;
 		}
@@ -186,16 +228,17 @@ AmtPtpServiceTouchInputInterruptType5(
 		report.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
 
 		// Adjust position. Apple uses different coordinate system.
-		report.Contacts[i].X = (USHORT)(DeviceContext->ContactRepository[i].X - DeviceContext->DeviceInfo->x.min);
-		report.Contacts[i].Y = (USHORT)(DeviceContext->ContactRepository[i].Y - DeviceContext->DeviceInfo->y.min);
+		report.Contacts[i].X = (USHORT) (DeviceContext->ContactRepository[i].X - DeviceContext->DeviceInfo->x.min);
+		report.Contacts[i].Y = (USHORT) (DeviceContext->ContactRepository[i].Y - DeviceContext->DeviceInfo->y.min);
 
 		// Set flags (by cases)
-		if (raw_n == 1)
-		{
+		if (raw_n == 1) {
 			report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
 			report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_QUALIFICATION_THRESHOLD;
 
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER,
 				"(SG) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 				f_type5->ContactIdentifier.Id,
 				report.Contacts[i].X,
@@ -203,16 +246,17 @@ AmtPtpServiceTouchInputInterruptType5(
 				DeviceContext->ContactRepository[i].Pressure,
 				DeviceContext->ContactRepository[i].Size,
 				report.Contacts[i].TipSwitch,
-				report.Contacts[i].Confidence);
-		}
-		else
-		{
+				report.Contacts[i].Confidence
+			);
+		} else {
 			// Save the information
 			// Use size to determine confidence in MU scenario
 			report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
 			report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD;
 
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER,
 				"(MU) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 				f_type5->ContactIdentifier.Id,
 				report.Contacts[i].X,
@@ -220,7 +264,8 @@ AmtPtpServiceTouchInputInterruptType5(
 				DeviceContext->ContactRepository[i].Pressure,
 				DeviceContext->ContactRepository[i].Size,
 				report.Contacts[i].TipSwitch,
-				report.Contacts[i].Confidence);
+				report.Contacts[i].Confidence
+			);
 		}
 		
 		actualFingers++;
@@ -232,29 +277,58 @@ AmtPtpServiceTouchInputInterruptType5(
 	report.ScanTime = 10000;
 
 	// Button
-	if (Buffer[DeviceContext->DeviceInfo->tp_button] && actualFingers < 2)
-	{
+	if (Buffer[DeviceContext->DeviceInfo->tp_button] && actualFingers < 2) {
 		report.IsButtonClicked = TRUE;
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC!: Trackpad button clicked\n");
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, 
+			TRACE_DRIVER, 
+			"%!FUNC!: Trackpad button clicked"
+		);
 	}
 
 	// Write output
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! With %d fingers.\n", report.ContactCount);
-	status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)&report, sizeof(PTP_REPORT));
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC!: WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! With %d fingers", 
+		report.ContactCount
+	);
+	status = WdfMemoryCopyFromBuffer(
+		reqMemory, 
+		0, 
+		(PVOID) &report, 
+		sizeof(PTP_REPORT)
+	);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", 
+			status
+		);
 		goto exit;
 	}
 
 	// Set result
-	WdfRequestSetInformation(request, sizeof(PTP_REPORT));
+	WdfRequestSetInformation(
+		request, 
+		sizeof(PTP_REPORT)
+	);
+
 	// Set completion flag
-	WdfRequestComplete(request, status);
+	WdfRequestComplete(
+		request, 
+		status
+	);
 
 exit:
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 	return status;
+
 }
 
 // Debuzz function from Linux Kernel: drivers/input/input.c
@@ -265,8 +339,8 @@ static INT AmtPtpDefuzzInput(
 	_In_ double Fuzz
 )
 {
-	if (Fuzz) 
-	{
+
+	if (Fuzz) {
 		if (NewValue > OldValue - Fuzz / 2 && NewValue < OldValue + Fuzz / 2)
 			return OldValue;
 
@@ -278,4 +352,5 @@ static INT AmtPtpDefuzzInput(
 	}
 
 	return NewValue;
+
 }
