@@ -77,11 +77,11 @@ enum TRACKPAD_TYPE {
 };
 
 /* Trackpad finger data offsets, le16-aligned */
-#define HEADER_TYPE1		(13 * sizeof(__le16))
-#define HEADER_TYPE2		(15 * sizeof(__le16))
-#define HEADER_TYPE3		(19 * sizeof(__le16))
-#define HEADER_TYPE4		(23 * sizeof(__le16))
-#define HEADER_TYPE5		( 6 * sizeof(__le16))
+#define HEADER_TYPE1		(13 * sizeof(USHORT))
+#define HEADER_TYPE2		(15 * sizeof(USHORT))
+#define HEADER_TYPE3		(19 * sizeof(USHORT))
+#define HEADER_TYPE4		(23 * sizeof(USHORT))
+#define HEADER_TYPE5		( 6 * sizeof(USHORT))
 
 /* Trackpad button data offsets */
 #define BUTTON_TYPE1		0
@@ -94,18 +94,18 @@ enum TRACKPAD_TYPE {
 #define HAS_INTEGRATED_BUTTON	1
 
 /* Trackpad finger data block size */
-#define FSIZE_TYPE1		(14 * sizeof(__le16))
-#define FSIZE_TYPE2		(14 * sizeof(__le16))
-#define FSIZE_TYPE3		(14 * sizeof(__le16))
-#define FSIZE_TYPE4		(15 * sizeof(__le16))
+#define FSIZE_TYPE1		(14 * sizeof(USHORT))
+#define FSIZE_TYPE2		(14 * sizeof(USHORT))
+#define FSIZE_TYPE3		(14 * sizeof(USHORT))
+#define FSIZE_TYPE4		(15 * sizeof(USHORT))
 #define FSIZE_TYPE5		(9)
 
 /* Offset from header to finger struct */
-#define DELTA_TYPE1		(0 * sizeof(__le16))
-#define DELTA_TYPE2		(0 * sizeof(__le16))
-#define DELTA_TYPE3		(0 * sizeof(__le16))
-#define DELTA_TYPE4		(1 * sizeof(__le16))
-#define DELTA_TYPE5		(0 * sizeof(__le16))
+#define DELTA_TYPE1		(0 * sizeof(USHORT))
+#define DELTA_TYPE2		(0 * sizeof(USHORT))
+#define DELTA_TYPE3		(0 * sizeof(USHORT))
+#define DELTA_TYPE4		(1 * sizeof(USHORT))
+#define DELTA_TYPE5		(0 * sizeof(USHORT))
 
 /* USB control message mode switch data */
 #define USBMSG_TYPE1	8, 0x300, 0, 0, 0x1, 0x8
@@ -126,39 +126,40 @@ enum TRACKPAD_TYPE {
 
 /* trackpad finger structure, le16-aligned */
 __declspec(align(2)) struct TRACKPAD_FINGER {
-	__le16 origin;		/* zero when switching track finger */
-	__le16 abs_x;		/* absolute x coodinate */
-	__le16 abs_y;		/* absolute y coodinate */
-	__le16 rel_x;		/* relative x coodinate */
-	__le16 rel_y;		/* relative y coodinate */
-	__le16 tool_major;	/* tool area, major axis */
-	__le16 tool_minor;	/* tool area, minor axis */
-	__le16 orientation;	/* 16384 when point, else 15 bit angle */
-	__le16 touch_major;	/* touch area, major axis */
-	__le16 touch_minor;	/* touch area, minor axis */
-	__le16 unused[2];	/* zeros */
-	__le16 pressure;	/* pressure on forcetouch touchpad */
-	__le16 multi;		/* one finger: varies, more fingers: constant */
+	USHORT origin;		/* zero when switching track finger */
+	USHORT abs_x;		/* absolute x coodinate */
+	USHORT abs_y;		/* absolute y coodinate */
+	USHORT rel_x;		/* relative x coodinate */
+	USHORT rel_y;		/* relative y coodinate */
+	USHORT tool_major;	/* tool area, major axis */
+	USHORT tool_minor;	/* tool area, minor axis */
+	USHORT orientation;	/* 16384 when point, else 15 bit angle */
+	USHORT touch_major;	/* touch area, major axis */
+	USHORT touch_minor;	/* touch area, minor axis */
+	USHORT unused[2];	/* zeros */
+	USHORT pressure;	/* pressure on forcetouch touchpad */
+	USHORT multi;		/* one finger: varies, more fingers: constant */
 };
 
-/* trackpad finger structure for type5 (magic trackpad), le16-aligned */
-__declspec(align(2)) struct TRACKPAD_FINGER_TYPE5 {
-	u8 abs_x;			/* absolute x coodinate */
-	u8 abs_x_y;			/* absolute x,y coodinate */
-	u8 abs_y[2];		/* absolute y coodinate */
-	u8 touch_major;		/* touch area, major axis */
-	u8 touch_minor;		/* touch area, minor axis */
-	u8 size;			/* tool area, size */
-	u8 pressure;		/* pressure on forcetouch touchpad */
-	u8 orientation_origin;	/* orientation and id */
-};
-
-struct TRACKPAD_EMULATED_MOUSE {
-	char reportId;		/* Expected 0x02 */
-	char buttons;
-	char x;
-	char y;
-	int padding;
+/* Trackpad finger structure for type5 (magic trackpad), le16-aligned */
+__declspec(align(2)) struct TRACKPAD_FINGER_TYPE5 
+{
+	UCHAR AbsoluteX;			/* absolute x coodinate */
+	UCHAR AbsoluteXY;			/* absolute x,y coodinate */
+	UCHAR AbsoluteY[2];			/* absolute y coodinate */
+	UCHAR TouchMajor;			/* touch area, major axis */
+	UCHAR TouchMinor;			/* touch area, minor axis */
+	UCHAR Size;					/* tool area, size */
+	UCHAR Pressure;				/* pressure on forcetouch touchpad */
+	union 
+	{
+		struct 
+		{
+			UCHAR Id : 4;
+			UCHAR Orientation : 4;
+		} ContactIdentifier;
+		UCHAR RawOrientationAndOrigin;
+	};
 };
 
 /* device-specific parameters */
@@ -209,8 +210,9 @@ struct BCM5974_CONFIG {
 #define SN_COORD	250		/* coordinate signal-to-noise ratio */
 #define SN_ORIENT	10		/* orientation signal-to-noise ratio */
 
-#define PRESSURE_LOWER_THRESHOLD 5
-#define PRESSURE_UPPER_THRESHOLD 150
+#define PRESSURE_QUALIFICATION_THRESHOLD 2
+#define SIZE_QUALIFICATION_THRESHOLD 7
+#define SIZE_MU_LOWER_THRESHOLD 5
 
 /* device constants */
 static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {

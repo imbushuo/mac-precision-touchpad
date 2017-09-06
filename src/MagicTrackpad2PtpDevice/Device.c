@@ -143,9 +143,32 @@ AmtPtpEvtDevicePrepareHardware(
 		// Get correct configuration from conf store
 		pDeviceContext->DeviceInfo = MagicTrackpad2GetConfig(pDeviceContext->DeviceDescriptor);
 		if (pDeviceContext->DeviceInfo == NULL) {
-			TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "MagicTrackpad2GetConfig failed 0x%x", status);
+			TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! failed with %!STATUS!\n", status);
 			return status;
 		}
+
+		// Set fuzz information
+		pDeviceContext->HorizonalFuzz = pDeviceContext->DeviceInfo->x.snratio ?
+			(pDeviceContext->DeviceInfo->x.max - pDeviceContext->DeviceInfo->x.min) / pDeviceContext->DeviceInfo->x.snratio :
+			0.0;
+
+		pDeviceContext->VerticalFuzz = pDeviceContext->DeviceInfo->y.snratio ?
+			(pDeviceContext->DeviceInfo->y.max - pDeviceContext->DeviceInfo->y.min) / pDeviceContext->DeviceInfo->y.snratio :
+			0.0;
+
+		pDeviceContext->PressureFuzz = pDeviceContext->DeviceInfo->p.snratio ?
+			(pDeviceContext->DeviceInfo->p.max - pDeviceContext->DeviceInfo->p.min) / pDeviceContext->DeviceInfo->p.snratio :
+			0.0;
+
+		pDeviceContext->WidthFuzz = pDeviceContext->DeviceInfo->w.snratio ?
+			(pDeviceContext->DeviceInfo->w.max - pDeviceContext->DeviceInfo->w.min) / pDeviceContext->DeviceInfo->w.snratio :
+			0.0;
+
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! fuzz information: h = %f, v = %f, p = %f, w = %f", 
+			pDeviceContext->HorizonalFuzz,
+			pDeviceContext->VerticalFuzz,
+			pDeviceContext->PressureFuzz,
+			pDeviceContext->WidthFuzz);
 	}
 
 	//
