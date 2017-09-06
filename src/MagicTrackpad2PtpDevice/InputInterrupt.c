@@ -141,7 +141,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	);
 
 	status = STATUS_SUCCESS;
-	s32 x, y = 0;
+	INT x, y = 0;
 
 	size_t raw_n, i = 0;
 	size_t headerSize = (unsigned int) DeviceContext->DeviceInfo->tp_header;
@@ -182,17 +182,17 @@ AmtPtpServiceTouchInputInterruptType5(
 
 	// Fingers
 	for (i = 0; i < raw_n; i++) {
-		u8 *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
+		UCHAR *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
 		f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
 		f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
 
-		u16 tmp_x;
-		u32 tmp_y;
-		tmp_x = (*((__le16*)f_type5)) & 0x1fff;
-		tmp_y = (s32) (*((__le32*)f_type5));
+		USHORT tmp_x;
+		UINT tmp_y;
+		tmp_x = (*((USHORT*)f_type5)) & 0x1fff;
+		tmp_y = (INT) (*((UINT*)f_type5));
 
-		x = (s16) (tmp_x << 3) >> 3;
-		y = -(s32) (tmp_y << 6) >> 19;
+		x = (SHORT) (tmp_x << 3) >> 3;
+		y = -(INT) (tmp_y << 6) >> 19;
 
 		// We need to defuzz input
 		if (DeviceContext->ContactRepository[i].ContactId == f_type5->ContactIdentifier.Id) {

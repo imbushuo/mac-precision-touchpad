@@ -9,7 +9,7 @@ AmtPtpGetDeviceConfig(
 	_In_ USB_DEVICE_DESCRIPTOR deviceInfo
 )
 {
-	u16 id = deviceInfo.idProduct;
+	USHORT id = deviceInfo.idProduct;
 	const struct BCM5974_CONFIG *cfg;
 
 	for (cfg = Bcm5974ConfigTable; cfg->ansi; ++cfg) {

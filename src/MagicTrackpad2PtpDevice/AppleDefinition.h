@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Types.h"
-
 #define USB_VENDOR_ID_APPLE		0x05ac
 
 /* MacbookAir, aka wellspring */
@@ -61,10 +59,10 @@
 
 /* button data structure */
 struct TRACKPAD_BUTTON_DATA {
-	u8 unknown1;		/* constant */
-	u8 button;			/* left button */
-	u8 rel_x;			/* relative x coordinate */
-	u8 rel_y;			/* relative y coordinate */
+	UCHAR unknown1;		/* constant */
+	UCHAR button;			/* left button */
+	UCHAR rel_x;			/* relative x coordinate */
+	UCHAR rel_y;			/* relative y coordinate */
 };
 
 /* trackpad header types */

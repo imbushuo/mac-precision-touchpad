@@ -49,7 +49,6 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
-    <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <Inf Include="MagicTrackpad2PtpDevice.inf" />
