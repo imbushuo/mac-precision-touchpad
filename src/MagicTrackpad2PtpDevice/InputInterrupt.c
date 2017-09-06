@@ -181,6 +181,7 @@ AmtPtpServiceTouchInputInterruptType5(
 	// First things
 	report.ReportID = REPORTID_MULTITOUCH;
 	report.ScanTime = 10000;
+	report.IsButtonClicked = 0;
 
 	// Check things to report
 	if (DeviceContext->IsSurfaceReportOn) {
