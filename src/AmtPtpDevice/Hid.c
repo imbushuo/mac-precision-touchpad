@@ -26,7 +26,7 @@ CONST HID_DESCRIPTOR AAPLMagicTrackpad2DefaultHidDescriptor = {
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetHidDescriptor(
+AmtPtpGetHidDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )
@@ -62,7 +62,7 @@ MagicTrackpad2GetHidDescriptor(
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 
 			TRACE_DRIVER, 
-			"%!FUNC! Request HID Report Descriptor for AAPL Magic Trackpad 2"
+			"%!FUNC! Request HID Report Descriptor"
 		);
 
 		szCopy = AAPLMagicTrackpad2DefaultHidDescriptor.bLength;
@@ -162,7 +162,7 @@ AmtPtpGetDeviceAttribs(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetReportDescriptor(
+AmtPtpGetReportDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )

@@ -181,21 +181,24 @@ AmtPtpEvtDevicePrepareHardware(
 		}
 
 		// Set fuzz information
-		pDeviceContext->HorizonalFuzz = pDeviceContext->DeviceInfo->x.snratio ?
-			(pDeviceContext->DeviceInfo->x.max - pDeviceContext->DeviceInfo->x.min) / pDeviceContext->DeviceInfo->x.snratio :
+		pDeviceContext->HorizonalFuzz = pDeviceContext->DeviceInfo->x.SnRatio ?
+			(pDeviceContext->DeviceInfo->x.MaxValue - pDeviceContext->DeviceInfo->x.MinValue) / pDeviceContext->DeviceInfo->x.SnRatio :
 			0.0;
 
-		pDeviceContext->VerticalFuzz = pDeviceContext->DeviceInfo->y.snratio ?
-			(pDeviceContext->DeviceInfo->y.max - pDeviceContext->DeviceInfo->y.min) / pDeviceContext->DeviceInfo->y.snratio :
+		pDeviceContext->VerticalFuzz = pDeviceContext->DeviceInfo->y.SnRatio ?
+			(pDeviceContext->DeviceInfo->y.MaxValue - pDeviceContext->DeviceInfo->y.MinValue) / pDeviceContext->DeviceInfo->y.SnRatio :
 			0.0;
 
-		pDeviceContext->PressureFuzz = pDeviceContext->DeviceInfo->p.snratio ?
-			(pDeviceContext->DeviceInfo->p.max - pDeviceContext->DeviceInfo->p.min) / pDeviceContext->DeviceInfo->p.snratio :
+		pDeviceContext->PressureFuzz = pDeviceContext->DeviceInfo->p.SnRatio ?
+			(pDeviceContext->DeviceInfo->p.MaxValue - pDeviceContext->DeviceInfo->p.MinValue) / pDeviceContext->DeviceInfo->p.SnRatio :
 			0.0;
 
-		pDeviceContext->WidthFuzz = pDeviceContext->DeviceInfo->w.snratio ?
-			(pDeviceContext->DeviceInfo->w.max - pDeviceContext->DeviceInfo->w.min) / pDeviceContext->DeviceInfo->w.snratio :
+		pDeviceContext->WidthFuzz = pDeviceContext->DeviceInfo->w.SnRatio ?
+			(pDeviceContext->DeviceInfo->w.MaxValue - pDeviceContext->DeviceInfo->w.MinValue) / pDeviceContext->DeviceInfo->w.SnRatio :
 			0.0;
+
+		// Prepare HID descriptor
+
 
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 

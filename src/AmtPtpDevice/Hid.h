@@ -98,16 +98,16 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xbc, 0x10, /* Logical Maximum: 7612 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0xbc, 0x10, /* Logical Maximum: 7612 (See defintion) (Varies by device) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x40, 0x06, /* Physical Maximum: 1600 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x40, 0x06, /* Physical Maximum: 1600 (See Apple Spec) (Varies by device) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0x7d, 0x04, /* Physical Maximum: 1149 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0xc9, 0x13, /* Logical Maximum: 5065 (See definition) */ \
+		PHYSICAL_MAXIMUM_2, 0x7d, 0x04, /* Physical Maximum: 1149 (See Apple Spec) (Varies by device) */ \
+		LOGICAL_MAXIMUM_2, 0xc9, 0x13, /* Logical Maximum: 5065 (See definition) (Varies by device) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM, 0x00, /* Physical Maximum: 0 */ \
@@ -137,16 +137,16 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xbc, 0x10, /* Logical Maximum: 7612 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0xbc, 0x10, /* Logical Maximum: 7612 (See defintion) (Varies by device) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x40, 0x06, /* Physical Maximum: 1600 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x40, 0x06, /* Physical Maximum: 1600 (See Apple Spec) (Varies by device) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0x7d, 0x04, /* Physical Maximum: 1149 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0xc9, 0x13, /* Logical Maximum: 5065 (See definition) */ \
+		PHYSICAL_MAXIMUM_2, 0x7d, 0x04, /* Physical Maximum: 1149 (See Apple Spec) (Varies by device) */ \
+		LOGICAL_MAXIMUM_2, 0xc9, 0x13, /* Logical Maximum: 5065 (See definition) (Varies by device) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		/* End of 4 bytes */ \
@@ -252,44 +252,24 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 #define PTP_CONTACT_CONFIDENCE_BIT   1
 #define PTP_CONTACT_TIPSWITCH_BIT    2
 
-typedef struct _HID_AAPL_MOUSE_REPORT {
-	struct
-	{
-		UCHAR  bButtons;
-		UCHAR  wXData;
-		UCHAR  wYData;
-		UINT   Padding;
-	} InputReport;
-} HID_AAPL_MOUSE_REPORT, *PHID_AAPL_MOUSE_REPORT;
-
-typedef struct _HID_INPUT_REPORT
-{
-	UCHAR ReportID;
-	HID_AAPL_MOUSE_REPORT MouseReport;
-} HID_INPUT_REPORT, *PHID_INPUT_REPORT;
-
-typedef struct _PTP_DEVICE_CAPS_FEATURE_REPORT
-{
+typedef struct _PTP_DEVICE_CAPS_FEATURE_REPORT {
 	UCHAR ReportID;
 	UCHAR MaximumContactPoints;
 	UCHAR ButtonType;
 } PTP_DEVICE_CAPS_FEATURE_REPORT, *PPTP_DEVICE_CAPS_FEATURE_REPORT;
 
-typedef struct _PTP_DEVICE_HQA_CERTIFICATION_REPORT
-{
+typedef struct _PTP_DEVICE_HQA_CERTIFICATION_REPORT {
 	UCHAR ReportID;
 	UCHAR CertificationBlob[256];
 } PTP_DEVICE_HQA_CERTIFICATION_REPORT, *PPTP_DEVICE_HQA_CERTIFICATION_REPORT;
 
-typedef struct _PTP_DEVICE_INPUT_MODE_REPORT
-{
+typedef struct _PTP_DEVICE_INPUT_MODE_REPORT {
 	UCHAR ReportID;
 	UCHAR Mode;
 } PTP_DEVICE_INPUT_MODE_REPORT, *PPTP_DEVICE_INPUT_MODE_REPORT;
 
 #pragma pack(1)
-typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT
-{
+typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT {
 	UCHAR ReportID;
 	UCHAR ButtonReport : 1;
 	UCHAR SurfaceReport : 1;
@@ -297,8 +277,7 @@ typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT
 } PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT, *PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT;
 
 #pragma pack(1)
-typedef struct _PTP_CONTACT
-{
+typedef struct _PTP_CONTACT {
 	UCHAR     Confidence : 1;
 	UCHAR     TipSwitch  : 1;
 	UCHAR	  ContactID  : 3;
@@ -308,8 +287,7 @@ typedef struct _PTP_CONTACT
 } PTP_CONTACT, *PPTP_CONTACT;
 
 // Used for defuzz - not report
-typedef struct _PTP_CONTACT_RAW
-{
+typedef struct _PTP_CONTACT_RAW {
 	USHORT    X;
 	USHORT    Y;
 	UCHAR     Pressure;
@@ -317,8 +295,7 @@ typedef struct _PTP_CONTACT_RAW
 	UCHAR     ContactId;
 } PTP_CONTACT_RAW, *PPTP_CONTACT_RAW;
 
-typedef struct _PTP_REPORT
-{
+typedef struct _PTP_REPORT {
 	UCHAR       ReportID;
 	PTP_CONTACT Contacts[5];
 	USHORT      ScanTime;

@@ -3,19 +3,17 @@
 EXTERN_C_START
 
 // Device context struct
-typedef struct _DEVICE_CONTEXT
-{
+typedef struct _DEVICE_CONTEXT {
+
 	WDFUSBDEVICE                UsbDevice;
 	WDFUSBPIPE                  InterruptPipe;
 	WDFUSBINTERFACE             UsbInterface;
 	WDFQUEUE                    InputQueue;
-
 	USB_DEVICE_DESCRIPTOR       DeviceDescriptor;
 
 	const struct BCM5974_CONFIG *DeviceInfo;
 
 	ULONG                       UsbDeviceTraits;
-
 	BOOL                        IsWellspringModeOn;
 	BOOL                        IsSurfaceReportOn;
 	BOOL                        IsButtonReportOn;
@@ -26,6 +24,9 @@ typedef struct _DEVICE_CONTEXT
 	double                      WidthFuzz;
 
 	PTP_CONTACT_RAW             ContactRepository[5];
+
+	HID_REPORT_DESCRIPTOR       HidReportDescriptor[2];
+	HID_DESCRIPTOR				HidDescriptor;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -121,7 +122,7 @@ AmtPtpServiceTouchInputInterruptType5(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetHidDescriptor(
+AmtPtpGetHidDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
@@ -135,7 +136,7 @@ AmtPtpGetDeviceAttribs(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetReportDescriptor(
+AmtPtpGetReportDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );

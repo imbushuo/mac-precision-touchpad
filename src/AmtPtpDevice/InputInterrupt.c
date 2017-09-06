@@ -234,8 +234,8 @@ AmtPtpServiceTouchInputInterruptType5(
 			report.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
 
 			// Adjust position. Apple uses different coordinate system.
-			report.Contacts[i].X = (USHORT) (DeviceContext->ContactRepository[i].X - DeviceContext->DeviceInfo->x.min);
-			report.Contacts[i].Y = (USHORT) (DeviceContext->ContactRepository[i].Y - DeviceContext->DeviceInfo->y.min);
+			report.Contacts[i].X = (USHORT) (DeviceContext->ContactRepository[i].X - DeviceContext->DeviceInfo->x.MinValue);
+			report.Contacts[i].Y = (USHORT) (DeviceContext->ContactRepository[i].Y - DeviceContext->DeviceInfo->y.MinValue);
 
 			// Set flags (by cases)
 			if (raw_n == 1) {
