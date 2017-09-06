@@ -7,11 +7,11 @@
 #include <initguid.h>
 #include <hidport.h>
 
+#include "Trace.h"
 #include "AppleDefinition.h"
 #include "Hid.h"
-#include "device.h"
-#include "queue.h"
-#include "trace.h"
+#include "Device.h"
+#include "Queue.h"
 
 EXTERN_C_START
 

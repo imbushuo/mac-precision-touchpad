@@ -31,42 +31,77 @@ MagicTrackpad2GetHidDescriptor(
 	_In_ WDFREQUEST Request
 )
 {
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
 	NTSTATUS        status   = STATUS_SUCCESS;
 	PDEVICE_CONTEXT pContext = DeviceGetContext(Device);
 	size_t			szCopy   = 0;
 	WDFMEMORY       reqMemory;
 
-	status = WdfRequestRetrieveOutputMemory(Request, &reqMemory);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
+
+	status = WdfRequestRetrieveOutputMemory(
+		Request, 
+		&reqMemory
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!", 
+			status
+		);
 		return status;
 	}
 
-	if (pContext->DeviceDescriptor.idProduct == USB_DEVICE_ID_APPLE_MAGICTRACKPAD2)
-	{
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Request HID Report Descriptor for AAPL Magic Trackpad 2");
-		szCopy = AAPLMagicTrackpad2DefaultHidDescriptor.bLength;
+	if (pContext->DeviceDescriptor.idProduct == USB_DEVICE_ID_APPLE_MAGICTRACKPAD2) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, 
+			TRACE_DRIVER, 
+			"%!FUNC! Request HID Report Descriptor for AAPL Magic Trackpad 2"
+		);
 
-		status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)&AAPLMagicTrackpad2DefaultHidDescriptor, szCopy);
-		if (!NT_SUCCESS(status))
-		{
-			TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
+		szCopy = AAPLMagicTrackpad2DefaultHidDescriptor.bLength;
+		status = WdfMemoryCopyFromBuffer(
+			reqMemory, 
+			0, 
+			(PVOID) &AAPLMagicTrackpad2DefaultHidDescriptor, 
+			szCopy
+		);
+
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(
+				TRACE_LEVEL_ERROR, 
+				TRACE_DRIVER, 
+				"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", 
+				status
+			);
 			return status;
 		}
 
-		WdfRequestSetInformation(Request, szCopy);
-	}
-	else
-	{
-		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "Device HID registry is not found");
+		WdfRequestSetInformation(
+			Request, 
+			szCopy
+		);
+	} else {
+		TraceEvents(
+			TRACE_LEVEL_WARNING, 
+			TRACE_DRIVER, 
+			"%!FUNC! Device HID registry is not found"
+		);
 		status = STATUS_INVALID_DEVICE_STATE;
 		return status;
 	}
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 	return status;
 
 }
@@ -79,18 +114,29 @@ AmtPtpGetDeviceAttribs(
 )
 {
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-
-	NTSTATUS               status            = STATUS_SUCCESS;
-	PDEVICE_CONTEXT        pContext          = DeviceGetContext(Device);
+	NTSTATUS               status = STATUS_SUCCESS;
+	PDEVICE_CONTEXT        pContext = DeviceGetContext(Device);
 	PHID_DEVICE_ATTRIBUTES pDeviceAttributes = NULL;
 
-	status = WdfRequestRetrieveOutputBuffer(Request, sizeof(HID_DEVICE_ATTRIBUTES), 
-		&pDeviceAttributes, NULL);
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
 
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
+	status = WdfRequestRetrieveOutputBuffer(
+		Request, 
+		sizeof(HID_DEVICE_ATTRIBUTES), 
+		&pDeviceAttributes, 
+		NULL);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!", 
+			status
+		);
 		return status;
 	}
 
@@ -99,9 +145,16 @@ AmtPtpGetDeviceAttribs(
 	pDeviceAttributes->VendorID      = pContext->DeviceDescriptor.idVendor;
 	pDeviceAttributes->VersionNumber = DEVICE_VERSION;
 	
-	// Set length
-	WdfRequestSetInformation(Request, sizeof(HID_DEVICE_ATTRIBUTES));
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	WdfRequestSetInformation(
+		Request, 
+		sizeof(HID_DEVICE_ATTRIBUTES)
+	);
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 
 	return status;
 
@@ -114,48 +167,88 @@ MagicTrackpad2GetReportDescriptor(
 	_In_ WDFREQUEST Request
 )
 {
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-
+	
 	NTSTATUS               status            = STATUS_SUCCESS;
 	PDEVICE_CONTEXT        pContext          = DeviceGetContext(Device);
 	size_t			       szCopy            = 0;
 	WDFMEMORY              reqMemory;
 
-	status = WdfRequestRetrieveOutputMemory(Request, &reqMemory);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
+
+	status = WdfRequestRetrieveOutputMemory(
+		Request, 
+		&reqMemory
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!", 
+			status
+		);
 		return status;
 	}
 
-	if (pContext->DeviceDescriptor.idProduct == USB_DEVICE_ID_APPLE_MAGICTRACKPAD2)
-	{
+	if (pContext->DeviceDescriptor.idProduct == USB_DEVICE_ID_APPLE_MAGICTRACKPAD2) {
 		szCopy = AAPLMagicTrackpad2DefaultHidDescriptor.DescriptorList[0].wReportLength;
-		if (szCopy == 0)
-		{
+		if (szCopy == 0) {
+
 			status = STATUS_INVALID_DEVICE_STATE;
-			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "Device HID report length is zero\n");
+			TraceEvents(
+				TRACE_LEVEL_WARNING, 
+				TRACE_DRIVER, 
+				"%!FUNC! Device HID report length is zero"
+			);
 			return status;
+
 		}
 
-		status = WdfMemoryCopyFromBuffer(reqMemory, 0, (PVOID)&AAPLMagicTrackpad2ReportDescriptor, szCopy);
-		if (!NT_SUCCESS(status))
-		{
-			TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
+		status = WdfMemoryCopyFromBuffer(
+			reqMemory, 
+			0, 
+			(PVOID) &AAPLMagicTrackpad2ReportDescriptor, 
+			szCopy
+		);
+
+		if (!NT_SUCCESS(status)) {
+
+			TraceEvents(
+				TRACE_LEVEL_ERROR, 
+				TRACE_DRIVER, 
+				"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", 
+				status
+			);
 			return status;
+
 		}
 
-		WdfRequestSetInformation(Request, szCopy);
-	}
-	else
-	{
-		TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "Device HID registry is not found\n");
+		WdfRequestSetInformation(
+			Request, 
+			szCopy
+		);
+	} else {
+		TraceEvents(
+			TRACE_LEVEL_WARNING, 
+			TRACE_DRIVER, 
+			"%!FUNC! Device HID registry is not found"
+		);
+
 		status = STATUS_INVALID_DEVICE_STATE;
 		return status;
 	}
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 	return status;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -165,8 +258,7 @@ AmtPtpGetStrings(
 	_In_ WDFREQUEST Request
 )
 {
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-
+	
 	NTSTATUS               status = STATUS_SUCCESS;
 	PDEVICE_CONTEXT        pContext = DeviceGetContext(Device);
 	void                   *pStringBuffer = NULL;
@@ -181,23 +273,44 @@ AmtPtpGetStrings(
 	PVOID                  inputBuffer;
 	ULONG                  languageId, stringId;
 
-	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
+
+	status = WdfRequestRetrieveInputMemory(
+		Request, 
+		&inputMemory
+	);
+
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, 
-			"%!FUNC! WdfRequestRetrieveInputMemory failed with status %!STATUS!", status);
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveInputMemory failed with status %!STATUS!",
+			status
+		);
 		return status;
 	}
 
-	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+	inputBuffer = WdfMemoryGetBuffer(
+		inputMemory, 
+		&inputBufferLength
+	);
 
 	//
 	// make sure buffer is big enough.
 	//
-	if (inputBufferLength < sizeof(ULONG))
-	{
+	if (inputBufferLength < sizeof(ULONG)) {
 		status = STATUS_INVALID_BUFFER_SIZE;
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! GetStringId: invalid input buffer. size %d, expect %d\n",
-			(int)inputBufferLength, (int)sizeof(ULONG));
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, 
+			TRACE_DRIVER, 
+			"%!FUNC! GetStringId: invalid input buffer. size %d, expect %d",
+			(int)inputBufferLength, 
+			(int) sizeof(ULONG)
+		);
 		return status;
 	}
 
@@ -209,41 +322,77 @@ AmtPtpGetStrings(
 	switch (stringId)
 	{
 		case HID_STRING_ID_IMANUFACTURER:
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_IMANUFACTURER is requested\n");
 			strIndex = pContext->DeviceDescriptor.iManufacturer;
 			break;
 		case HID_STRING_ID_IPRODUCT:
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_IPRODUCT is requested\n");
 			strIndex = pContext->DeviceDescriptor.iProduct;
 			break;
 		case HID_STRING_ID_ISERIALNUMBER:
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! HID_STRING_ID_ISERIALNUMBER is requested\n");
 			strIndex = pContext->DeviceDescriptor.iSerialNumber;
 			break;
 		default:
-			TraceEvents(TRACE_LEVEL_WARNING, TRACE_DRIVER, "%!FUNC! gets invalid string type\n");
+			TraceEvents(
+				TRACE_LEVEL_WARNING, 
+				TRACE_DRIVER, 
+				"%!FUNC! gets invalid string type"
+			);
 			return status;
 	}
-	status = WdfUsbTargetDeviceAllocAndQueryString(pContext->UsbDevice, 
-		WDF_NO_OBJECT_ATTRIBUTES, &memHandle, &wcharCount, strIndex, (USHORT) languageId);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!", status);
+
+	status = WdfUsbTargetDeviceAllocAndQueryString(
+		pContext->UsbDevice, 
+		WDF_NO_OBJECT_ATTRIBUTES, 
+		&memHandle, 
+		&wcharCount, 
+		strIndex, 
+		(USHORT) languageId
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, "%!FUNC! WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!", 
+			status
+		);
 		return status;
 	}
 
-	status = WdfRequestRetrieveOutputBuffer(Request, wcharCount * sizeof(WCHAR), &pStringBuffer, &actualSize);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
+	status = WdfRequestRetrieveOutputBuffer(
+		Request, 
+		wcharCount * sizeof(WCHAR), 
+		&pStringBuffer, 
+		&actualSize
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", 
+			status
+		);
 		return status;
 	}
 
-	WdfMemoryCopyToBuffer(memHandle, 0, &pStringBuffer, actualSize);
-	WdfRequestSetInformation(Request, actualSize);
+	WdfMemoryCopyToBuffer(
+		memHandle,
+		0, 
+		&pStringBuffer, 
+		actualSize
+	);
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	WdfRequestSetInformation(
+		Request, 
+		actualSize
+	);
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 	return status;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -253,6 +402,7 @@ RequestGetHidXferPacketToReadFromDevice(
 	_Out_ HID_XFER_PACKET  *Packet
 )
 {
+
 	//
 	// Driver need to write to the output buffer (so that App can read from it)
 	//
@@ -271,37 +421,67 @@ RequestGetHidXferPacketToReadFromDevice(
 	//
 	// Get report Id from input buffer
 	//
-	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	status = WdfRequestRetrieveInputMemory(
+		Request, 
+		&inputMemory
+	);
+
 	if (!NT_SUCCESS(status)) {
-		KdPrint(("WdfRequestRetrieveInputMemory failed 0x%x\n", status));
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveInputMemory failed with %!STATUS!", 
+			status
+		);
 		return status;
 	}
-	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+	inputBuffer = WdfMemoryGetBuffer(
+		inputMemory, 
+		&inputBufferLength
+	);
 
 	if (inputBufferLength < sizeof(UCHAR)) {
 		status = STATUS_INVALID_BUFFER_SIZE;
-		KdPrint(("WdfRequestRetrieveInputMemory: invalid input buffer. size %d, expect %d\n",
-			(int)inputBufferLength, (int)sizeof(UCHAR)));
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfRequestRetrieveInputMemory: invalid input buffer. size %d, expect %d",
+			(int) inputBufferLength, 
+			(int) sizeof(UCHAR)
+		);
 		return status;
 	}
 
-	Packet->reportId = *(PUCHAR)inputBuffer;
+	Packet->reportId = *(PUCHAR) inputBuffer;
 
 	//
 	// Get report buffer from output buffer
 	//
-	status = WdfRequestRetrieveOutputMemory(Request, &outputMemory);
+	status = WdfRequestRetrieveOutputMemory(
+		Request, 
+		&outputMemory
+	);
+
 	if (!NT_SUCCESS(status)) {
-		KdPrint(("WdfRequestRetrieveOutputMemory failed 0x%x\n", status));
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfRequestRetrieveOutputMemory failed with %!STATUS!",
+			status
+		);
 		return status;
 	}
 
-	outputBuffer = WdfMemoryGetBuffer(outputMemory, &outputBufferLength);
+	outputBuffer = WdfMemoryGetBuffer(
+		outputMemory, 
+		&outputBufferLength
+	);
 
-	Packet->reportBuffer = (PUCHAR)outputBuffer;
-	Packet->reportBufferLen = (ULONG)outputBufferLength;
+	Packet->reportBuffer = (PUCHAR) outputBuffer;
+	Packet->reportBufferLen = (ULONG) outputBufferLength;
 
 	return status;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -311,6 +491,7 @@ RequestGetHidXferPacketToWriteToDevice(
 	_Out_ HID_XFER_PACKET  *Packet
 )
 {
+
 	//
 	// Driver need to read from the input buffer (which was written by App)
 	//
@@ -335,28 +516,51 @@ RequestGetHidXferPacketToWriteToDevice(
 	//
 	// Get report Id from output buffer length
 	//
-	status = WdfRequestRetrieveOutputMemory(Request, &outputMemory);
+	status = WdfRequestRetrieveOutputMemory(
+		Request, 
+		&outputMemory
+	);
 	if (!NT_SUCCESS(status)) {
-		KdPrint(("WdfRequestRetrieveOutputMemory failed 0x%x\n", status));
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfRequestRetrieveOutputMemory failed with %!STATUS!",
+			status
+		);
 		return status;
 	}
-	WdfMemoryGetBuffer(outputMemory, &outputBufferLength);
-	Packet->reportId = (UCHAR)outputBufferLength;
+	WdfMemoryGetBuffer(
+		outputMemory, 
+		&outputBufferLength
+	);
+	Packet->reportId = (UCHAR) outputBufferLength;
 
 	//
 	// Get report buffer from input buffer
 	//
-	status = WdfRequestRetrieveInputMemory(Request, &inputMemory);
+	status = WdfRequestRetrieveInputMemory(
+		Request, 
+		&inputMemory
+	);
 	if (!NT_SUCCESS(status)) {
-		KdPrint(("WdfRequestRetrieveInputMemory failed 0x%x\n", status));
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfRequestRetrieveInputMemory failed with %!STATUS!",
+			status
+		);
 		return status;
 	}
-	inputBuffer = WdfMemoryGetBuffer(inputMemory, &inputBufferLength);
+	inputBuffer = WdfMemoryGetBuffer(
+		inputMemory, 
+		&inputBufferLength
+	);
 
-	Packet->reportBuffer = (PUCHAR)inputBuffer;
-	Packet->reportBufferLen = (ULONG)inputBufferLength;
+	Packet->reportBuffer = (PUCHAR) inputBuffer;
+	Packet->reportBufferLen = (ULONG) inputBufferLength;
 
 	return status;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -366,20 +570,33 @@ AmtPtpReportFeatures(
 	_In_ WDFREQUEST Request
 )
 {
+
 	NTSTATUS status;
 	PDEVICE_CONTEXT deviceContext;
 	HID_XFER_PACKET packet;
 	size_t reportSize;
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
 
 	status = STATUS_SUCCESS;
 	deviceContext = DeviceGetContext(Device);
 
-	status = RequestGetHidXferPacketToReadFromDevice(Request, &packet);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! RequestGetHidXferPacketToReadFromDevice failed with status %!STATUS!", status);
+	status = RequestGetHidXferPacketToReadFromDevice(
+		Request, 
+		&packet
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! RequestGetHidXferPacketToReadFromDevice failed with status %!STATUS!", 
+			status
+		);
 		goto exit;
 	}
 
@@ -387,13 +604,21 @@ AmtPtpReportFeatures(
 	{
 		case REPORTID_DEVICE_CAPS:
 		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is requested.\n");
-			reportSize = sizeof(PPTP_DEVICE_CAPS_FEATURE_REPORT) + sizeof(packet.reportId);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_DEVICE_CAPS is requested"
+			);
+
 			// Size sanity check
-			if (packet.reportBufferLen < reportSize) 
-			{
+			reportSize = sizeof(PPTP_DEVICE_CAPS_FEATURE_REPORT) + sizeof(packet.reportId);
+			if (packet.reportBufferLen < reportSize) {
 				status = STATUS_INVALID_BUFFER_SIZE;
-				TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! Report buffer is too small.\n");
+				TraceEvents(
+					TRACE_LEVEL_ERROR, 
+					TRACE_DRIVER, 
+					"%!FUNC! Report buffer is too small"
+				);
 				goto exit;
 			}
 
@@ -403,23 +628,47 @@ AmtPtpReportFeatures(
 			capsReport->ButtonType = PTP_BUTTON_TYPE_CLICK_PAD;
 			capsReport->ReportID = REPORTID_DEVICE_CAPS;
 
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS has maximum contact points of %d.\n", 
-				capsReport->MaximumContactPoints);
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS has touchpad type %d.\n", 
-				capsReport->ButtonType);
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_DEVICE_CAPS is fulfilled.\n");
-			WdfRequestSetInformation(Request, reportSize);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_DEVICE_CAPS has maximum contact points of %d", 
+				capsReport->MaximumContactPoints
+			);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_DEVICE_CAPS has touchpad type %d", 
+				capsReport->ButtonType
+			);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_DEVICE_CAPS is fulfilled"
+			);
+
+			WdfRequestSetInformation(
+				Request, 
+				reportSize
+			);
 			break;
 		}
 		case REPORTID_PTPHQA:
 		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_PTPHQA is requested.\n");
-			reportSize = sizeof(PPTP_DEVICE_HQA_CERTIFICATION_REPORT) + sizeof(packet.reportId);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_PTPHQA is requested"
+			);
+
 			// Size sanity check
-			if (packet.reportBufferLen < reportSize)
-			{
+			reportSize = sizeof(PPTP_DEVICE_HQA_CERTIFICATION_REPORT) + sizeof(packet.reportId);
+			if (packet.reportBufferLen < reportSize) {
 				status = STATUS_INVALID_BUFFER_SIZE;
-				TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! Report buffer is too small.\n");
+				TraceEvents(
+					TRACE_LEVEL_ERROR, 
+					TRACE_DRIVER, 
+					"%!FUNC! Report buffer is too small."
+				);
 				goto exit;
 			}
 
@@ -428,18 +677,37 @@ AmtPtpReportFeatures(
 			*certReport->CertificationBlob = DEFAULT_PTP_HQA_BLOB;
 			certReport->ReportID = REPORTID_PTPHQA;
 
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_PTPHQA is fulfilled.\n");
-			WdfRequestSetInformation(Request, reportSize);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_PTPHQA is fulfilled"
+			);
+
+			WdfRequestSetInformation(
+				Request, 
+				reportSize
+			);
 			break;
 		}
 		default:
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Unsupported type %d is requested.\n", packet.reportId);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Unsupported type %d is requested", 
+				packet.reportId
+			);
+
 			status = STATUS_NOT_SUPPORTED;
 			goto exit;
 	}
 exit:
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 	return status;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -449,19 +717,32 @@ AmtPtpSetFeatures(
 	_In_ WDFREQUEST Request
 )
 {
+
 	NTSTATUS        status;
 	HID_XFER_PACKET packet;
 	PDEVICE_CONTEXT deviceContext;
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Entry"
+	);
 
 	status = STATUS_SUCCESS;
 	deviceContext = DeviceGetContext(Device);
 
-	status = RequestGetHidXferPacketToWriteToDevice(Request, &packet);
-	if (!NT_SUCCESS(status))
-	{
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! RequestGetHidXferPacketToWriteToDevice failed with status %!STATUS!", status);
+	status = RequestGetHidXferPacketToWriteToDevice(
+		Request, 
+		&packet
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! RequestGetHidXferPacketToWriteToDevice failed with status %!STATUS!", 
+			status
+		);
 		goto exit;
 	}
 
@@ -469,56 +750,119 @@ AmtPtpSetFeatures(
 	{
 		case REPORTID_REPORTMODE:
 		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE is requested.\n");
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_REPORTMODE is requested"
+			);
 			PPTP_DEVICE_INPUT_MODE_REPORT devInputMode = (PPTP_DEVICE_INPUT_MODE_REPORT) packet.reportBuffer;
 
 			switch (devInputMode->Mode)
 			{
 			case PTP_COLLECTION_MOUSE:
-				TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input.\n");
-				status = AmtPtpSetWellspringMode(deviceContext, FALSE);
-				if (!NT_SUCCESS(status))
-				{
-					TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", status);
+				TraceEvents(
+					TRACE_LEVEL_INFORMATION, 
+					TRACE_DRIVER, 
+					"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input"
+				);
+				status = AmtPtpSetWellspringMode(
+					deviceContext,
+					FALSE
+				);
+				if (!NT_SUCCESS(status)) {
+					TraceEvents(
+						TRACE_LEVEL_ERROR, 
+						TRACE_DRIVER, 
+						"%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", 
+						status
+					);
 					goto exit;
 				}
 				break;
 			case PTP_COLLECTION_WINDOWS:
-				TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input.\n");
-				status = AmtPtpSetWellspringMode(deviceContext, TRUE);
-				if (!NT_SUCCESS(status))
-				{
-					TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", status);
+				TraceEvents(
+					TRACE_LEVEL_INFORMATION, 
+					TRACE_DRIVER, 
+					"%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input"
+				);
+
+				status = AmtPtpSetWellspringMode(
+					deviceContext, 
+					TRUE
+				);
+				if (!NT_SUCCESS(status)) {
+					TraceEvents(
+						TRACE_LEVEL_ERROR, 
+						TRACE_DRIVER, 
+						"%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", 
+						status
+					);
 					goto exit;
 				}
 				break;
 			}
 
-			WdfRequestSetInformation(Request, sizeof(PTP_DEVICE_INPUT_MODE_REPORT));
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_REPORTMODE is fulfilled.\n");
+			WdfRequestSetInformation(
+				Request, 
+				sizeof(PTP_DEVICE_INPUT_MODE_REPORT)
+			);
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_REPORTMODE is fulfilled"
+			);
 			break;
 		}
 		case REPORTID_FUNCSWITCH:
 		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_FUNCSWITCH is requested.\n");
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_FUNCSWITCH is requested"
+			);
 			PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT secInput = (PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT) packet.reportBuffer;
 
 			deviceContext->IsButtonReportOn = secInput->ButtonReport;
 			deviceContext->IsSurfaceReportOn = secInput->SurfaceReport;
 
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_FUNCSWITCH requested Button = %d, Surface = %d.\n",
-				secInput->ButtonReport, secInput->SurfaceReport);
-			WdfRequestSetInformation(Request, sizeof(PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT));
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Report REPORTID_FUNCSWITCH is fulfilled.\n");
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_FUNCSWITCH requested Button = %d, Surface = %d",
+				secInput->ButtonReport, 
+				secInput->SurfaceReport
+			);
+
+			WdfRequestSetInformation(
+				Request,
+				sizeof(PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT)
+			);
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER, 
+				"%!FUNC! Report REPORTID_FUNCSWITCH is fulfilled"
+			);
 			break;
 		}
 		default:
-			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Unsupported type %d is requested.\n", packet.reportId);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, 
+				TRACE_DRIVER, 
+				"%!FUNC! Unsupported type %d is requested",
+				packet.reportId
+			);
 			status = STATUS_NOT_SUPPORTED;
 			goto exit;
 	}
 
 exit:
-	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit"
+	);
 	return STATUS_SUCCESS;
+
 }
