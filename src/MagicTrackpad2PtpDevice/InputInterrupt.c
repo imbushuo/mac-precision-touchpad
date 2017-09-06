@@ -238,7 +238,7 @@ AmtPtpServiceTouchInputInterruptType5(
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION, 
-				TRACE_DRIVER,
+				TRACE_INPUT,
 				"(SG) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 				f_type5->ContactIdentifier.Id,
 				report.Contacts[i].X,
@@ -256,7 +256,7 @@ AmtPtpServiceTouchInputInterruptType5(
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION, 
-				TRACE_DRIVER,
+				TRACE_INPUT,
 				"(MU) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 				f_type5->ContactIdentifier.Id,
 				report.Contacts[i].X,
@@ -281,7 +281,7 @@ AmtPtpServiceTouchInputInterruptType5(
 		report.IsButtonClicked = TRUE;
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 
-			TRACE_DRIVER, 
+			TRACE_INPUT,
 			"%!FUNC!: Trackpad button clicked"
 		);
 	}
