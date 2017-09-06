@@ -197,6 +197,10 @@ AmtPtpEvtDevicePrepareHardware(
 			(pDeviceContext->DeviceInfo->w.max - pDeviceContext->DeviceInfo->w.min) / pDeviceContext->DeviceInfo->w.snratio :
 			0.0;
 
+		pDeviceContext->SgContactSizeQualLevel = SIZE_QUALIFICATION_THRESHOLD;
+		pDeviceContext->MuContactSizeQualLevel = SIZE_MU_LOWER_THRESHOLD;
+		pDeviceContext->PressureQualLevel = PRESSURE_QUALIFICATION_THRESHOLD;
+
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 
 			TRACE_DEVICE, 

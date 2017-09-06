@@ -8,7 +8,8 @@
 
 HID_REPORT_DESCRIPTOR AAPLMagicTrackpad2ReportDescriptor[] = {
 	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
-	AAPL_PTP_CONFIGURATION_TLC
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
 };
 
 CONST HID_DESCRIPTOR AAPLMagicTrackpad2DefaultHidDescriptor = {
@@ -611,7 +612,7 @@ AmtPtpReportFeatures(
 			);
 
 			// Size sanity check
-			reportSize = sizeof(PPTP_DEVICE_CAPS_FEATURE_REPORT) + sizeof(packet.reportId);
+			reportSize = sizeof(PTP_DEVICE_CAPS_FEATURE_REPORT) + sizeof(packet.reportId);
 			if (packet.reportBufferLen < reportSize) {
 				status = STATUS_INVALID_BUFFER_SIZE;
 				TraceEvents(
@@ -661,7 +662,7 @@ AmtPtpReportFeatures(
 			);
 
 			// Size sanity check
-			reportSize = sizeof(PPTP_DEVICE_HQA_CERTIFICATION_REPORT) + sizeof(packet.reportId);
+			reportSize = sizeof(PTP_DEVICE_HQA_CERTIFICATION_REPORT) + sizeof(packet.reportId);
 			if (packet.reportBufferLen < reportSize) {
 				status = STATUS_INVALID_BUFFER_SIZE;
 				TraceEvents(
@@ -685,6 +686,45 @@ AmtPtpReportFeatures(
 
 			WdfRequestSetInformation(
 				Request, 
+				reportSize
+			);
+			break;
+		}
+		case REPORTID_UMAPP_CONF:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Report REPORTID_UMAPP_CONF is requested"
+			);
+
+			// Size sanity check
+			reportSize = sizeof(PTP_USERMODEAPP_CONF_REPORT) + sizeof(packet.reportId);
+			if (packet.reportBufferLen < reportSize) {
+				status = STATUS_INVALID_BUFFER_SIZE;
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! Report buffer is too small."
+				);
+				goto exit;
+			}
+
+			PPTP_USERMODEAPP_CONF_REPORT confReport = (PPTP_USERMODEAPP_CONF_REPORT)packet.reportBuffer;
+			
+			confReport->ReportID = REPORTID_UMAPP_CONF;
+			confReport->MultipleContactSizeQualificationLevel = deviceContext->MuContactSizeQualLevel;
+			confReport->SingleContactSizeQualificationLevel = deviceContext->SgContactSizeQualLevel;
+			confReport->PressureQualificationLevel = deviceContext->PressureQualLevel;
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Report REPORTID_UMAPP_CONF is fulfilled"
+			);
+
+			WdfRequestSetInformation(
+				Request,
 				reportSize
 			);
 			break;
@@ -844,6 +884,43 @@ AmtPtpSetFeatures(
 				TRACE_DRIVER, 
 				"%!FUNC! Report REPORTID_FUNCSWITCH is fulfilled"
 			);
+			break;
+		}
+		case REPORTID_UMAPP_CONF:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Report REPORTID_UMAPP_CONF is requested"
+			);
+			PPTP_USERMODEAPP_CONF_REPORT umConfInput = (PPTP_USERMODEAPP_CONF_REPORT) packet.reportBuffer;
+
+			// Set value
+			deviceContext->SgContactSizeQualLevel = umConfInput->SingleContactSizeQualificationLevel;
+			deviceContext->MuContactSizeQualLevel = umConfInput->MultipleContactSizeQualificationLevel;
+			deviceContext->PressureQualLevel = umConfInput->PressureQualificationLevel;
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Report REPORTID_UMAPP_CONF requested PressureQual = %d, SgSize = %d, MuSize = %d",
+				umConfInput->PressureQualificationLevel,
+				umConfInput->SingleContactSizeQualificationLevel,
+				umConfInput->MultipleContactSizeQualificationLevel
+			);
+
+			// Report back
+			WdfRequestSetInformation(
+				Request,
+				sizeof(PTP_USERMODEAPP_CONF_REPORT)
+			);
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Report REPORTID_UMAPP_CONF is fulfilled"
+			);
+
 			break;
 		}
 		default:

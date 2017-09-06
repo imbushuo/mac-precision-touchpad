@@ -16,6 +16,10 @@ typedef struct _DEVICE_CONTEXT
 
 	ULONG                       UsbDeviceTraits;
 
+	UCHAR						PressureQualLevel;
+	UCHAR						SgContactSizeQualLevel;
+	UCHAR						MuContactSizeQualLevel;
+
 	BOOL                        IsWellspringModeOn;
 	BOOL                        IsSurfaceReportOn;
 	BOOL                        IsButtonReportOn;
