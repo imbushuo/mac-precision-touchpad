@@ -427,8 +427,10 @@ RequestGetHidXferPacketToReadFromDevice(
 	);
 
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR,
-			"%!FUNC! WdfRequestRetrieveInputMemory failed with %!STATUS!",
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DRIVER, 
+			"%!FUNC! WdfRequestRetrieveInputMemory failed with %!STATUS!", 
 			status
 		);
 		return status;
@@ -440,7 +442,9 @@ RequestGetHidXferPacketToReadFromDevice(
 
 	if (inputBufferLength < sizeof(UCHAR)) {
 		status = STATUS_INVALID_BUFFER_SIZE;
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
 			"%!FUNC! WdfRequestRetrieveInputMemory: invalid input buffer. size %d, expect %d",
 			(int) inputBufferLength, 
 			(int) sizeof(UCHAR)
@@ -459,7 +463,9 @@ RequestGetHidXferPacketToReadFromDevice(
 	);
 
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
 			"%!FUNC! WdfRequestRetrieveOutputMemory failed with %!STATUS!",
 			status
 		);
@@ -515,7 +521,9 @@ RequestGetHidXferPacketToWriteToDevice(
 		&outputMemory
 	);
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
 			"%!FUNC! WdfRequestRetrieveOutputMemory failed with %!STATUS!",
 			status
 		);
@@ -535,7 +543,9 @@ RequestGetHidXferPacketToWriteToDevice(
 		&inputMemory
 	);
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR,
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
 			"%!FUNC! WdfRequestRetrieveInputMemory failed with %!STATUS!",
 			status
 		);
