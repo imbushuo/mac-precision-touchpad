@@ -51,7 +51,7 @@
     <ClInclude Include="Queue.h" />
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="MagicTrackpad2PtpDevice.inf" />
+    <Inf Include="AmtPtpDevice.inf" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{87EFA31B-25EB-4944-A30A-300171BFFF57}</ProjectGuid>
@@ -62,6 +62,7 @@
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootNamespace>MagicTrackpad2PtpDevice</RootNamespace>
     <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <ProjectName>AmtPtpDevice</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
