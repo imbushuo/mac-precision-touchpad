@@ -242,8 +242,8 @@ AmtPtpServiceTouchInputInterruptType5(
 
 			// Set flags (by cases)
 			if (raw_n == 1) {
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
-				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_QUALIFICATION_THRESHOLD;
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->SgContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
@@ -258,26 +258,13 @@ AmtPtpServiceTouchInputInterruptType5(
 					report.Contacts[i].Confidence
 				);
 			} else {
+
 				// Save the information
 				// Use size to determine confidence in MU scenario
-				if (raw_n == 2) {
-					report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
-					report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD;
-				}
-				else {
-					if (DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD) {
-						report.Contacts[i].TipSwitch = 1;
-						muTotalPressure += DeviceContext->ContactRepository[i].Pressure;
-					}
-
-					if (DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD) {
-						report.Contacts[i].Confidence = 1;
-						muTotalSize += DeviceContext->ContactRepository[i].Size;
-					}
-				}
-
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > PRESSURE_QUALIFICATION_THRESHOLD;
-				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= SIZE_MU_LOWER_THRESHOLD;
+				muTotalPressure += DeviceContext->ContactRepository[i].Pressure;
+				muTotalSize += DeviceContext->ContactRepository[i].Size;
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->MuContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
@@ -297,7 +284,7 @@ AmtPtpServiceTouchInputInterruptType5(
 		}
 
 		if (actualFingers > 2) {
-			if (muTotalPressure > PRESSURE_MU_QUALIFICATION_THRESHOLD_TOTAL) {
+			if (muTotalPressure > DeviceContext->PressureQualLevel * 2.15) {
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION,
 					TRACE_INPUT,
@@ -307,7 +294,7 @@ AmtPtpServiceTouchInputInterruptType5(
 					report.Contacts[i].TipSwitch = 1;
 				}
 
-				if (muTotalSize > SIZE_MU_QUALIFICATION_THRESHOLD_TOTAL) {
+				if (muTotalSize > DeviceContext->MuContactSizeQualLevel * 2.15) {
 					TraceEvents(
 						TRACE_LEVEL_INFORMATION,
 						TRACE_INPUT,
