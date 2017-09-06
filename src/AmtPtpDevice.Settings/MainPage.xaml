@@ -1,0 +1,23 @@
+﻿<Page
+    x:Class="AmtPtpDevice.Settings.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AmtPtpDevice.Settings"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Margin="10">
+            <Slider x:Name="m_sensitivitySlider" 
+                    Minimum="0" Maximum="5" 
+                    Header="Sensitivity" />
+            <Slider x:Name="m_confidenceSlider" 
+                    Minimum="0" Maximum="18" 
+                    Header="Finger Size" />
+            <Button x:Name="m_setButton"
+                    Content="Apply Settings"
+                    Click="OnSetButtonClicked" />
+        </StackPanel>
+    </Grid>
+</Page>

@@ -612,7 +612,7 @@ AmtPtpReportFeatures(
 			);
 
 			// Size sanity check
-			reportSize = sizeof(PTP_DEVICE_CAPS_FEATURE_REPORT) + sizeof(packet.reportId);
+			reportSize = sizeof(PTP_DEVICE_CAPS_FEATURE_REPORT);
 			if (packet.reportBufferLen < reportSize) {
 				status = STATUS_INVALID_BUFFER_SIZE;
 				TraceEvents(
@@ -662,7 +662,7 @@ AmtPtpReportFeatures(
 			);
 
 			// Size sanity check
-			reportSize = sizeof(PTP_DEVICE_HQA_CERTIFICATION_REPORT) + sizeof(packet.reportId);
+			reportSize = sizeof(PTP_DEVICE_HQA_CERTIFICATION_REPORT);
 			if (packet.reportBufferLen < reportSize) {
 				status = STATUS_INVALID_BUFFER_SIZE;
 				TraceEvents(
@@ -699,7 +699,7 @@ AmtPtpReportFeatures(
 			);
 
 			// Size sanity check
-			reportSize = sizeof(PTP_USERMODEAPP_CONF_REPORT) + sizeof(packet.reportId);
+			reportSize = sizeof(PTP_USERMODEAPP_CONF_REPORT);
 			if (packet.reportBufferLen < reportSize) {
 				status = STATUS_INVALID_BUFFER_SIZE;
 				TraceEvents(
