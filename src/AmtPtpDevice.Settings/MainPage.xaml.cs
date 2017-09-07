@@ -1,39 +1,35 @@
-﻿using AmtPtpDevice.Settings.DataObjects;
+﻿using AmtPtpDevice.Settings.Comm;
+using AmtPtpDevice.Settings.DataObjects;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Devices.Enumeration;
 using Windows.Devices.HumanInterfaceDevice;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
+using Windows.Foundation.Metadata;
 using Windows.Storage.Streams;
+using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 namespace AmtPtpDevice.Settings
 {
     public sealed partial class MainPage : Page
     {
-        private HidDevice m_hidDevice;
-        private DeviceWatcher m_devWatcher;
-        private ConcurrentDictionary<string, DeviceInformation> m_devices;
         private PtpUserModeConfReport m_report;
+        private bool m_isInitialDataPresented = false;
+        private UsbHidDeviceAccessSubscription m_inputDevice;
+        private UsbHidDeviceAccessSubscription m_battery;
 
         public MainPage()
         {
             this.InitializeComponent();
-            m_devices = new ConcurrentDictionary<string, DeviceInformation>();
+            ApplicationView.GetForCurrentView().SetPreferredMinSize(new Size(480, 500));
+            ApplicationView.PreferredLaunchViewSize = new Size(480, 500);
+            ApplicationView.PreferredLaunchWindowingMode = ApplicationViewWindowingMode.PreferredLaunchViewSize;
 
             this.Loaded += OnPageLoaded;
         }
@@ -41,65 +37,93 @@ namespace AmtPtpDevice.Settings
         private void OnPageLoaded(object sender, RoutedEventArgs e)
         {
             SetupWatcher();
+
+            if (ApiInformation.IsTypePresent("Windows.UI.ViewManagement.ApplicationView"))
+            {
+                var titleBar = ApplicationView.GetForCurrentView().TitleBar;
+                if (titleBar != null)
+                {
+                    titleBar.ButtonBackgroundColor = titleBar.ButtonInactiveBackgroundColor 
+                        = ((SolidColorBrush) Resources["AppBarBackground"]).Color;
+                    titleBar.ButtonForegroundColor = ((SolidColorBrush) Resources["ApplicationForegroundThemeBrush"]).Color;
+                    titleBar.BackgroundColor = titleBar.InactiveBackgroundColor 
+                        = ((SolidColorBrush) Resources["AppBarBackground"]).Color;
+                    titleBar.ForegroundColor = ((SolidColorBrush) Resources["ApplicationForegroundThemeBrush"]).Color;
+                }
+            }
         }
 
         private void SetupWatcher()
         {
-            var deviceSelector = HidDevice.GetDeviceSelector(0xff00, 0x0001, 0x05ac, 0x0265);
-            
-            if (m_devWatcher != null)
-            {
-                m_devWatcher.Stop();
-                m_devices.Clear();
-            }
+            m_inputDevice = new UsbHidDeviceAccessSubscription(HidDevice.GetDeviceSelector(0xff00, 0x0001, 0x05ac, 0x0265));
+            m_battery = new UsbHidDeviceAccessSubscription(HidDevice.GetDeviceSelector(0xff00, 0x0014, 0x05ac, 0x0265));
 
-            m_devWatcher = DeviceInformation.CreateWatcher(deviceSelector);
-
-            m_devWatcher.Added += OnDeviceAdded;
-            m_devWatcher.Removed += OnDeviceRemoved;
-            m_devWatcher.EnumerationCompleted += OnEnumerationCompleted;
-
-            m_devWatcher.Start();
+            m_inputDevice.TargetDeviceAvailable += OnInputDeviceAvailable;
+            m_inputDevice.TargetDeviceLost += OnInputDeviceLost;
+            m_battery.TargetDeviceAvailable += OnBatteryAvailable;
         }
 
-        private async void OnEnumerationCompleted(DeviceWatcher sender, object args)
+        private async void OnBatteryAvailable(object sender, EventArgs e)
         {
-            if (!m_devices.Any()) return;
-            var trackpad = m_devices.First();
+            var bReport = await m_battery.Device.GetInputReportAsync(0x90);
+            var ptr = Marshal.AllocHGlobal((int) bReport.Data.Length);
+            Marshal.Copy(bReport.Data.ToArray(), 0, ptr, (int) bReport.Data.Length);
 
-            m_hidDevice = await HidDevice.FromIdAsync(trackpad.Key, FileAccessMode.ReadWrite);
-            var sReport = await m_hidDevice.GetFeatureReportAsync(0x09);
-            var ptr = Marshal.AllocHGlobal((int) sReport.Data.Length);
-            Marshal.Copy(sReport.Data.ToArray(), 0, ptr, (int)sReport.Data.Length);
-
-            m_report = Marshal.PtrToStructure<PtpUserModeConfReport>(ptr);
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() =>
+            var battReport = Marshal.PtrToStructure<Mt2BatteryStatusReport>(ptr);
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                // Set value
-                m_sensitivitySlider.Value = m_report.PressureQualificationLevel;
-                m_confidenceSlider.Value = m_report.SingleContactSizeQualificationLevel;
+                m_battStatus.Text = $"Battery is {battReport.ChargeStatus}% charged.";
             });
 
             Marshal.FreeHGlobal(ptr);
         }
 
-        private void OnDeviceRemoved(DeviceWatcher sender, DeviceInformationUpdate args)
+        private async void OnInputDeviceLost(object sender, EventArgs e)
         {
-            m_devices.TryRemove(args.Id, out DeviceInformation removedDevice);
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                // Set visibility
+                m_disconnctedView.Visibility = Visibility.Visible;
+                m_deviceControl.Visibility = Visibility.Collapsed;
+                // Set state
+                m_isInitialDataPresented = false;
+            });
         }
 
-        private void OnDeviceAdded(DeviceWatcher sender, DeviceInformation args)
+        private async void OnInputDeviceAvailable(object sender, EventArgs e)
         {
-            m_devices.TryAdd(args.Id, args);
+            var sReport = await m_inputDevice.Device.GetFeatureReportAsync(0x09);
+            var ptr = Marshal.AllocHGlobal((int)sReport.Data.Length);
+            Marshal.Copy(sReport.Data.ToArray(), 0, ptr, (int)sReport.Data.Length);
+
+            m_report = Marshal.PtrToStructure<PtpUserModeConfReport>(ptr);
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                // Set value
+                m_sensitivitySlider.Value = m_report.PressureQualificationLevel;
+                m_confidenceSlider.Value = m_report.SingleContactSizeQualificationLevel;
+                m_muConfidenceSlider.Value = m_report.MultipleContactSizeQualificationLevel;
+
+                // Set visibility
+                m_disconnctedView.Visibility = Visibility.Collapsed;
+                m_deviceControl.Visibility = Visibility.Visible;
+
+                // Set state
+                m_isInitialDataPresented = true;
+            });
+
+            Marshal.FreeHGlobal(ptr);
         }
 
-        private async void OnSetButtonClicked(object sender, RoutedEventArgs e)
+        private async void ApplySettings()
         {
+            if (m_inputDevice.Device == null || !m_isInitialDataPresented) return;
+
             m_report.PressureQualificationLevel = (byte) m_sensitivitySlider.Value;
             m_report.SingleContactSizeQualificationLevel = (byte) m_confidenceSlider.Value;
+            m_report.MultipleContactSizeQualificationLevel = (byte) m_muConfidenceSlider.Value;
 
-            if (m_hidDevice == null) return;
-            var featureReport = m_hidDevice.CreateFeatureReport(0x09);
+            var featureReport = m_inputDevice.Device.CreateFeatureReport(0x09);
             using (var datawriter = new DataWriter())
             {
                 datawriter.WriteByte(0x09);
@@ -107,8 +131,28 @@ namespace AmtPtpDevice.Settings
                 datawriter.WriteByte(m_report.SingleContactSizeQualificationLevel);
                 datawriter.WriteByte(m_report.MultipleContactSizeQualificationLevel);
                 featureReport.Data = datawriter.DetachBuffer();
-                await m_hidDevice.SendFeatureReportAsync(featureReport);
+                await m_inputDevice.Device.SendFeatureReportAsync(featureReport);
             }
+        }
+
+        private async void OnGestureButtonClicked(object sender, RoutedEventArgs e)
+        {
+            await Launcher.LaunchUriAsync(new Uri("ms-settings:devices-touchpad"));
+        }
+
+        private void OnSliderValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            ApplySettings();
+        }
+
+        private void OnConfidenceSliderValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            ApplySettings();
+        }
+
+        private void OnMuConfidenceSliderValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+        {
+            ApplySettings();
         }
     }
 }

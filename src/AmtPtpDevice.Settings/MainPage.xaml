@@ -7,17 +7,42 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel Margin="10">
+    <Grid Background="{ThemeResource  ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="{ThemeResource AppBarBackground}">
+            <TextBlock Margin="15,0,0,0" VerticalAlignment="Center"
+                Style="{StaticResource BaseTextBlockStyle}">
+                <Run Typography.Capitals="AllPetiteCaps">Input Settings</Run>
+            </TextBlock>
+        </Grid>
+        <StackPanel x:Name="m_deviceControl" Margin="15,10" Grid.Row="1" Visibility="Collapsed">
+            <TextBlock x:Name="m_battStatus" Margin="0,0,0,10"
+                    Style="{StaticResource BaseTextBlockStyle}"  />
             <Slider x:Name="m_sensitivitySlider" 
-                    Minimum="0" Maximum="5" 
-                    Header="Sensitivity" />
+                    Minimum="0" Maximum="20" 
+                    ValueChanged="OnSliderValueChanged"
+                    Header="Touch sensitivity" />
             <Slider x:Name="m_confidenceSlider" 
-                    Minimum="0" Maximum="18" 
-                    Header="Finger Size" />
-            <Button x:Name="m_setButton"
-                    Content="Apply Settings"
-                    Click="OnSetButtonClicked" />
+                    Minimum="0" Maximum="25" 
+                    ValueChanged="OnConfidenceSliderValueChanged"
+                    Header="Single finder confidence threshold" />
+            <Slider x:Name="m_muConfidenceSlider" 
+                    Minimum="0" Maximum="25" 
+                    ValueChanged="OnMuConfidenceSliderValueChanged"
+                    Header="Multiple finder confidence threshold" />
+            <HyperlinkButton Margin="0,10,0,0" 
+                    Click="OnGestureButtonClicked"
+                    Content="Gesture settings" />
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                    Text="Note: Settings won't be persisted for debug purpose. To reset values, unplug and plug in your trackpad." />
+        </StackPanel>
+        <StackPanel x:Name="m_disconnctedView" Margin="15,10" Grid.Row="1">
+            <TextBlock Margin="0,0,0,10"
+                       Text="Please connect your device and continue."
+                       Style="{StaticResource BaseTextBlockStyle}"  />
         </StackPanel>
     </Grid>
 </Page>
