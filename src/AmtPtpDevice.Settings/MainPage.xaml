@@ -28,11 +28,11 @@
             <Slider x:Name="m_confidenceSlider" 
                     Minimum="0" Maximum="25" 
                     ValueChanged="OnConfidenceSliderValueChanged"
-                    Header="Single finder confidence threshold" />
+                    Header="Single finger confidence threshold" />
             <Slider x:Name="m_muConfidenceSlider" 
                     Minimum="0" Maximum="25" 
                     ValueChanged="OnMuConfidenceSliderValueChanged"
-                    Header="Multiple finder confidence threshold" />
+                    Header="Multiple finger confidence threshold" />
             <HyperlinkButton Margin="0,10,0,0" 
                     Click="OnGestureButtonClicked"
                     Content="Gesture settings" />
