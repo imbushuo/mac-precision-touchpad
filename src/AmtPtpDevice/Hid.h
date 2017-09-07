@@ -19,6 +19,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 #define REPORTID_PTPHQA 0x08
 #define REPORTID_FUNCSWITCH 0x06
 #define REPORTID_DEVICE_CAPS 0x07
+#define REPORTID_UMAPP_CONF  0x09
 
 #define BUTTON_SWITCH 0x57
 #define SURFACE_SWITCH 0x58
@@ -50,7 +51,20 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 #define BEGIN_COLLECTION 0xa1
 #define END_COLLECTION   0xc0
 
-#define AAPL_PTP_CONFIGURATION_TLC \
+#define AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC \
+	USAGE_PAGE_1, 0x00, 0xff, /* Usage Page: Vendor defined */ \
+	USAGE, 0x01, /* Usage: Vendor Usage 0x01 */ \
+	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
+		REPORT_ID, REPORTID_UMAPP_CONF, /* Report ID: User-mode Application configuration */ \
+		USAGE, 0x01, /* Usage: Vendor Usage 0x01 */ \
+		LOGICAL_MINIMUM, 0x00, /* Logical Minimum 0 */ \
+		LOGICAL_MAXIMUM_2, 0xff, 0x00, /* Logical Maximum 255 */ \
+		REPORT_SIZE, 0x08, /* Report Size: 8 */ \
+		REPORT_COUNT, 0x03, /* Report Count: 3 */ \
+		FEATURE, 0x02, /* Feature: (Data, Var, Abs) */ \
+	END_COLLECTION
+
+#define AAPL_PTP_WINDOWS_CONFIGURATION_TLC \
 	USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 	USAGE, 0x0e, /* Usage: Configuration */ \
 	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
@@ -62,7 +76,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 			LOGICAL_MAXIMUM, MAX_FINGERS, /* Logical Maximum: MAX_TOUCH_COUNT fingers */ \
 			REPORT_SIZE, 0x08, /* Report Size: 0x08 */ \
 			REPORT_COUNT, 0x01, /* Report Count: 0x01 */ \
-			FEATURE, 0x02, /* Feature: (Data, Var, Avs) */ \
+			FEATURE, 0x02, /* Feature: (Data, Var, Abs) */ \
 		END_COLLECTION, /* End Collection */ \
 		BEGIN_COLLECTION, 0x00, /* Begin Collection: Physical */ \
 			REPORT_ID, REPORTID_FUNCSWITCH, /* Report ID: Function Switch */ \
@@ -302,3 +316,10 @@ typedef struct _PTP_REPORT {
 	UCHAR       ContactCount;
 	UCHAR       IsButtonClicked;
 } PTP_REPORT, *PPTP_REPORT;
+
+typedef struct _PTP_USERMODEAPP_CONF_REPORT {
+	UCHAR		ReportID;
+	UCHAR		PressureQualificationLevel;
+	UCHAR		SingleContactSizeQualificationLevel;
+	UCHAR		MultipleContactSizeQualificationLevel;
+} PTP_USERMODEAPP_CONF_REPORT, *PPTP_USERMODEAPP_CONF_REPORT;

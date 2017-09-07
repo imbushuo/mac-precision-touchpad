@@ -1,0 +1,48 @@
+﻿<Page
+    x:Class="AmtPtpDevice.Settings.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AmtPtpDevice.Settings"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource  ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Background="{ThemeResource AppBarBackground}">
+            <TextBlock Margin="15,0,0,0" VerticalAlignment="Center"
+                Style="{StaticResource BaseTextBlockStyle}">
+                <Run Typography.Capitals="AllPetiteCaps">Input Settings</Run>
+            </TextBlock>
+        </Grid>
+        <StackPanel x:Name="m_deviceControl" Margin="15,10" Grid.Row="1" Visibility="Collapsed">
+            <TextBlock x:Name="m_battStatus" Margin="0,0,0,10"
+                    Style="{StaticResource BaseTextBlockStyle}"  />
+            <Slider x:Name="m_sensitivitySlider" 
+                    Minimum="0" Maximum="20" 
+                    ValueChanged="OnSliderValueChanged"
+                    Header="Touch sensitivity" />
+            <Slider x:Name="m_confidenceSlider" 
+                    Minimum="0" Maximum="25" 
+                    ValueChanged="OnConfidenceSliderValueChanged"
+                    Header="Single finger confidence threshold" />
+            <Slider x:Name="m_muConfidenceSlider" 
+                    Minimum="0" Maximum="25" 
+                    ValueChanged="OnMuConfidenceSliderValueChanged"
+                    Header="Multiple finger confidence threshold" />
+            <HyperlinkButton Margin="0,10,0,0" 
+                    Click="OnGestureButtonClicked"
+                    Content="Gesture settings" />
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                    Text="Note: Settings won't be persisted for debug purpose. To reset values, unplug and plug in your trackpad." />
+        </StackPanel>
+        <StackPanel x:Name="m_disconnctedView" Margin="15,10" Grid.Row="1">
+            <TextBlock Margin="0,0,0,10"
+                       Text="Please connect your device and continue."
+                       Style="{StaticResource BaseTextBlockStyle}"  />
+        </StackPanel>
+    </Grid>
+</Page>

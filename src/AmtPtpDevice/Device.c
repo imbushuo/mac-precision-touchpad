@@ -197,8 +197,9 @@ AmtPtpEvtDevicePrepareHardware(
 			(pDeviceContext->DeviceInfo->w.MaxValue - pDeviceContext->DeviceInfo->w.MinValue) / pDeviceContext->DeviceInfo->w.SnRatio :
 			0.0;
 
-		// Prepare HID descriptor
-
+		pDeviceContext->SgContactSizeQualLevel = SIZE_QUALIFICATION_THRESHOLD;
+		pDeviceContext->MuContactSizeQualLevel = SIZE_MU_LOWER_THRESHOLD;
+		pDeviceContext->PressureQualLevel = PRESSURE_QUALIFICATION_THRESHOLD;
 
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 
