@@ -30,7 +30,9 @@ typedef struct _DEVICE_CONTEXT {
 
 	PTP_CONTACT_RAW             ContactRepository[5];
 
-	HID_REPORT_DESCRIPTOR       HidReportDescriptor[2];
+	// One PTP collection, one Microsoft configuration collection 
+	// and one AAPL PTP UMDF configuration collection
+	HID_REPORT_DESCRIPTOR       HidReportDescriptor[3];
 	HID_DESCRIPTOR				HidDescriptor;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
