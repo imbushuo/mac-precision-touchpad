@@ -210,6 +210,7 @@ AmtPtpEvtDevicePrepareHardware(
 			pDeviceContext->PressureFuzz,
 			pDeviceContext->WidthFuzz
 		);
+
 	}
 
 	//
