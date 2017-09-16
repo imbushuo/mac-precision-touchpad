@@ -11,7 +11,7 @@ typedef struct _DEVICE_CONTEXT {
 	WDFQUEUE                    InputQueue;
 	USB_DEVICE_DESCRIPTOR       DeviceDescriptor;
 
-	const struct BCM5974_CONFIG *DeviceInfo;
+	const struct AAPL_TRACKPAD_CONFIG *DeviceInfo;
 
 	ULONG                       UsbDeviceTraits;
 

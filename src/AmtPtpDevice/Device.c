@@ -4,13 +4,13 @@
 #include "device.tmh"
 
 _IRQL_requires_(PASSIVE_LEVEL)
-static const struct BCM5974_CONFIG*
+static const struct AAPL_TRACKPAD_CONFIG*
 AmtPtpGetDeviceConfig(
 	_In_ USB_DEVICE_DESCRIPTOR deviceInfo
 )
 {
 	USHORT id = deviceInfo.idProduct;
-	const struct BCM5974_CONFIG *cfg;
+	const struct AAPL_TRACKPAD_CONFIG *cfg;
 
 	for (cfg = Bcm5974ConfigTable; cfg->ansi; ++cfg) {
 		if (cfg->ansi == id || cfg->iso == id || cfg->jis == id) {

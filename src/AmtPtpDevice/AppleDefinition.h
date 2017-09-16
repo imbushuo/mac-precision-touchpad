@@ -125,41 +125,42 @@ __declspec(align(2)) struct TRACKPAD_FINGER_TYPE5
 };
 
 /* Device-specific parameters */
-struct BCM5974_PARAM {
+struct AAPL_TRACKPAD_PARAM {
 	int SnRatio;			/* Signal-to-noise ratio */
 	int MinValue;			/* Device minimum reading */
 	int MaxValue;			/* Device maximum reading */
 };
 
-struct BCM5974_DEVICE_PHYSICAL_SIZE {
+struct AAPL_TRACKPAD_PHYSICAL_SIZE {
 	int Width;			/* Physical Size */
 	int Length;			/* Physical Length */
 };
 
 /* Device-specific configuration */
-struct BCM5974_CONFIG {
-	int ansi, iso, jis;				/* the product id of this device */
-	int caps;						/* device capability bitmask */
-	int bt_ep;						/* the endpoint of the button interface */
-	int bt_datalen;					/* data length of the button interface */
-	int tp_ep;						/* the endpoint of the trackpad interface */
-	enum TRACKPAD_TYPE tp_type;		/* type of trackpad interface */
-	int tp_header;					/* bytes in header block */
-	int tp_datalen;					/* data length of the trackpad interface */
-	int tp_button;					/* offset to button data */
-	int tp_fsize;					/* bytes in single finger block */
-	int tp_delta;					/* offset from header to finger struct */
-	int um_size;					/* usb control message length */
-	int um_req_val;					/* usb control message value */
-	int um_req_idx;					/* usb control message index */
-	int um_switch_idx;				/* usb control message mode switch index */
-	int um_switch_on;				/* usb control message mode switch on */
-	int um_switch_off;				/* usb control message mode switch off */
-	struct BCM5974_PARAM p;			/* finger pressure limits */
-	struct BCM5974_PARAM w;			/* finger width limits */
-	struct BCM5974_PARAM x;			/* horizontal limits */
-	struct BCM5974_PARAM y;			/* vertical limits */
-	struct BCM5974_PARAM o;			/* orientation limits */
+struct AAPL_TRACKPAD_CONFIG {
+	int ansi, iso, jis;							/* the product id of this device */
+	int caps;									/* device capability bitmask */
+	int bt_ep;									/* the endpoint of the button interface */
+	int bt_datalen;								/* data length of the button interface */
+	int tp_ep;									/* the endpoint of the trackpad interface */
+	enum TRACKPAD_TYPE tp_type;					/* type of trackpad interface */
+	int tp_header;								/* bytes in header block */
+	int tp_datalen;								/* data length of the trackpad interface */
+	int tp_button;								/* offset to button data */
+	int tp_fsize;								/* bytes in single finger block */
+	int tp_delta;								/* offset from header to finger struct */
+	int um_size;								/* usb control message length */
+	int um_req_val;								/* usb control message value */
+	int um_req_idx;								/* usb control message index */
+	int um_switch_idx;							/* usb control message mode switch index */
+	int um_switch_on;							/* usb control message mode switch on */
+	int um_switch_off;							/* usb control message mode switch off */
+	struct AAPL_TRACKPAD_PARAM p;						/* finger pressure limits */
+	struct AAPL_TRACKPAD_PARAM w;						/* finger width limits */
+	struct AAPL_TRACKPAD_PARAM x;						/* horizontal limits */
+	struct AAPL_TRACKPAD_PARAM y;						/* vertical limits */
+	struct AAPL_TRACKPAD_PARAM o;						/* orientation limits */
+	struct AAPL_TRACKPAD_PHYSICAL_SIZE size;	/* Physical size*/
 };
 
 #define DATAFORMAT(type)				\
@@ -185,7 +186,7 @@ struct BCM5974_CONFIG {
 #define SIZE_MU_QUALIFICATION_THRESHOLD_TOTAL 25
 
 /* device constants */
-static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
+static const struct AAPL_TRACKPAD_CONFIG Bcm5974ConfigTable[] = {
 	{
 		USB_DEVICE_ID_APPLE_WELLSPRING7_ANSI,
 		USB_DEVICE_ID_APPLE_WELLSPRING7_ISO,
@@ -197,7 +198,8 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_WIDTH, 0, 2048 },
 		{ SN_COORD, -4750, 5280 },
 		{ SN_COORD, -150, 6730 },
-		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION },
+		{ 1067, 775 }
 	},
 	{
 		USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI,
@@ -210,7 +212,8 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_WIDTH, 0, 2048 },
 		{ SN_COORD, -4750, 5280 },
 		{ SN_COORD, -150, 6730 },
-		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION },
+		{ 1067, 775 }
 	},
 	{
 		USB_DEVICE_ID_APPLE_WELLSPRING8_ANSI,
@@ -223,7 +226,8 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_WIDTH, 0, 2048 },
 		{ SN_COORD, -4620, 5140 },
 		{ SN_COORD, -150, 6600 },
-		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION },
+		{ 1048, 756 }
 	},
 	{
 		USB_DEVICE_ID_APPLE_WELLSPRING9_ANSI,
@@ -236,7 +240,8 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_WIDTH, 0, 2048 },
 		{ SN_COORD, -4828, 5345 },
 		{ SN_COORD, -203, 6803 },
-		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION },
+		{ 1067, 775 }
 	},
 	{
 		USB_DEVICE_ID_APPLE_MAGICTRACKPAD2,
@@ -249,6 +254,7 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_WIDTH, 0, 2048 },
 		{ SN_COORD, -3678, 3934 },
 		{ SN_COORD, -2479, 2586 },
-		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION },
+		{ 1600, 1149 }
 	}
 };
