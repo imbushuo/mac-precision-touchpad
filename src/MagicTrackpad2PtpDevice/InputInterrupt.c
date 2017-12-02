@@ -225,13 +225,23 @@ AmtPtpServiceTouchInputInterruptType5(
 					DeviceContext->ContactRepository[i].Size, 
 					DeviceContext->WidthFuzz
 				);
+				DeviceContext->ContactRepository[i].Orientation = (USHORT)AmtPtpDefuzzInput(
+					MAX_FINGER_ORIENTATION - ((f_type5->RawOrientationAndOrigin & 0xf0) << 6),
+					DeviceContext->ContactRepository[i].Orientation,
+					DeviceContext->OrientationFuzz
+				);
 			} else {
 				DeviceContext->ContactRepository[i].ContactId = f_type5->ContactIdentifier.Id;
 				DeviceContext->ContactRepository[i].X = (USHORT) x;
 				DeviceContext->ContactRepository[i].Y = (USHORT) y;
 				DeviceContext->ContactRepository[i].Pressure = f_type5->Pressure;
 				DeviceContext->ContactRepository[i].Size = f_type5->Size;
+				DeviceContext->ContactRepository[i].Orientation = MAX_FINGER_ORIENTATION - ((f_type5->RawOrientationAndOrigin & 0xf0) << 6);
 			}
+
+			// These two values don't get defuzzed
+			DeviceContext->ContactRepository[i].TouchMajor = f_type5->TouchMajor << 2;
+			DeviceContext->ContactRepository[i].TouchMinor = f_type5->TouchMinor << 2;
 
 			// Set ID.
 			report.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
@@ -242,16 +252,20 @@ AmtPtpServiceTouchInputInterruptType5(
 
 			// Set flags (by cases)
 			if (raw_n == 1) {
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * DeviceContext->ContactRepository[i].TouchMinor > 78000;
+				// report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
 				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->SgContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
 					TRACE_INPUT,
-					"(SG) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
+					"(SG) Finger %d, X: %d, Y: %d, O: %d, TMajor: %d, TMinor: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 					f_type5->ContactIdentifier.Id,
 					report.Contacts[i].X,
 					report.Contacts[i].Y,
+					DeviceContext->ContactRepository[i].Orientation,
+					DeviceContext->ContactRepository[i].TouchMajor,
+					DeviceContext->ContactRepository[i].TouchMinor,
 					DeviceContext->ContactRepository[i].Pressure,
 					DeviceContext->ContactRepository[i].Size,
 					report.Contacts[i].TipSwitch,
@@ -263,16 +277,21 @@ AmtPtpServiceTouchInputInterruptType5(
 				// Use size to determine confidence in MU scenario
 				muTotalPressure += DeviceContext->ContactRepository[i].Pressure;
 				muTotalSize += DeviceContext->ContactRepository[i].Size;
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * DeviceContext->ContactRepository[i].TouchMinor > 78000;
+				// report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
 				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->MuContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
 					TRACE_INPUT,
-					"(MU) Finger %d, X: %d, Y: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
+					"(MU) Finger %d, X: %d, Y: %d, O: %d, TMajor: %d, TMinor: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 					f_type5->ContactIdentifier.Id,
 					report.Contacts[i].X,
 					report.Contacts[i].Y,
+					DeviceContext->ContactRepository[i].Orientation,
+					DeviceContext->ContactRepository[i].TouchMajor,
+					DeviceContext->ContactRepository[i].TouchMinor,
 					DeviceContext->ContactRepository[i].Pressure,
 					DeviceContext->ContactRepository[i].Size,
 					report.Contacts[i].TipSwitch,

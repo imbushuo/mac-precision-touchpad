@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MagicTrackpad2PtpDevice", "src\MagicTrackpad2PtpDevice\MagicTrackpad2PtpDevice.vcxproj", "{87EFA31B-25EB-4944-A30A-300171BFFF57}"
 EndProject
@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2557B86E-6ED
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contrib", "contrib", "{1C0E2F63-A3D6-4B44-BDC7-22F6E31EA9F2}"
 	ProjectSection(SolutionItems) = preProject
+		App Interface.md = App Interface.md
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
@@ -55,5 +56,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{87EFA31B-25EB-4944-A30A-300171BFFF57} = {2557B86E-6ED8-495A-B9A5-BF80CD5C4DAC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8D62F4C-ADCF-4882-AA6B-CA7D97CB284B}
 	EndGlobalSection
 EndGlobal

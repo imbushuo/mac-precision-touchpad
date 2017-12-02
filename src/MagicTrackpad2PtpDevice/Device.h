@@ -28,6 +28,7 @@ typedef struct _DEVICE_CONTEXT
 	double                      VerticalFuzz;
 	double                      PressureFuzz;
 	double                      WidthFuzz;
+	double						OrientationFuzz;
 
 	PTP_CONTACT_RAW             ContactRepository[5];
 

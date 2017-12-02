@@ -197,6 +197,10 @@ AmtPtpEvtDevicePrepareHardware(
 			(pDeviceContext->DeviceInfo->w.max - pDeviceContext->DeviceInfo->w.min) / pDeviceContext->DeviceInfo->w.snratio :
 			0.0;
 
+		pDeviceContext->OrientationFuzz = pDeviceContext->DeviceInfo->o.snratio ?
+			(pDeviceContext->DeviceInfo->o.max - pDeviceContext->DeviceInfo->o.min) / pDeviceContext->DeviceInfo->o.snratio :
+			0.0;
+
 		pDeviceContext->SgContactSizeQualLevel = SIZE_QUALIFICATION_THRESHOLD;
 		pDeviceContext->MuContactSizeQualLevel = SIZE_MU_LOWER_THRESHOLD;
 		pDeviceContext->PressureQualLevel = PRESSURE_QUALIFICATION_THRESHOLD;
@@ -204,11 +208,12 @@ AmtPtpEvtDevicePrepareHardware(
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 
 			TRACE_DEVICE, 
-			"%!FUNC! fuzz information: h = %f, v = %f, p = %f, w = %f", 
+			"%!FUNC! fuzz information: h = %f, v = %f, p = %f, w = %f, o = %f", 
 			pDeviceContext->HorizonalFuzz,
 			pDeviceContext->VerticalFuzz,
 			pDeviceContext->PressureFuzz,
-			pDeviceContext->WidthFuzz
+			pDeviceContext->WidthFuzz,
+			pDeviceContext->OrientationFuzz
 		);
 	}
 

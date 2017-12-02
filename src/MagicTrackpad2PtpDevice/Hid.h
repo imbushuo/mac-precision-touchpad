@@ -321,6 +321,9 @@ typedef struct _PTP_CONTACT_RAW {
 	UCHAR		Pressure;
 	UCHAR		Size;
 	UCHAR		ContactId;
+	USHORT		TouchMajor;
+	USHORT		TouchMinor;
+	USHORT		Orientation;
 } PTP_CONTACT_RAW, *PPTP_CONTACT_RAW;
 
 typedef struct _PTP_REPORT {
