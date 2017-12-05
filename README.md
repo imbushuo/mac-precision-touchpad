@@ -8,7 +8,14 @@ This project aims to implement Windows Precision Touchpad Protocol for Apple Mac
 
 ## For Developers
 
-It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit (at least Creators Update version) is required for development and testing. 
+It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit (at least Creators Update version) is required for development and testing.
+
+## Device Support
+
+- [x] Apple Magic Trackpad 2
+- [ ] _(Work in progress)_ MacBook Pro with Retina Display (2013, 2014, 2015)
+- [ ] MacBook Air (2014, 2015)
+- [ ] MacBook Pro 2016
 
 ## Roadmap
 
