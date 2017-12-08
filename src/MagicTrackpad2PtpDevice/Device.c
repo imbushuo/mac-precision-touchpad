@@ -204,6 +204,8 @@ AmtPtpEvtDevicePrepareHardware(
 		pDeviceContext->SgContactSizeQualLevel = SIZE_QUALIFICATION_THRESHOLD;
 		pDeviceContext->MuContactSizeQualLevel = SIZE_MU_LOWER_THRESHOLD;
 		pDeviceContext->PressureQualLevel = PRESSURE_QUALIFICATION_THRESHOLD;
+		pDeviceContext->TouchMajorThreshold = ABS_MT_TOUCH_MAJOR_THRESHOLD;
+		pDeviceContext->TouchMinorThreshold = ABS_MT_TOUCH_MINOR_THRESHOLD;
 
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 

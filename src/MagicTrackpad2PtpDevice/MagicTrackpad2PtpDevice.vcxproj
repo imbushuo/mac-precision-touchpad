@@ -201,7 +201,6 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
-    <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -219,7 +218,6 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
-    <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -237,7 +235,6 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
-    <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -255,7 +252,6 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
-    <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

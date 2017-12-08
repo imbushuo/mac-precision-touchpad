@@ -62,6 +62,12 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		REPORT_SIZE, 0x08, /* Report Size: 8 */ \
 		REPORT_COUNT, 0x03, /* Report Count: 3 */ \
 		FEATURE, 0x02, /* Feature: (Data, Var, Abs) */ \
+		USAGE, 0x02, /* Usage: Vendor Usage 0x02 */ \
+		REPORT_COUNT, 0x02, /* Report Count: 2 */ \
+		REPORT_SIZE, 0x10, /* Report Size: 16 */ \
+		LOGICAL_MINIMUM, 0x00, /* Logical Minimum 0 */ \
+		LOGICAL_MAXIMUM_2, 0xf0, 0xff, /* Logical Maximum 65520 */ \
+		FEATURE, 0x02, /* Feature: (Data, Var, Abs) */ \
 	END_COLLECTION
 
 #define AAPL_PTP_WINDOWS_CONFIGURATION_TLC \
@@ -339,4 +345,6 @@ typedef struct _PTP_USERMODEAPP_CONF_REPORT {
 	UCHAR		PressureQualificationLevel;
 	UCHAR		SingleContactSizeQualificationLevel;
 	UCHAR		MultipleContactSizeQualificationLevel;
+	USHORT		TouchMajorThreshold;
+	USHORT		TouchMinorThreshold;
 } PTP_USERMODEAPP_CONF_REPORT, *PPTP_USERMODEAPP_CONF_REPORT;

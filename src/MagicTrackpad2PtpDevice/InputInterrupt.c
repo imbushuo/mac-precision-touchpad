@@ -240,8 +240,8 @@ AmtPtpServiceTouchInputInterruptType5(
 			}
 
 			// These two values don't get defuzzed
-			DeviceContext->ContactRepository[i].TouchMajor = f_type5->TouchMajor << 2;
-			DeviceContext->ContactRepository[i].TouchMinor = f_type5->TouchMinor << 2;
+			DeviceContext->ContactRepository[i].TouchMajor = ((SHORT) f_type5->TouchMajor) << 2;
+			DeviceContext->ContactRepository[i].TouchMinor = ((SHORT) f_type5->TouchMinor) << 2;
 
 			// Set ID.
 			report.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
@@ -252,18 +252,19 @@ AmtPtpServiceTouchInputInterruptType5(
 
 			// Set flags (by cases)
 			if (raw_n == 1) {
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * DeviceContext->ContactRepository[i].TouchMinor > 78000;
-				// report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * DeviceContext->ContactRepository[i].TouchMinor > 
+					DeviceContext->TouchMajorThreshold * DeviceContext->TouchMinorThreshold;
 				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->SgContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
 					TRACE_INPUT,
-					"(SG) Finger %d, X: %d, Y: %d, O: %d, TMajor: %d, TMinor: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
+					"(SG) Finger %d, X: %d, Y: %d, O: %d, O2: %d, TMajor: %d, TMinor: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 					f_type5->ContactIdentifier.Id,
 					report.Contacts[i].X,
 					report.Contacts[i].Y,
 					DeviceContext->ContactRepository[i].Orientation,
+					f_type5->ContactIdentifier.Orientation,
 					DeviceContext->ContactRepository[i].TouchMajor,
 					DeviceContext->ContactRepository[i].TouchMinor,
 					DeviceContext->ContactRepository[i].Pressure,
@@ -271,25 +272,27 @@ AmtPtpServiceTouchInputInterruptType5(
 					report.Contacts[i].TipSwitch,
 					report.Contacts[i].Confidence
 				);
-			} else {
+			} 
+			else {
 
 				// Save the information
 				// Use size to determine confidence in MU scenario
 				muTotalPressure += DeviceContext->ContactRepository[i].Pressure;
 				muTotalSize += DeviceContext->ContactRepository[i].Size;
 				
-				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * DeviceContext->ContactRepository[i].TouchMinor > 78000;
-				// report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].Pressure > DeviceContext->PressureQualLevel;
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * DeviceContext->ContactRepository[i].TouchMinor > 
+					DeviceContext->TouchMajorThreshold * DeviceContext->TouchMinorThreshold;
 				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= DeviceContext->MuContactSizeQualLevel;
 
 				TraceEvents(
 					TRACE_LEVEL_INFORMATION, 
 					TRACE_INPUT,
-					"(MU) Finger %d, X: %d, Y: %d, O: %d, TMajor: %d, TMinor: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
+					"(MU) Finger %d, X: %d, Y: %d, O: %d, O2: %d, TMajor: %d, TMinor: %d, Pressure: %d, Size: %d, TipSwitch: %d, Confidence: %d",
 					f_type5->ContactIdentifier.Id,
 					report.Contacts[i].X,
 					report.Contacts[i].Y,
 					DeviceContext->ContactRepository[i].Orientation,
+					f_type5->ContactIdentifier.Orientation,
 					DeviceContext->ContactRepository[i].TouchMajor,
 					DeviceContext->ContactRepository[i].TouchMinor,
 					DeviceContext->ContactRepository[i].Pressure,
@@ -300,30 +303,6 @@ AmtPtpServiceTouchInputInterruptType5(
 			}
 		
 			actualFingers++;
-		}
-
-		if (actualFingers > 2) {
-			if (muTotalPressure > DeviceContext->PressureQualLevel * 2.15) {
-				TraceEvents(
-					TRACE_LEVEL_INFORMATION,
-					TRACE_INPUT,
-					"(MU) Perform finger tip switch bit correction."
-				);
-				for (i = 0; i < actualFingers; i++) {
-					report.Contacts[i].TipSwitch = 1;
-				}
-
-				if (muTotalSize > DeviceContext->MuContactSizeQualLevel * 2.15) {
-					TraceEvents(
-						TRACE_LEVEL_INFORMATION,
-						TRACE_INPUT,
-						"(MU) Perform finger confidence bit correction."
-					);
-					for (i = 0; i < actualFingers; i++) {
-						report.Contacts[i].Confidence = 1;
-					}
-				}
-			}
 		}
 
 		// Set header information

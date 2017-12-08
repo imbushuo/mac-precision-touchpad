@@ -12,5 +12,7 @@ namespace AmtPtpDevice.Settings.DataObjects
         public byte PressureQualificationLevel;
         public byte SingleContactSizeQualificationLevel;
         public byte MultipleContactSizeQualificationLevel;
+        public ushort TouchMajorThreshold;
+        public ushort TouchMinorThreshold;
     }
 }

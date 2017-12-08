@@ -20,6 +20,9 @@ typedef struct _DEVICE_CONTEXT
 	UCHAR						SgContactSizeQualLevel;
 	UCHAR						MuContactSizeQualLevel;
 
+	USHORT						TouchMajorThreshold;
+	USHORT						TouchMinorThreshold;
+
 	BOOL                        IsWellspringModeOn;
 	BOOL                        IsSurfaceReportOn;
 	BOOL                        IsButtonReportOn;
