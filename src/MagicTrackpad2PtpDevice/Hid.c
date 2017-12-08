@@ -716,8 +716,6 @@ AmtPtpReportFeatures(
 			confReport->MultipleContactSizeQualificationLevel = deviceContext->MuContactSizeQualLevel;
 			confReport->SingleContactSizeQualificationLevel = deviceContext->SgContactSizeQualLevel;
 			confReport->PressureQualificationLevel = deviceContext->PressureQualLevel;
-			confReport->TouchMajorThreshold = deviceContext->TouchMajorThreshold;
-			confReport->TouchMinorThreshold = deviceContext->TouchMinorThreshold;
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
@@ -901,18 +899,14 @@ AmtPtpSetFeatures(
 			deviceContext->SgContactSizeQualLevel = umConfInput->SingleContactSizeQualificationLevel;
 			deviceContext->MuContactSizeQualLevel = umConfInput->MultipleContactSizeQualificationLevel;
 			deviceContext->PressureQualLevel = umConfInput->PressureQualificationLevel;
-			deviceContext->TouchMajorThreshold = umConfInput->TouchMajorThreshold;
-			deviceContext->TouchMinorThreshold = umConfInput->TouchMinorThreshold;
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
 				TRACE_DRIVER,
-				"%!FUNC! Report REPORTID_UMAPP_CONF requested PressureQual = %d, SgSize = %d, MuSize = %d, TMar = %d, TMin = %d",
+				"%!FUNC! Report REPORTID_UMAPP_CONF requested PressureQual = %d, SgSize = %d, MuSize = %d",
 				umConfInput->PressureQualificationLevel,
 				umConfInput->SingleContactSizeQualificationLevel,
-				umConfInput->MultipleContactSizeQualificationLevel,
-				umConfInput->TouchMajorThreshold,
-				umConfInput->TouchMinorThreshold
+				umConfInput->MultipleContactSizeQualificationLevel
 			);
 
 			// Report back

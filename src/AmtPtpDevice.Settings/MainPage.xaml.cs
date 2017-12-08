@@ -103,8 +103,6 @@ namespace AmtPtpDevice.Settings
                 m_sensitivitySlider.Value = m_report.PressureQualificationLevel;
                 m_confidenceSlider.Value = m_report.SingleContactSizeQualificationLevel;
                 m_muConfidenceSlider.Value = m_report.MultipleContactSizeQualificationLevel;
-                m_touchMajorSlider.Value = m_report.TouchMajorThreshold;
-                m_touchMinorSlider.Value = m_report.TouchMinorThreshold;
 
                 // Set visibility
                 m_disconnctedView.Visibility = Visibility.Collapsed;
@@ -124,8 +122,6 @@ namespace AmtPtpDevice.Settings
             m_report.PressureQualificationLevel = (byte) m_sensitivitySlider.Value;
             m_report.SingleContactSizeQualificationLevel = (byte) m_confidenceSlider.Value;
             m_report.MultipleContactSizeQualificationLevel = (byte) m_muConfidenceSlider.Value;
-            m_report.TouchMajorThreshold = (ushort) m_touchMajorSlider.Value;
-            m_report.TouchMinorThreshold = (ushort) m_touchMinorSlider.Value;
 
             var featureReport = m_inputDevice.Device.CreateFeatureReport(0x09);
             using (var datawriter = new DataWriter())
@@ -134,8 +130,6 @@ namespace AmtPtpDevice.Settings
                 datawriter.WriteByte(m_report.PressureQualificationLevel);
                 datawriter.WriteByte(m_report.SingleContactSizeQualificationLevel);
                 datawriter.WriteByte(m_report.MultipleContactSizeQualificationLevel);
-                datawriter.WriteUInt16(m_report.TouchMajorThreshold);
-                datawriter.WriteUInt16(m_report.TouchMinorThreshold);
                 featureReport.Data = datawriter.DetachBuffer();
                 await m_inputDevice.Device.SendFeatureReportAsync(featureReport);
             }
@@ -157,16 +151,6 @@ namespace AmtPtpDevice.Settings
         }
 
         private void OnMuConfidenceSliderValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
-        {
-            ApplySettings();
-        }
-
-        private void OnTouchMajorSliderValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
-        {
-            ApplySettings();
-        }
-
-        private void OnTouchMinorSliderValueChanged(object sender, Windows.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs e)
         {
             ApplySettings();
         }
