@@ -201,6 +201,7 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -218,6 +219,7 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -235,6 +237,7 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -252,6 +255,7 @@
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -279,7 +283,6 @@
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
-      <AdditionalOptions>/sm %(AdditionalOptions)</AdditionalOptions>
     </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -304,7 +307,6 @@
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
-      <AdditionalOptions>/sm %(AdditionalOptions)</AdditionalOptions>
     </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -328,9 +330,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
     </ClCompile>
     <DriverSign />
-    <DriverSign>
-      <AdditionalOptions>/sm %(AdditionalOptions)</AdditionalOptions>
-    </DriverSign>
+    <DriverSign />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -353,9 +353,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
     </ClCompile>
     <DriverSign />
-    <DriverSign>
-      <AdditionalOptions>/sm %(AdditionalOptions)</AdditionalOptions>
-    </DriverSign>
+    <DriverSign />
   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
