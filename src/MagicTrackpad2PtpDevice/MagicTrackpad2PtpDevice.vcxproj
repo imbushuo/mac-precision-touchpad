@@ -199,6 +199,7 @@
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
@@ -216,6 +217,7 @@
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
@@ -233,6 +235,7 @@
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
@@ -250,6 +253,7 @@
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCodeSignature)</ProductionCertificate>
   </PropertyGroup>
