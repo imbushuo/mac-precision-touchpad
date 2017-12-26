@@ -210,6 +210,22 @@ AmtPtpServiceTouchInputInterruptType2(
 		goto exit;
 	}
 
+	// Allocate output memory.
+	status = WdfRequestRetrieveOutputMemory(
+		request,
+		&reqMemory
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!",
+			status
+		);
+		goto exit;
+	}
+
 	// Type 2 touchpad surface report
 	if (DeviceContext->IsSurfaceReportOn) {
 		// Handles trackpad surface report here.
@@ -254,9 +270,10 @@ AmtPtpServiceTouchInputInterruptType2(
 
 			DeviceContext->ContactRepository[i].TouchMajor = f->touch_major << 1;
 			DeviceContext->ContactRepository[i].TouchMinor = f->touch_minor << 1;
-			DeviceContext->ContactRepository[i].ContactId = f->origin;
+			// Issue?
+			DeviceContext->ContactRepository[i].ContactId = (UCHAR) f->origin;
 
-			report.Contacts[i].ContactID = f->origin;
+			report.Contacts[i].ContactID = (UCHAR) f->origin;
 			report.Contacts[i].X = (USHORT) (DeviceContext->ContactRepository[i].X - DeviceContext->DeviceInfo->x.min);
 			report.Contacts[i].Y = (USHORT) (DeviceContext->ContactRepository[i].Y - DeviceContext->DeviceInfo->y.min);
 

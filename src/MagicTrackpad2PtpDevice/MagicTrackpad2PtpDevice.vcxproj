@@ -56,7 +56,6 @@
     <ClCompile Include="Hid.c" />
     <ClCompile Include="InputInterrupt.c" />
     <ClCompile Include="Queue.c" />
-    <ClCompile Include="Utils.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppleDefinition.h" />

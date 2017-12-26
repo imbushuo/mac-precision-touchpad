@@ -62,9 +62,6 @@
     <ClCompile Include="Hid.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
