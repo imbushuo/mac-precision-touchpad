@@ -12,13 +12,44 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 
 	WDF_USB_CONTINUOUS_READER_CONFIG contReaderConfig;
 	NTSTATUS status;
+	size_t transferLength = 0;
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Entry"
+	);
+
+	switch (DeviceContext->DeviceInfo->tp_type)
+	{
+	case TYPE1:
+		transferLength = HEADER_TYPE1 + FSIZE_TYPE1 * MAX_FINGERS;
+		break;
+	case TYPE2:
+		transferLength = HEADER_TYPE2 + FSIZE_TYPE2 * MAX_FINGERS;
+		break;
+	case TYPE3:
+		transferLength = HEADER_TYPE3 + FSIZE_TYPE3 * MAX_FINGERS;
+		break;
+	case TYPE4:
+		transferLength = HEADER_TYPE4 + FSIZE_TYPE4 * MAX_FINGERS;
+		break;
+	case TYPE5:
+		transferLength = HEADER_TYPE5 + FSIZE_TYPE5 * MAX_FINGERS;
+		break;
+	}
+
+	if (transferLength <= 0) {
+		status = STATUS_UNKNOWN_REVISION;
+		return status;
+	}
 
 	WDF_USB_CONTINUOUS_READER_CONFIG_INIT(
 		&contReaderConfig,
 		AmtPtpEvtUsbInterruptPipeReadComplete,
-		DeviceContext,    // Context
-		HEADER_TYPE5 + FSIZE_TYPE5 * MAX_FINGERS
-	);   // TransferLength
+		DeviceContext,		// Context
+		transferLength		// Calculate transferred length by device information
+	);
 
 	contReaderConfig.EvtUsbTargetPipeReadersFailed = AmtPtpEvtUsbInterruptReadersFailed;
 
@@ -29,9 +60,20 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 	);
 
 	if (!NT_SUCCESS(status)) {
-		// TODO: Trace
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! AmtPtpConfigContReaderForInterruptEndPoint failed with Status code %!STATUS!",
+			status
+		);
 		return status;
 	}
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Exit"
+	);
 
 	return STATUS_SUCCESS;
 
@@ -46,7 +88,6 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	_In_ WDFCONTEXT  Context
 )
 {
-
 	UNREFERENCED_PARAMETER(Pipe);
 
 	WDFDEVICE       device;
@@ -55,46 +96,58 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	NTSTATUS        status;
 
 	device = WdfObjectContextGetObject(pDeviceContext);
-
 	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
 	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
 
-	if (!pDeviceContext->IsWellspringModeOn) return;
-
-	if (pDeviceContext->DeviceInfo->tp_type != TYPE5) {
+	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0) {
 		TraceEvents(
-			TRACE_LEVEL_WARNING, 
-			TRACE_DRIVER, 
-			"%!FUNC! Mode not yet supported"
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! Malformed input received. Length = %llu",
+			NumBytesTransferred
 		);
+
 		return;
 	}
 
-	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0) {
-		TraceEvents(
-			TRACE_LEVEL_INFORMATION, 
-			TRACE_DRIVER,
-			"%!FUNC! Malformed input received. Length = %llu", 
-			NumBytesTransferred
-		);
-	} else {
-		szBuffer = WdfMemoryGetBuffer(
-			Buffer, 
-			NULL
-		);
-		status = AmtPtpServiceTouchInputInterruptType5(
-			pDeviceContext, 
-			szBuffer, 
-			NumBytesTransferred
-		);
+	if (!pDeviceContext->IsWellspringModeOn) return;
 
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(
-				TRACE_LEVEL_WARNING, 
-				TRACE_DRIVER, 
-				"%!FUNC! AmtPtpServiceTouchInputInterrupt failed with %!STATUS!", 
-				status
+	// Dispatch USB Interrupt routine by device family
+	switch (pDeviceContext->DeviceInfo->tp_type) {
+	case TYPE1:
+	case TYPE3:
+	case TYPE4:
+		TraceEvents(
+			TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"%!FUNC! Mode not yet supported"
+		);
+		break;
+	// MacBookPro10,2 & MacBookPro11,1
+	case TYPE2:
+		break;
+	// Magic Trackpad 2
+	case TYPE5:
+		{
+			szBuffer = WdfMemoryGetBuffer(
+				Buffer,
+				NULL
 			);
+			status = AmtPtpServiceTouchInputInterruptType5(
+				pDeviceContext,
+				szBuffer,
+				NumBytesTransferred
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! AmtPtpServiceTouchInputInterrupt5 failed with %!STATUS!",
+					status
+				);
+			}
+			break;
 		}
 	}
 
@@ -115,6 +168,170 @@ AmtPtpEvtUsbInterruptReadersFailed(
 	UNREFERENCED_PARAMETER(Status);
 
 	return TRUE;
+}
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpServiceTouchInputInterruptType2(
+	_In_ PDEVICE_CONTEXT DeviceContext,
+	_In_ UCHAR* Buffer,
+	_In_ size_t NumBytesTransferred
+)
+{
+	
+	NTSTATUS status;
+	WDFREQUEST request;
+	WDFMEMORY  reqMemory;
+	PTP_REPORT report;
+	const struct TRACKPAD_FINGER *f;
+
+	size_t raw_n, i = 0;
+	size_t headerSize = (unsigned int)DeviceContext->DeviceInfo->tp_header;
+	size_t fingerprintSize = (unsigned int)DeviceContext->DeviceInfo->tp_fsize;
+	INT x, y = 0;
+
+	status = STATUS_SUCCESS;
+	report.ReportID = REPORTID_MULTITOUCH;
+	report.ScanTime = 10000;
+	report.IsButtonClicked = 0;
+
+	// Retrieve next PTP touchpad request.
+	status = WdfIoQueueRetrieveNextRequest(
+		DeviceContext->InputQueue,
+		&request
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! No pending PTP request. Interrupt disposed"
+		);
+		goto exit;
+	}
+
+	// Type 2 touchpad surface report
+	if (DeviceContext->IsSurfaceReportOn) {
+		// Handles trackpad surface report here.
+		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
+		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
+
+		// Fingers
+		for (i = 0; i < raw_n; i++) {
+			UCHAR *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
+			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
+
+			// Shall we keep this?
+			if (f->touch_major == 0) continue;
+
+			// Translate X and Y
+			x = f->abs_x;
+			y = DeviceContext->DeviceInfo->y.min + DeviceContext->DeviceInfo->y.max - f->abs_y;
+
+			// Defuzz functions remain the same
+			// TODO: Implement defuzz later
+
+			if (DeviceContext->ContactRepository[i].ContactId == f->origin) {
+
+				DeviceContext->ContactRepository[i].X = (USHORT) AmtPtpDefuzzInput(
+					x,
+					DeviceContext->ContactRepository[i].X,
+					DeviceContext->HorizonalFuzz
+				);
+				DeviceContext->ContactRepository[i].Y = (USHORT) AmtPtpDefuzzInput(
+					y,
+					DeviceContext->ContactRepository[i].Y,
+					DeviceContext->VerticalFuzz
+				);
+
+			}
+			else {
+
+				DeviceContext->ContactRepository[i].X = (USHORT) x;
+				DeviceContext->ContactRepository[i].Y = (USHORT) y;
+
+			}
+
+			DeviceContext->ContactRepository[i].TouchMajor = f->touch_major << 1;
+			DeviceContext->ContactRepository[i].TouchMinor = f->touch_minor << 1;
+			DeviceContext->ContactRepository[i].ContactId = f->origin;
+
+			report.Contacts[i].ContactID = f->origin;
+			report.Contacts[i].X = (USHORT) (DeviceContext->ContactRepository[i].X - DeviceContext->DeviceInfo->x.min);
+			report.Contacts[i].Y = (USHORT) (DeviceContext->ContactRepository[i].Y - DeviceContext->DeviceInfo->y.min);
+
+			// Set flags, case by case
+			if (raw_n == 1) {
+				
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * 
+					DeviceContext->ContactRepository[i].TouchMinor > 78000;
+				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= 
+					DeviceContext->SgContactSizeQualLevel;
+
+			}
+			else {
+
+				report.Contacts[i].TipSwitch = DeviceContext->ContactRepository[i].TouchMajor * 
+					DeviceContext->ContactRepository[i].TouchMinor > 78000;
+				report.Contacts[i].Confidence = DeviceContext->ContactRepository[i].Size >= 
+					DeviceContext->MuContactSizeQualLevel;
+
+			}
+
+		}
+	}
+
+	// Type 2 touchpad contains integrated trackpad buttons
+	if (DeviceContext->IsButtonReportOn) {
+		// Handles trackpad button input here.
+		if (Buffer[DeviceContext->DeviceInfo->tp_button]) {
+			report.IsButtonClicked = TRUE;
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_INPUT,
+				"%!FUNC!: Trackpad button clicked"
+			);
+		}
+	}
+
+	// Compose final report and write it back
+	status = WdfMemoryCopyFromBuffer(
+		reqMemory,
+		0,
+		(PVOID)&report,
+		sizeof(PTP_REPORT)
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+			status
+		);
+		goto exit;
+	}
+
+	// Set result
+	WdfRequestSetInformation(
+		request,
+		sizeof(PTP_REPORT)
+	);
+
+	// Set completion flag
+	WdfRequestComplete(
+		request,
+		status
+	);
+
+exit:
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Exit"
+	);
+	return status;
+
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
