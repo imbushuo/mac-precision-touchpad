@@ -4,11 +4,6 @@
 #include "AppleDefinition.h"
 #include <hidport.h>
 
-//
-// This is the default report descriptor for the Hid device provided
-// by the mini driver in response to IOCTL_HID_GET_REPORT_DESCRIPTOR.
-// 
-
 typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 
 #define DEVICE_VERSION 0x01
@@ -111,17 +106,18 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		/* End of a byte */ \
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
+		/* This hard-coded size is designed for MacBookPro 11,1 */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xbc, 0x1d, /* Logical Maximum: 7612 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0x2e, 0x27, /* Logical Maximum: 10030 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x40, 0x06, /* Physical Maximum: 1600 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x28, 0x04, /* Physical Maximum: 1064 (See Apple Spec) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0x7d, 0x04, /* Physical Maximum: 1149 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0xc9, 0x13, /* Logical Maximum: 5065 (See definition) */ \
+		PHYSICAL_MAXIMUM_2, 0x05, 0x03, /* Physical Maximum: 773 (See Apple Spec) */ \
+		LOGICAL_MAXIMUM_2, 0xe0, 0x1a, /* Logical Maximum: 6880 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM, 0x00, /* Physical Maximum: 0 */ \
@@ -151,16 +147,16 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xbc, 0x1d, /* Logical Maximum: 7612 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0x2e, 0x27, /* Logical Maximum: 10030 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x40, 0x06, /* Physical Maximum: 1600 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x28, 0x04, /* Physical Maximum: 1064 (See Apple Spec) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0x7d, 0x04, /* Physical Maximum: 1149 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0xc9, 0x13, /* Logical Maximum: 5065 (See definition) */ \
+		PHYSICAL_MAXIMUM_2, 0x05, 0x03, /* Physical Maximum: 773 (See Apple Spec) */ \
+		LOGICAL_MAXIMUM_2, 0xe0, 0x1a, /* Logical Maximum: 6880 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		/* End of 4 bytes */ \
