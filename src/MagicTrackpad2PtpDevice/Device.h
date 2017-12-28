@@ -134,7 +134,7 @@ AmtPtpServiceTouchInputInterruptType5(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetHidDescriptor(
+AmtPtpGetHidDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
@@ -148,7 +148,7 @@ AmtPtpGetDeviceAttribs(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetReportDescriptor(
+AmtPtpGetReportDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );

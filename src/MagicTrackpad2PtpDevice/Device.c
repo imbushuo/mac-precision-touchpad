@@ -96,7 +96,7 @@ AmtPtpCreateDevice(
 	//
 	status = WdfDeviceCreateDeviceInterface(
 		device,
-		&GUID_DEVINTERFACE_MagicTrackpad2PtpDevice,
+		&GUID_DEVINTERFACE_AmtPtpDevice,
 		NULL // ReferenceString
 	);
 
@@ -104,7 +104,7 @@ AmtPtpCreateDevice(
 		//
 		// Initialize the I/O Package and any Queues
 		//
-		status = MagicTrackpad2PtpDeviceQueueInitialize(device);
+		status = AmtPtpDeviceQueueInitialize(device);
 	}
 
 	TraceEvents(
@@ -124,6 +124,7 @@ AmtPtpEvtDevicePrepareHardware(
 	_In_ WDFCMRESLIST ResourceListTranslated
 )
 {
+
 	NTSTATUS								status;
 	PDEVICE_CONTEXT							pDeviceContext;
 	ULONG									waitWakeEnable;
@@ -423,7 +424,7 @@ AmtPtpEvtDeviceD0Entry(
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
 		TRACE_DRIVER, 
-		"%!FUNC! -->MagicTrackpad2PtpDeviceEvtDeviceD0Entry - coming from %s",
+		"%!FUNC! -->AmtPtpDeviceEvtDeviceD0Entry - coming from %s",
 		DbgDevicePowerString(PreviousState)
 	);
 
@@ -462,7 +463,7 @@ End:
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
 		TRACE_DRIVER, 
-		"%!FUNC! <--MagicTrackpad2PtpDeviceEvtDeviceD0Entry"
+		"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Entry"
 	);
 
 	return status;
@@ -482,7 +483,7 @@ AmtPtpEvtDeviceD0Exit(
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
 		TRACE_DRIVER,
-		"%!FUNC! -->MagicTrackpad2PtpDeviceEvtDeviceD0Exit - moving to %s", 
+		"%!FUNC! -->AmtPtpDeviceEvtDeviceD0Exit - moving to %s", 
 		DbgDevicePowerString(TargetState)
 	);
 
@@ -495,7 +496,7 @@ AmtPtpEvtDeviceD0Exit(
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
 		TRACE_DRIVER, 
-		"%!FUNC! <--MagicTrackpad2PtpDeviceEvtDeviceD0Exit"
+		"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Exit"
 	);
 
 	return STATUS_SUCCESS;

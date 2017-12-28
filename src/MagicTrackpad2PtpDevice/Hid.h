@@ -162,7 +162,7 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 		/* End of 4 bytes */ \
 	END_COLLECTION /* End Collection */ \
 
-#define AAPL_MAGIC_TRACKPAD2_PTP_TLC \
+#define AAPL_WELLSPRING_7A_PTP_TLC \
 	USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 	USAGE, 0x05, /* Usage: Touch Pad */ \
 	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
