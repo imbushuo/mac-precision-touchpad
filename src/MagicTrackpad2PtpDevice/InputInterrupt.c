@@ -125,7 +125,27 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 		break;
 	// MacBookPro10,2 & MacBookPro11,1
 	case TYPE2:
-		break;
+		{
+			szBuffer = WdfMemoryGetBuffer(
+				Buffer,
+				NULL
+			);
+			status = AmtPtpServiceTouchInputInterruptType2(
+				pDeviceContext,
+				szBuffer,
+				NumBytesTransferred
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! AmtPtpServiceTouchInputInterrupt5 failed with %!STATUS!",
+					status
+				);
+			}
+			break;
+		}
 	// Magic Trackpad 2
 	case TYPE5:
 		{
