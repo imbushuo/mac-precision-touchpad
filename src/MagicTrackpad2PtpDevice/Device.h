@@ -199,4 +199,9 @@ static INT AmtPtpDefuzzInput(
 	_In_ double Fuzz
 );
 
+// Helper function for numberic operation
+static inline INT AmtRawToInteger(
+	_In_ USHORT x
+);
+
 EXTERN_C_END

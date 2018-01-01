@@ -287,6 +287,7 @@ AmtPtpSetWellspringMode(
 	_In_ BOOL IsWellspringModeOn
 )
 {
+
 	NTSTATUS						status;
 	WDF_USB_CONTROL_SETUP_PACKET	setupPacket;
 	WDF_MEMORY_DESCRIPTOR			memoryDescriptor;
@@ -299,6 +300,11 @@ AmtPtpSetWellspringMode(
 		TRACE_DRIVER, 
 		"%!FUNC! Entry"
 	);
+
+	// Type 3 does not need a mode switch.
+	if (DeviceContext->DeviceInfo->tp_type == TYPE3) {
+		return STATUS_SUCCESS;
+	}
 
 	status = WdfMemoryCreate(
 		WDF_NO_OBJECT_ATTRIBUTES, 
@@ -345,20 +351,22 @@ AmtPtpSetWellspringMode(
 		&cbTransferred
 	);
 
-	if (!NT_SUCCESS(status) || cbTransferred != (ULONG) DeviceContext->DeviceInfo->um_size) {
+	if (!NT_SUCCESS(status) /* || cbTransferred != (ULONG) DeviceContext->DeviceInfo->um_size */ ) {
 		TraceEvents(
 			TRACE_LEVEL_ERROR, 
 			TRACE_DEVICE, 
-			"%!FUNC! WdfUsbTargetDeviceSendControlTransferSynchronously (Read) failed with %!STATUS!", 
-			status
+			"%!FUNC! WdfUsbTargetDeviceSendControlTransferSynchronously (Read) failed with %!STATUS!, cbTransferred = %llu, um_size = %d", 
+			status,
+			cbTransferred,
+			DeviceContext->DeviceInfo->um_size
 		);
 		goto cleanup;
 	}
 
 	// Apply the mode switch
 	buffer[DeviceContext->DeviceInfo->um_switch_idx] = IsWellspringModeOn ?
-		(unsigned char)DeviceContext->DeviceInfo->um_switch_on : 
-		(unsigned char)DeviceContext->DeviceInfo->um_switch_off;
+		(unsigned char) DeviceContext->DeviceInfo->um_switch_on : 
+		(unsigned char) DeviceContext->DeviceInfo->um_switch_off;
 
 	// Write configuration
 	WDF_USB_CONTROL_SETUP_PACKET_INIT(
