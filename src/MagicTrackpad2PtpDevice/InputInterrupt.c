@@ -269,6 +269,7 @@ AmtPtpServiceTouchInputInterruptType2(
 		// Handles trackpad surface report here.
 		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
 		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
+		report.ContactCount = (UCHAR) raw_n;
 
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
