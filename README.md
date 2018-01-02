@@ -2,7 +2,7 @@
 
 [![Build Status](https://ligstd.visualstudio.com/_apis/public/build/definitions/7694e0d0-94e3-4fd2-b39a-ecd261e1ba2e/22/badge)](https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/)
 
-**Warning: The project is under development, with some features incomplete yet. Currently it only works on Apple Magic Trackpad 2 with minor issues. A duly signed, working driver will be released in future. Stay tuned.**
+**Warning: The project is under development, with some features incomplete yet.**
 
 This project aims to implement Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10.
 
