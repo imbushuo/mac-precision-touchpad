@@ -22,21 +22,21 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 
 	switch (DeviceContext->DeviceInfo->tp_type)
 	{
-	case TYPE1:
-		transferLength = HEADER_TYPE1 + FSIZE_TYPE1 * MAX_FINGERS;
-		break;
-	case TYPE2:
-		transferLength = HEADER_TYPE2 + FSIZE_TYPE2 * MAX_FINGERS;
-		break;
-	case TYPE3:
-		transferLength = HEADER_TYPE3 + FSIZE_TYPE3 * MAX_FINGERS;
-		break;
-	case TYPE4:
-		transferLength = HEADER_TYPE4 + FSIZE_TYPE4 * MAX_FINGERS;
-		break;
-	case TYPE5:
-		transferLength = HEADER_TYPE5 + FSIZE_TYPE5 * MAX_FINGERS;
-		break;
+		case TYPE1:
+			transferLength = HEADER_TYPE1 + FSIZE_TYPE1 * MAX_FINGERS;
+			break;
+		case TYPE2:
+			transferLength = HEADER_TYPE2 + FSIZE_TYPE2 * MAX_FINGERS;
+			break;
+		case TYPE3:
+			transferLength = HEADER_TYPE3 + FSIZE_TYPE3 * MAX_FINGERS;
+			break;
+		case TYPE4:
+			transferLength = HEADER_TYPE4 + FSIZE_TYPE4 * MAX_FINGERS;
+			break;
+		case TYPE5:
+			transferLength = HEADER_TYPE5 + FSIZE_TYPE5 * MAX_FINGERS;
+			break;
 	}
 
 	if (transferLength <= 0) {
@@ -133,41 +133,46 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 
 	// Dispatch USB Interrupt routine by device family
 	switch (pDeviceContext->DeviceInfo->tp_type) {
-		case TYPE1:
-		case TYPE3:
-		case TYPE4:
-			TraceEvents(
-				TRACE_LEVEL_WARNING,
-				TRACE_DRIVER,
-				"%!FUNC! Mode not yet supported"
-			);
-			break;
-		// MacBookPro10,2 & MacBookPro11,1
-		case TYPE2:
-		{
-			szBuffer = WdfMemoryGetBuffer(
-				Buffer,
-				NULL
-			);
-			status = AmtPtpServiceTouchInputInterruptType2(
-				pDeviceContext,
-				szBuffer,
-				NumBytesTransferred
-			);
-
-			if (!NT_SUCCESS(status)) {
+			case TYPE1:
+			case TYPE4:
+			{
 				TraceEvents(
 					TRACE_LEVEL_WARNING,
 					TRACE_DRIVER,
-					"%!FUNC! AmtPtpServiceTouchInputInterrupt2 failed with %!STATUS!",
-					status
+					"%!FUNC! Mode not yet supported"
 				);
+				break;
 			}
-			break;
-		}
-		// Magic Trackpad 2
-		case TYPE5:
+			// Universal routine handler
+			case TYPE2:
+			case TYPE3:
 			{
+
+				szBuffer = WdfMemoryGetBuffer(
+					Buffer,
+					NULL
+				);
+				status = AmtPtpServiceTouchInputInterrupt(
+					pDeviceContext,
+					szBuffer,
+					NumBytesTransferred
+				);
+
+				if (!NT_SUCCESS(status)) {
+					TraceEvents(
+						TRACE_LEVEL_WARNING,
+						TRACE_DRIVER,
+						"%!FUNC! AmtPtpServiceTouchInputInterrupt failed with %!STATUS!",
+						status
+					);
+				}
+				break;
+
+			}
+			// Magic Trackpad 2
+			case TYPE5:
+			{
+
 				szBuffer = WdfMemoryGetBuffer(
 					Buffer,
 					NULL
@@ -187,6 +192,7 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 					);
 				}
 				break;
+
 			}
 	}
 
@@ -217,7 +223,7 @@ AmtPtpEvtUsbInterruptReadersFailed(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-AmtPtpServiceTouchInputInterruptType2(
+AmtPtpServiceTouchInputInterrupt(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ UCHAR* Buffer,
 	_In_ size_t NumBytesTransferred

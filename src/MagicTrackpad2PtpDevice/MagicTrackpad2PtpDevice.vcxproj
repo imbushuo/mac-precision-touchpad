@@ -60,7 +60,9 @@
   <ItemGroup>
     <ClInclude Include="AppleDefinition.h" />
     <ClInclude Include="Device.h" />
+    <ClInclude Include="DeviceFamily\Wellspring5.h" />
     <ClInclude Include="DeviceFamily\Wellspring7A.h" />
+    <ClInclude Include="DeviceFamily\Wellspring8.h" />
     <ClInclude Include="DeviceFamily\WellspringMt2.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="Hid.h" />
