@@ -14,9 +14,9 @@ It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Developm
 
 - [x] Apple Magic Trackpad 2
 - [x] MacBook Pro with Retina Display (MacBookPro10,2 & MacBookPro11,1)
-- [ ] _(Work in progress)_ MacBook Pro with Retina Display (2013, 2014, 2015)
-- [ ] MacBook Air (2014, 2015)
-- [ ] MacBook Pro 2016
+- [ ] _(Work in progress)_ MacBook Pro with Retina Display (2014, 2015)
+- [ ] MacBook Air (2014, 2015) _Coming soon_
+- [ ] MacBook Pro 2015, 2016 _SPI devices will be considered later_
 
 ## Roadmap
 
