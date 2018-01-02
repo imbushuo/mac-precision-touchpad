@@ -28,6 +28,7 @@ typedef struct _DEVICE_CONTEXT
 	double                      VerticalFuzz;
 	double                      PressureFuzz;
 	double                      WidthFuzz;
+	double						OrientationFuzz;
 
 	PTP_CONTACT_RAW             ContactRepository[5];
 
@@ -59,6 +60,13 @@ _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpConfigContReaderForInterruptEndPoint(
 	_In_ PDEVICE_CONTEXT DeviceContext
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetWellspringMode(
+	_In_  PDEVICE_CONTEXT DeviceContext,
+	_Out_ BOOL* IsWellspringModeOn
 );
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -113,7 +121,7 @@ AmtPtpEvtUsbInterruptReadersFailed(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-AmtPtpServiceMouseInputInterrupt(
+AmtPtpServiceTouchInputInterruptType2(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ UCHAR* Buffer,
 	_In_ size_t NumBytesTransferred
@@ -127,13 +135,19 @@ AmtPtpServiceTouchInputInterruptType5(
 	_In_ size_t NumBytesTransferred
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpEmergResetDevice(
+	_In_ PDEVICE_CONTEXT DeviceContext
+);
+
 ///
 /// HID sections
 ///
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetHidDescriptor(
+AmtPtpGetHidDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
@@ -147,7 +161,7 @@ AmtPtpGetDeviceAttribs(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetReportDescriptor(
+AmtPtpGetReportDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
@@ -196,6 +210,11 @@ static INT AmtPtpDefuzzInput(
 	_In_ int NewValue,
 	_In_ int OldValue,
 	_In_ double Fuzz
+);
+
+// Helper function for numberic operation
+static inline INT AmtRawToInteger(
+	_In_ USHORT x
 );
 
 EXTERN_C_END

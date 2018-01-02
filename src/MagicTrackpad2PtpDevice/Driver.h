@@ -20,7 +20,7 @@ EXTERN_C_START
 //
 
 DRIVER_INITIALIZE DriverEntry;
-EVT_WDF_DRIVER_DEVICE_ADD MagicTrackpad2PtpDeviceEvtDeviceAdd;
-EVT_WDF_OBJECT_CONTEXT_CLEANUP MagicTrackpad2PtpDeviceEvtDriverContextCleanup;
+EVT_WDF_DRIVER_DEVICE_ADD AmtPtpDeviceEvtDeviceAdd;
+EVT_WDF_OBJECT_CONTEXT_CLEANUP AmtPtpDeviceEvtDriverContextCleanup;
 
 EXTERN_C_END

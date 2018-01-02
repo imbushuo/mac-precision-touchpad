@@ -21,7 +21,7 @@ DbgIoControlGetString(
 );
 
 NTSTATUS
-MagicTrackpad2PtpDeviceQueueInitialize(
+AmtPtpDeviceQueueInitialize(
 	_In_ WDFDEVICE Device
 );
 

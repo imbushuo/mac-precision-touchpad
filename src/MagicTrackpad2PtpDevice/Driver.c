@@ -33,10 +33,10 @@ DriverEntry(
 	// the framework driver object is deleted during driver unload.
 	//
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-	attributes.EvtCleanupCallback = MagicTrackpad2PtpDeviceEvtDriverContextCleanup;
+	attributes.EvtCleanupCallback = AmtPtpDeviceEvtDriverContextCleanup;
 
 	WDF_DRIVER_CONFIG_INIT(&config,
-		MagicTrackpad2PtpDeviceEvtDeviceAdd
+		AmtPtpDeviceEvtDeviceAdd
 	);
 
 	status = WdfDriverCreate(DriverObject,
@@ -67,7 +67,7 @@ DriverEntry(
 }
 
 NTSTATUS
-MagicTrackpad2PtpDeviceEvtDeviceAdd(
+AmtPtpDeviceEvtDeviceAdd(
 	_In_    WDFDRIVER       Driver,
 	_Inout_ PWDFDEVICE_INIT DeviceInit
 )
@@ -102,7 +102,7 @@ MagicTrackpad2PtpDeviceEvtDeviceAdd(
 }
 
 VOID
-MagicTrackpad2PtpDeviceEvtDriverContextCleanup(
+AmtPtpDeviceEvtDriverContextCleanup(
 	_In_ WDFOBJECT DriverObject
 )
 {

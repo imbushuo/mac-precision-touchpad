@@ -17,11 +17,9 @@
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <Inf Include="MagicTrackpad2PtpDevice.inf">
-      <Filter>Driver Files</Filter>
-    </Inf>
+    <Filter Include="Device Specific Metadata Files">
+      <UniqueIdentifier>{d3b4239b-c0e3-4d91-a6ee-730df7a15240}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h">
@@ -45,6 +43,15 @@
     <ClInclude Include="Hid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HidCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceFamily\Wellspring7A.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceFamily\WellspringMt2.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -67,5 +74,10 @@
     <ResourceCompile Include="Resource.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="AmtPtpDevice.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
   </ItemGroup>
 </Project>
