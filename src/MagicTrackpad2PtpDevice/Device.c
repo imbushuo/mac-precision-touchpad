@@ -778,3 +778,49 @@ DbgDevicePowerString(
 		return "UnKnown Device Power State";
 	}
 }
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpEmergResetDevice(
+	_In_ PDEVICE_CONTEXT DeviceContext
+)
+{
+
+	NTSTATUS status;
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Enter");
+
+	status = AmtPtpSetWellspringMode(
+		DeviceContext, 
+		FALSE);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, 
+			TRACE_DEVICE, 
+			"%!FUNC! AmtPtpSetWellspringMode failed with %!STATUS!", 
+			status);
+	}
+
+	status = AmtPtpSetWellspringMode(
+		DeviceContext,
+		TRUE);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DEVICE,
+			"%!FUNC! AmtPtpSetWellspringMode failed with %!STATUS!",
+			status);
+	}
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, 
+		TRACE_DRIVER, 
+		"%!FUNC! Exit");
+
+	return status;
+
+}

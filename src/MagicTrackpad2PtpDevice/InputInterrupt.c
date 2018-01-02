@@ -106,12 +106,25 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
 
 	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0) {
+
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
 			TRACE_DRIVER,
-			"%!FUNC! Malformed input received. Length = %llu",
+			"%!FUNC! Malformed input received. Length = %llu. Attempt to reset device.",
 			NumBytesTransferred
 		);
+
+		status = AmtPtpEmergResetDevice(pDeviceContext);
+		if (!NT_SUCCESS(status)) {
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! AmtPtpEmergResetDevice failed with %!STATUS!",
+				status
+			);
+
+		}
 
 		return;
 	}

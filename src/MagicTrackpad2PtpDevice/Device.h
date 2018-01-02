@@ -135,6 +135,12 @@ AmtPtpServiceTouchInputInterruptType5(
 	_In_ size_t NumBytesTransferred
 );
 
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpEmergResetDevice(
+	_In_ PDEVICE_CONTEXT DeviceContext
+);
+
 ///
 /// HID sections
 ///
