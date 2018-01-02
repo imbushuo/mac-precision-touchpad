@@ -14,7 +14,7 @@ It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Developm
 
 - [x] Apple Magic Trackpad 2
 - [x] MacBook, MacBook Pro 2011 (MacBook8 and more)
-- [x] MacBook Pro with Retina Display (MacBookPro10,2 & MacBookPro11,1)
+- [x] MacBook Pro with Retina Display (MacBookPro 10,1, MacBookPro10,2 & MacBookPro11,1)
 - [x] MacBook Air 2013, 2014(?), 2015 (MacBook6,2 & 7,2 and more)
 - [ ] _(Work in progress)_ MacBook Pro with Retina Display (2014, 2015)
 - [ ] MacBook Pro 2015, 2016 _SPI devices will be considered later_
@@ -28,7 +28,7 @@ It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Developm
 - [x] HID Protocol Implementation (Configuration)
 - [x] Device Test (Magic Trackpad 2)
 - [x] Refine input experience (tip switch detection and pressure)
-- [ ] Refine input experience (gesture experience)
+- [x] Refine input experience (gesture experience)
 - [ ] More Models (I need donation)
 
 ## Acknowledgements
