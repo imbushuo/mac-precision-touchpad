@@ -64,6 +64,13 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
+AmtPtpGetWellspringMode(
+	_In_  PDEVICE_CONTEXT DeviceContext,
+	_Out_ BOOL* IsWellspringModeOn
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
 SelectInterruptInterface(
 	_In_ WDFDEVICE Device
 );

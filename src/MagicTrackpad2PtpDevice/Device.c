@@ -282,6 +282,110 @@ AmtPtpEvtDevicePrepareHardware(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
+AmtPtpGetWellspringMode(
+	_In_  PDEVICE_CONTEXT DeviceContext,
+	_Out_ BOOL* IsWellspringModeOn
+)
+{
+
+	NTSTATUS						status;
+	WDF_USB_CONTROL_SETUP_PACKET	setupPacket;
+	WDF_MEMORY_DESCRIPTOR			memoryDescriptor;
+	ULONG							cbTransferred;
+	WDFMEMORY						bufHandle = NULL;
+	unsigned char*					buffer;
+
+	status = STATUS_SUCCESS;
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Entry"
+	);
+
+	// Type 3 does not need a mode switch.
+	if (DeviceContext->DeviceInfo->tp_type == TYPE3) {
+		*IsWellspringModeOn = TRUE;
+		return STATUS_SUCCESS;
+	}
+
+	status = WdfMemoryCreate(
+		WDF_NO_OBJECT_ATTRIBUTES,
+		PagedPool,
+		0,
+		DeviceContext->DeviceInfo->um_size,
+		&bufHandle,
+		&buffer
+	);
+
+	if (!NT_SUCCESS(status)) {
+		goto cleanup;
+	}
+
+	RtlZeroMemory(
+		buffer,
+		DeviceContext->DeviceInfo->um_size
+	);
+
+	WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
+		&memoryDescriptor,
+		buffer,
+		sizeof(DeviceContext->DeviceInfo->um_size)
+	);
+
+	WDF_USB_CONTROL_SETUP_PACKET_INIT(
+		&setupPacket,
+		BmRequestDeviceToHost,
+		BmRequestToInterface,
+		BCM5974_WELLSPRING_MODE_READ_REQUEST_ID,
+		(USHORT)DeviceContext->DeviceInfo->um_req_val,
+		(USHORT)DeviceContext->DeviceInfo->um_req_idx
+	);
+
+	// Set stuffs right
+	setupPacket.Packet.bm.Request.Type = BmRequestClass;
+
+	status = WdfUsbTargetDeviceSendControlTransferSynchronously(
+		DeviceContext->UsbDevice,
+		WDF_NO_HANDLE,
+		NULL,
+		&setupPacket,
+		&memoryDescriptor,
+		&cbTransferred
+	);
+
+	// Behavior mismatch: Actual device does not transfer bytes as expected (in length)
+	// So we do not check um_size as a temporary workaround.
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DEVICE,
+			"%!FUNC! WdfUsbTargetDeviceSendControlTransferSynchronously (Read) failed with %!STATUS!, cbTransferred = %llu, um_size = %d",
+			status,
+			cbTransferred,
+			DeviceContext->DeviceInfo->um_size
+		);
+		goto cleanup;
+	}
+
+	// Check mode switch
+	unsigned char wellspringBit = buffer[DeviceContext->DeviceInfo->um_switch_idx];
+	*IsWellspringModeOn = wellspringBit == DeviceContext->DeviceInfo->um_switch_on ? TRUE : FALSE;
+
+cleanup:
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Exit"
+	);
+
+	bufHandle = NULL;
+	return status;
+
+}
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
 AmtPtpSetWellspringMode(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ BOOL IsWellspringModeOn
@@ -351,7 +455,9 @@ AmtPtpSetWellspringMode(
 		&cbTransferred
 	);
 
-	if (!NT_SUCCESS(status) /* || cbTransferred != (ULONG) DeviceContext->DeviceInfo->um_size */ ) {
+	// Behavior mismatch: Actual device does not transfer bytes as expected (in length)
+	// So we do not check um_size as a temporary workaround.
+	if (!NT_SUCCESS(status)) {
 		TraceEvents(
 			TRACE_LEVEL_ERROR, 
 			TRACE_DEVICE, 
@@ -403,15 +509,16 @@ AmtPtpSetWellspringMode(
 	// Set status
 	DeviceContext->IsWellspringModeOn = IsWellspringModeOn;
 
+cleanup:
 	TraceEvents(
-		TRACE_LEVEL_INFORMATION, 
-		TRACE_DRIVER, 
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
 		"%!FUNC! Exit"
 	);
 
-cleanup:
 	bufHandle = NULL;
 	return status;
+
 }
 
 // D0 Entry & Exit
