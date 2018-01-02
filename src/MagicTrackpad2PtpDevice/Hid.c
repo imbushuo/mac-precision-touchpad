@@ -151,6 +151,9 @@ AmtPtpGetHidDescriptor(
 			break;
 
 		}
+		case USB_DEVICE_ID_APPLE_WELLSPRING7_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7_JIS:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
@@ -159,7 +162,7 @@ AmtPtpGetHidDescriptor(
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
 				TRACE_DRIVER,
-				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 7A Series"
+				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 7/7A Series"
 			);
 
 			szCopy = AmtPtp7aDefaultHidDescriptor.bLength;
@@ -413,6 +416,9 @@ AmtPtpGetReportDescriptor(
 			break;
 
 		}
+		case USB_DEVICE_ID_APPLE_WELLSPRING7_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7_JIS:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
