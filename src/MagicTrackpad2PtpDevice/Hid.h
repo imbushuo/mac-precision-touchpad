@@ -7,7 +7,9 @@
 #include "HidCommon.h"
 
 // Device family metadata
+#include "DeviceFamily\Wellspring5.h"
 #include "DeviceFamily\Wellspring7A.h"
+#include "DeviceFamily\Wellspring8.h"
 #include "DeviceFamily\WellspringMt2.h"
 
 typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;

@@ -52,6 +52,12 @@
     <ClInclude Include="DeviceFamily\WellspringMt2.h">
       <Filter>Device Specific Metadata Files</Filter>
     </ClInclude>
+    <ClInclude Include="DeviceFamily\Wellspring8.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceFamily\Wellspring5.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">

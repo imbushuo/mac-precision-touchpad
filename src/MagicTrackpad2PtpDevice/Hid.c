@@ -6,8 +6,20 @@
 #ifndef _AAPL_HID_DESCRIPTOR_H_
 #define _AAPL_HID_DESCRIPTOR_H_
 
+HID_REPORT_DESCRIPTOR AmtPtp5ReportDescriptor[] = {
+	AAPL_WELLSPRING_5_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
 HID_REPORT_DESCRIPTOR AmtPtp7aReportDescriptor[] = {
 	AAPL_WELLSPRING_7A_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+HID_REPORT_DESCRIPTOR AmtPtp8ReportDescriptor[] = {
+	AAPL_WELLSPRING_8_PTP_TLC,
 	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
 };
@@ -16,6 +28,18 @@ HID_REPORT_DESCRIPTOR AmtPtpMt2ReportDescriptor[] = {
 	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
 	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+CONST HID_DESCRIPTOR AmtPtp5DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+{
+	0x22,                               // bDescriptorType
+	sizeof(AmtPtp5ReportDescriptor)    // bDescriptorLength
+}
 };
 
 CONST HID_DESCRIPTOR AmtPtp7aDefaultHidDescriptor = {
@@ -28,6 +52,18 @@ CONST HID_DESCRIPTOR AmtPtp7aDefaultHidDescriptor = {
 		0x22,                               // bDescriptorType
 		sizeof(AmtPtp7aReportDescriptor)    // bDescriptorLength
 	}
+};
+
+CONST HID_DESCRIPTOR AmtPtp8DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+{
+	0x22,                               // bDescriptorType
+	sizeof(AmtPtp8ReportDescriptor)    // bDescriptorLength
+}
 };
 
 CONST HID_DESCRIPTOR AmtPtpMt2DefaultHidDescriptor = {
@@ -79,6 +115,42 @@ AmtPtpGetHidDescriptor(
 	}
 
 	switch (pContext->DeviceDescriptor.idProduct) {
+		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
+		{
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 5 Series"
+			);
+
+			szCopy = AmtPtp5DefaultHidDescriptor.bLength;
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtp5DefaultHidDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
@@ -95,6 +167,42 @@ AmtPtpGetHidDescriptor(
 				reqMemory,
 				0,
 				(PVOID)&AmtPtp7aDefaultHidDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
+		case USB_DEVICE_ID_APPLE_WELLSPRING8_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING8_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING8_JIS:
+		{
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 8 Series"
+			);
+
+			szCopy = AmtPtp8DefaultHidDescriptor.bLength;
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtp8DefaultHidDescriptor,
 				szCopy
 			);
 
@@ -261,6 +369,50 @@ AmtPtpGetReportDescriptor(
 	}
 
 	switch (pContext->DeviceDescriptor.idProduct) {
+		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
+		{
+
+			szCopy = AmtPtp5DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			if (szCopy == 0) {
+
+				status = STATUS_INVALID_DEVICE_STATE;
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! Device HID report length is zero"
+				);
+				return status;
+
+			}
+
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtp5ReportDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
@@ -283,6 +435,50 @@ AmtPtpGetReportDescriptor(
 				reqMemory,
 				0,
 				(PVOID)&AmtPtp7aReportDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
+		case USB_DEVICE_ID_APPLE_WELLSPRING8_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING8_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING8_JIS:
+		{
+
+			szCopy = AmtPtp8DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			if (szCopy == 0) {
+
+				status = STATUS_INVALID_DEVICE_STATE;
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! Device HID report length is zero"
+				);
+				return status;
+
+			}
+
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtp8ReportDescriptor,
 				szCopy
 			);
 
