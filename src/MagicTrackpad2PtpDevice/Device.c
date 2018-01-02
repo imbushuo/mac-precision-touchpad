@@ -790,7 +790,7 @@ AmtPtpEmergResetDevice(
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
 		TRACE_DRIVER,
-		"%!FUNC! Enter");
+		"%!FUNC! Entry");
 
 	status = AmtPtpSetWellspringMode(
 		DeviceContext, 
