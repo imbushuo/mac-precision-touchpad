@@ -4,7 +4,7 @@
 #include "queue.tmh"
 
 NTSTATUS
-MagicTrackpad2PtpDeviceQueueInitialize(
+AmtPtpDeviceQueueInitialize(
 	_In_ WDFDEVICE Device
 )
 {
@@ -143,7 +143,7 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 	switch (IoControlCode)
 	{
 		case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
-			status = MagicTrackpad2GetHidDescriptor(
+			status = AmtPtpGetHidDescriptor(
 				device, 
 				Request
 			);
@@ -155,7 +155,7 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 			);
 			break;
 		case IOCTL_HID_GET_REPORT_DESCRIPTOR:
-			status = MagicTrackpad2GetReportDescriptor(
+			status = AmtPtpGetReportDescriptor(
 				device, 
 				Request
 			);

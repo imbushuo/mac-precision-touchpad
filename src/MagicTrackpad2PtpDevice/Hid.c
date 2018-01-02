@@ -6,28 +6,47 @@
 #ifndef _AAPL_HID_DESCRIPTOR_H_
 #define _AAPL_HID_DESCRIPTOR_H_
 
-HID_REPORT_DESCRIPTOR AAPLMagicTrackpad2ReportDescriptor[] = {
+HID_REPORT_DESCRIPTOR AmtPtp7aReportDescriptor[] = {
+	AAPL_WELLSPRING_7A_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+HID_REPORT_DESCRIPTOR AmtPtpMt2ReportDescriptor[] = {
 	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
 	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
 };
 
-CONST HID_DESCRIPTOR AAPLMagicTrackpad2DefaultHidDescriptor = {
+CONST HID_DESCRIPTOR AmtPtp7aDefaultHidDescriptor = {
 	0x09,   // bLength
 	0x21,   // bDescriptorType
 	0x0100, // bcdHID
 	0x00,   // bCountryCode
 	0x01,   // bNumDescriptors
 	{
-		0x22,                                         // bDescriptorType
-		sizeof(AAPLMagicTrackpad2ReportDescriptor)    // bDescriptorLength
+		0x22,                               // bDescriptorType
+		sizeof(AmtPtp7aReportDescriptor)    // bDescriptorLength
 	}
 };
+
+CONST HID_DESCRIPTOR AmtPtpMt2DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+{
+	0x22,                               // bDescriptorType
+	sizeof(AmtPtpMt2ReportDescriptor)    // bDescriptorLength
+}
+};
+
 #endif
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetHidDescriptor(
+AmtPtpGetHidDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )
@@ -59,43 +78,89 @@ MagicTrackpad2GetHidDescriptor(
 		return status;
 	}
 
-	if (pContext->DeviceDescriptor.idProduct == USB_DEVICE_ID_APPLE_MAGICTRACKPAD2) {
-		TraceEvents(
-			TRACE_LEVEL_INFORMATION, 
-			TRACE_DRIVER, 
-			"%!FUNC! Request HID Report Descriptor for AAPL Magic Trackpad 2"
-		);
+	switch (pContext->DeviceDescriptor.idProduct) {
+		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
+		{
 
-		szCopy = AAPLMagicTrackpad2DefaultHidDescriptor.bLength;
-		status = WdfMemoryCopyFromBuffer(
-			reqMemory, 
-			0, 
-			(PVOID) &AAPLMagicTrackpad2DefaultHidDescriptor, 
-			szCopy
-		);
-
-		if (!NT_SUCCESS(status)) {
 			TraceEvents(
-				TRACE_LEVEL_ERROR, 
-				TRACE_DRIVER, 
-				"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", 
-				status
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 7A Series"
 			);
-			return status;
-		}
 
-		WdfRequestSetInformation(
-			Request, 
-			szCopy
-		);
-	} else {
-		TraceEvents(
-			TRACE_LEVEL_WARNING, 
-			TRACE_DRIVER, 
-			"%!FUNC! Device HID registry is not found"
-		);
-		status = STATUS_INVALID_DEVICE_STATE;
-		return status;
+			szCopy = AmtPtp7aDefaultHidDescriptor.bLength;
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtp7aDefaultHidDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
+		case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
+		{
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for Apple Magic Trackpad 2 Family"
+			);
+
+			szCopy = AmtPtpMt2DefaultHidDescriptor.bLength;
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID) &AmtPtpMt2DefaultHidDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		};
+		default: 
+		{
+
+			TraceEvents(
+				TRACE_LEVEL_WARNING,
+				TRACE_DRIVER,
+				"%!FUNC! Device HID registry is not found"
+			);
+			status = STATUS_INVALID_DEVICE_STATE;
+			break;
+
+		}
 	}
 
 	TraceEvents(
@@ -163,7 +228,7 @@ AmtPtpGetDeviceAttribs(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-MagicTrackpad2GetReportDescriptor(
+AmtPtpGetReportDescriptor(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 )
@@ -195,52 +260,106 @@ MagicTrackpad2GetReportDescriptor(
 		return status;
 	}
 
-	if (pContext->DeviceDescriptor.idProduct == USB_DEVICE_ID_APPLE_MAGICTRACKPAD2) {
-		szCopy = AAPLMagicTrackpad2DefaultHidDescriptor.DescriptorList[0].wReportLength;
-		if (szCopy == 0) {
+	switch (pContext->DeviceDescriptor.idProduct) {
+		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
+		{
+
+			szCopy = AmtPtp7aDefaultHidDescriptor.DescriptorList[0].wReportLength;
+			if (szCopy == 0) {
+
+				status = STATUS_INVALID_DEVICE_STATE;
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! Device HID report length is zero"
+				);
+				return status;
+
+			}
+
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtp7aReportDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
+		case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
+		{
+
+			szCopy = AmtPtpMt2DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			if (szCopy == 0) {
+
+				status = STATUS_INVALID_DEVICE_STATE;
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! Device HID report length is zero"
+				);
+				return status;
+
+			}
+
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtpMt2ReportDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
+		default:
+		{
+
+			TraceEvents(
+				TRACE_LEVEL_WARNING,
+				TRACE_DRIVER,
+				"%!FUNC! Device HID registry is not found"
+			);
 
 			status = STATUS_INVALID_DEVICE_STATE;
-			TraceEvents(
-				TRACE_LEVEL_WARNING, 
-				TRACE_DRIVER, 
-				"%!FUNC! Device HID report length is zero"
-			);
-			return status;
+			break;
 
 		}
-
-		status = WdfMemoryCopyFromBuffer(
-			reqMemory, 
-			0, 
-			(PVOID) &AAPLMagicTrackpad2ReportDescriptor, 
-			szCopy
-		);
-
-		if (!NT_SUCCESS(status)) {
-
-			TraceEvents(
-				TRACE_LEVEL_ERROR, 
-				TRACE_DRIVER, 
-				"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", 
-				status
-			);
-			return status;
-
-		}
-
-		WdfRequestSetInformation(
-			Request, 
-			szCopy
-		);
-	} else {
-		TraceEvents(
-			TRACE_LEVEL_WARNING, 
-			TRACE_DRIVER, 
-			"%!FUNC! Device HID registry is not found"
-		);
-
-		status = STATUS_INVALID_DEVICE_STATE;
-		return status;
 	}
 
 	TraceEvents(
@@ -795,51 +914,92 @@ AmtPtpSetFeatures(
 				TRACE_DRIVER, 
 				"%!FUNC! Report REPORTID_REPORTMODE is requested"
 			);
+
 			PPTP_DEVICE_INPUT_MODE_REPORT devInputMode = (PPTP_DEVICE_INPUT_MODE_REPORT) packet.reportBuffer;
+
+			// Get current WellSpring mode
+			BOOL bWellspringMode = FALSE;
+			status = AmtPtpGetWellspringMode(
+				deviceContext,
+				&bWellspringMode
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! -> AmtPtpGetWellspringMode failed with status %!STATUS!",
+					status
+				);
+				goto exit;
+
+			}
 
 			switch (devInputMode->Mode)
 			{
-			case PTP_COLLECTION_MOUSE:
-				TraceEvents(
-					TRACE_LEVEL_INFORMATION, 
-					TRACE_DRIVER, 
-					"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input"
-				);
-				status = AmtPtpSetWellspringMode(
-					deviceContext,
-					FALSE
-				);
-				if (!NT_SUCCESS(status)) {
-					TraceEvents(
-						TRACE_LEVEL_ERROR, 
-						TRACE_DRIVER, 
-						"%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", 
-						status
-					);
-					goto exit;
-				}
-				break;
-			case PTP_COLLECTION_WINDOWS:
-				TraceEvents(
-					TRACE_LEVEL_INFORMATION, 
-					TRACE_DRIVER, 
-					"%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input"
-				);
+				case PTP_COLLECTION_MOUSE:
+				{
 
-				status = AmtPtpSetWellspringMode(
-					deviceContext, 
-					TRUE
-				);
-				if (!NT_SUCCESS(status)) {
 					TraceEvents(
-						TRACE_LEVEL_ERROR, 
-						TRACE_DRIVER, 
-						"%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", 
-						status
+						TRACE_LEVEL_INFORMATION,
+						TRACE_DRIVER,
+						"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input"
 					);
-					goto exit;
+
+					if (bWellspringMode) {
+
+						status = AmtPtpSetWellspringMode(
+							deviceContext,
+							FALSE
+						);
+
+						if (!NT_SUCCESS(status)) {
+							TraceEvents(
+								TRACE_LEVEL_ERROR,
+								TRACE_DRIVER,
+								"%!FUNC! -> AmtPtpSetWellspringMode failed with status %!STATUS!",
+								status
+							);
+							goto exit;
+						}
+
+					}
+				
+					break;
+
 				}
-				break;
+				case PTP_COLLECTION_WINDOWS:
+				{
+
+					TraceEvents(
+						TRACE_LEVEL_INFORMATION,
+						TRACE_DRIVER,
+						"%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input"
+					);
+
+					if (!bWellspringMode) {
+						
+						status = AmtPtpSetWellspringMode(
+							deviceContext,
+							TRUE
+						);
+
+						if (!NT_SUCCESS(status)) {
+							TraceEvents(
+								TRACE_LEVEL_ERROR,
+								TRACE_DRIVER,
+								"%!FUNC! -> AmtPtpSetWellspringMode failed with status %!STATUS!",
+								status
+							);
+							goto exit;
+						}
+
+					}
+
+					break;
+
+				}
 			}
 
 			WdfRequestSetInformation(
