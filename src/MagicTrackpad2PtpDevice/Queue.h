@@ -35,7 +35,7 @@ AmtPtpDispatchReadReportRequests(
 //
 // Events from the IoQueue object
 //
-EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL MagicTrackpad2PtpDeviceEvtIoDeviceControl;
-EVT_WDF_IO_QUEUE_IO_STOP MagicTrackpad2PtpDeviceEvtIoStop;
+EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL AmtPtpDeviceEvtIoDeviceControl;
+EVT_WDF_IO_QUEUE_IO_STOP AmtPtpDeviceEvtIoStop;
 
 EXTERN_C_END

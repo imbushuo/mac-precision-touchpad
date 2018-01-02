@@ -26,8 +26,8 @@ AmtPtpDeviceQueueInitialize(
 		WdfIoQueueDispatchParallel
 	);
 
-	queueConfig.EvtIoDeviceControl = MagicTrackpad2PtpDeviceEvtIoDeviceControl;
-	queueConfig.EvtIoStop = MagicTrackpad2PtpDeviceEvtIoStop;
+	queueConfig.EvtIoDeviceControl = AmtPtpDeviceEvtIoDeviceControl;
+	queueConfig.EvtIoStop = AmtPtpDeviceEvtIoStop;
 
 	status = WdfIoQueueCreate(
 		Device,
@@ -116,7 +116,7 @@ DbgIoControlGetString(
 }
 
 VOID
-MagicTrackpad2PtpDeviceEvtIoDeviceControl(
+AmtPtpDeviceEvtIoDeviceControl(
 	_In_ WDFQUEUE Queue,
 	_In_ WDFREQUEST Request,
 	_In_ size_t OutputBufferLength,
@@ -213,7 +213,7 @@ MagicTrackpad2PtpDeviceEvtIoDeviceControl(
 }
 
 VOID
-MagicTrackpad2PtpDeviceEvtIoStop(
+AmtPtpDeviceEvtIoStop(
 	_In_ WDFQUEUE Queue,
 	_In_ WDFREQUEST Request,
 	_In_ ULONG ActionFlags
