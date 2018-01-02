@@ -548,7 +548,7 @@ AmtPtpEvtDeviceD0Entry(
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
 			TRACE_DRIVER,
-			"%!FUNC! Start Wellspring Mode"
+			"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Entry - Start Wellspring Mode"
 		);
 
 		status = AmtPtpSetWellspringMode(
@@ -560,7 +560,7 @@ AmtPtpEvtDeviceD0Entry(
 			TraceEvents(
 				TRACE_LEVEL_WARNING,
 				TRACE_DRIVER,
-				"%!FUNC! Start Wellspring Mode failed with %!STATUS!",
+				"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Entry - Start Wellspring Mode failed with %!STATUS!",
 				status
 			);
 		}
@@ -575,7 +575,7 @@ AmtPtpEvtDeviceD0Entry(
 		TraceEvents(
 			TRACE_LEVEL_ERROR, 
 			TRACE_DRIVER, 
-			"%!FUNC! Failed to start interrupt pipe %!STATUS!", 
+			"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Entry - Failed to start interrupt pipe %!STATUS!", 
 			status
 		);
 		goto End;
@@ -639,7 +639,7 @@ AmtPtpEvtDeviceD0Exit(
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
 		TRACE_DRIVER,
-		"%!FUNC! Cancel Wellspring Mode"
+		"%!FUNC! -->AmtPtpDeviceEvtDeviceD0Exit - Cancel Wellspring Mode"
 	);
 
 	status = AmtPtpSetWellspringMode(
@@ -651,7 +651,7 @@ AmtPtpEvtDeviceD0Exit(
 		TraceEvents(
 			TRACE_LEVEL_WARNING,
 			TRACE_DRIVER,
-			"%!FUNC! Cancel Wellspring Mode failed with %!STATUS!",
+			"%!FUNC! -->AmtPtpDeviceEvtDeviceD0Exit - Cancel Wellspring Mode failed with %!STATUS!",
 			status
 		);
 	}

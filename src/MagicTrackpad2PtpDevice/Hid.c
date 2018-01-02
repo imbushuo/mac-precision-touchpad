@@ -798,51 +798,92 @@ AmtPtpSetFeatures(
 				TRACE_DRIVER, 
 				"%!FUNC! Report REPORTID_REPORTMODE is requested"
 			);
+
 			PPTP_DEVICE_INPUT_MODE_REPORT devInputMode = (PPTP_DEVICE_INPUT_MODE_REPORT) packet.reportBuffer;
+
+			// Get current WellSpring mode
+			BOOL bWellspringMode = FALSE;
+			status = AmtPtpGetWellspringMode(
+				deviceContext,
+				&bWellspringMode
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! -> AmtPtpGetWellspringMode failed with status %!STATUS!",
+					status
+				);
+				goto exit;
+
+			}
 
 			switch (devInputMode->Mode)
 			{
-			case PTP_COLLECTION_MOUSE:
-				TraceEvents(
-					TRACE_LEVEL_INFORMATION, 
-					TRACE_DRIVER, 
-					"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input"
-				);
-				status = AmtPtpSetWellspringMode(
-					deviceContext,
-					FALSE
-				);
-				if (!NT_SUCCESS(status)) {
-					TraceEvents(
-						TRACE_LEVEL_ERROR, 
-						TRACE_DRIVER, 
-						"%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", 
-						status
-					);
-					goto exit;
-				}
-				break;
-			case PTP_COLLECTION_WINDOWS:
-				TraceEvents(
-					TRACE_LEVEL_INFORMATION, 
-					TRACE_DRIVER, 
-					"%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input"
-				);
+				case PTP_COLLECTION_MOUSE:
+				{
 
-				status = AmtPtpSetWellspringMode(
-					deviceContext, 
-					TRUE
-				);
-				if (!NT_SUCCESS(status)) {
 					TraceEvents(
-						TRACE_LEVEL_ERROR, 
-						TRACE_DRIVER, 
-						"%!FUNC! MagicTrackpad2PtpDeviceSetWellspringMode failed with status %!STATUS!", 
-						status
+						TRACE_LEVEL_INFORMATION,
+						TRACE_DRIVER,
+						"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input"
 					);
-					goto exit;
+
+					if (bWellspringMode) {
+
+						status = AmtPtpSetWellspringMode(
+							deviceContext,
+							FALSE
+						);
+
+						if (!NT_SUCCESS(status)) {
+							TraceEvents(
+								TRACE_LEVEL_ERROR,
+								TRACE_DRIVER,
+								"%!FUNC! -> AmtPtpSetWellspringMode failed with status %!STATUS!",
+								status
+							);
+							goto exit;
+						}
+
+					}
+				
+					break;
+
 				}
-				break;
+				case PTP_COLLECTION_WINDOWS:
+				{
+
+					TraceEvents(
+						TRACE_LEVEL_INFORMATION,
+						TRACE_DRIVER,
+						"%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input"
+					);
+
+					if (!bWellspringMode) {
+						
+						status = AmtPtpSetWellspringMode(
+							deviceContext,
+							TRUE
+						);
+
+						if (!NT_SUCCESS(status)) {
+							TraceEvents(
+								TRACE_LEVEL_ERROR,
+								TRACE_DRIVER,
+								"%!FUNC! -> AmtPtpSetWellspringMode failed with status %!STATUS!",
+								status
+							);
+							goto exit;
+						}
+
+					}
+
+					break;
+
+				}
 			}
 
 			WdfRequestSetInformation(
