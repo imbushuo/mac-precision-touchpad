@@ -543,6 +543,29 @@ AmtPtpEvtDeviceD0Entry(
 		DbgDevicePowerString(PreviousState)
 	);
 
+	// Check wellspring mode
+	if (pDeviceContext->IsButtonReportOn || pDeviceContext->IsWellspringModeOn) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! Start Wellspring Mode"
+		);
+
+		status = AmtPtpSetWellspringMode(
+			pDeviceContext,
+			TRUE
+		);
+
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(
+				TRACE_LEVEL_WARNING,
+				TRACE_DRIVER,
+				"%!FUNC! Start Wellspring Mode failed with %!STATUS!",
+				status
+			);
+		}
+	}
+
 	//
 	// Since continuous reader is configured for this interrupt-pipe, we must explicitly start
 	// the I/O target to get the framework to post read requests.
@@ -592,8 +615,10 @@ AmtPtpEvtDeviceD0Exit(
 )
 {
 	PDEVICE_CONTEXT         pDeviceContext;
+	NTSTATUS				status;
 
 	PAGED_CODE();
+	status = STATUS_SUCCESS;
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -603,10 +628,33 @@ AmtPtpEvtDeviceD0Exit(
 	);
 
 	pDeviceContext = DeviceGetContext(Device);
+
+	// Stop IO Pipe.
 	WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(
 		pDeviceContext->InterruptPipe),
 		WdfIoTargetCancelSentIo
 	);
+
+	// Cancel Wellspring mode.
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Cancel Wellspring Mode"
+	);
+
+	status = AmtPtpSetWellspringMode(
+		pDeviceContext,
+		FALSE
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"%!FUNC! Cancel Wellspring Mode failed with %!STATUS!",
+			status
+		);
+	}
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -614,7 +662,7 @@ AmtPtpEvtDeviceD0Exit(
 		"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Exit"
 	);
 
-	return STATUS_SUCCESS;
+	return status;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
