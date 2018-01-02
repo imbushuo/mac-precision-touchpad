@@ -133,17 +133,17 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 
 	// Dispatch USB Interrupt routine by device family
 	switch (pDeviceContext->DeviceInfo->tp_type) {
-	case TYPE1:
-	case TYPE3:
-	case TYPE4:
-		TraceEvents(
-			TRACE_LEVEL_WARNING,
-			TRACE_DRIVER,
-			"%!FUNC! Mode not yet supported"
-		);
-		break;
-	// MacBookPro10,2 & MacBookPro11,1
-	case TYPE2:
+		case TYPE1:
+		case TYPE3:
+		case TYPE4:
+			TraceEvents(
+				TRACE_LEVEL_WARNING,
+				TRACE_DRIVER,
+				"%!FUNC! Mode not yet supported"
+			);
+			break;
+		// MacBookPro10,2 & MacBookPro11,1
+		case TYPE2:
 		{
 			szBuffer = WdfMemoryGetBuffer(
 				Buffer,
@@ -165,29 +165,29 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 			}
 			break;
 		}
-	// Magic Trackpad 2
-	case TYPE5:
-		{
-			szBuffer = WdfMemoryGetBuffer(
-				Buffer,
-				NULL
-			);
-			status = AmtPtpServiceTouchInputInterruptType5(
-				pDeviceContext,
-				szBuffer,
-				NumBytesTransferred
-			);
-
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(
-					TRACE_LEVEL_WARNING,
-					TRACE_DRIVER,
-					"%!FUNC! AmtPtpServiceTouchInputInterrupt5 failed with %!STATUS!",
-					status
+		// Magic Trackpad 2
+		case TYPE5:
+			{
+				szBuffer = WdfMemoryGetBuffer(
+					Buffer,
+					NULL
 				);
+				status = AmtPtpServiceTouchInputInterruptType5(
+					pDeviceContext,
+					szBuffer,
+					NumBytesTransferred
+				);
+
+				if (!NT_SUCCESS(status)) {
+					TraceEvents(
+						TRACE_LEVEL_WARNING,
+						TRACE_DRIVER,
+						"%!FUNC! AmtPtpServiceTouchInputInterrupt5 failed with %!STATUS!",
+						status
+					);
+				}
+				break;
 			}
-			break;
-		}
 	}
 
 	TraceEvents(

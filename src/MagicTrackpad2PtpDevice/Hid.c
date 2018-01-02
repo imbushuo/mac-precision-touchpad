@@ -12,6 +12,12 @@ HID_REPORT_DESCRIPTOR AmtPtp7aReportDescriptor[] = {
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
 };
 
+HID_REPORT_DESCRIPTOR AmtPtpMt2ReportDescriptor[] = {
+	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
 CONST HID_DESCRIPTOR AmtPtp7aDefaultHidDescriptor = {
 	0x09,   // bLength
 	0x21,   // bDescriptorType
@@ -23,6 +29,19 @@ CONST HID_DESCRIPTOR AmtPtp7aDefaultHidDescriptor = {
 		sizeof(AmtPtp7aReportDescriptor)    // bDescriptorLength
 	}
 };
+
+CONST HID_DESCRIPTOR AmtPtpMt2DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+{
+	0x22,                               // bDescriptorType
+	sizeof(AmtPtpMt2ReportDescriptor)    // bDescriptorLength
+}
+};
+
 #endif
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -96,6 +115,40 @@ AmtPtpGetHidDescriptor(
 			break;
 
 		}
+		case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
+		{
+
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for Apple Magic Trackpad 2 Family"
+			);
+
+			szCopy = AmtPtpMt2DefaultHidDescriptor.bLength;
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID) &AmtPtpMt2DefaultHidDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		};
 		default: 
 		{
 
@@ -230,6 +283,48 @@ AmtPtpGetReportDescriptor(
 				reqMemory,
 				0,
 				(PVOID)&AmtPtp7aReportDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				return status;
+
+			}
+
+			WdfRequestSetInformation(
+				Request,
+				szCopy
+			);
+			break;
+
+		}
+		case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
+		{
+
+			szCopy = AmtPtpMt2DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			if (szCopy == 0) {
+
+				status = STATUS_INVALID_DEVICE_STATE;
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! Device HID report length is zero"
+				);
+				return status;
+
+			}
+
+			status = WdfMemoryCopyFromBuffer(
+				reqMemory,
+				0,
+				(PVOID)&AmtPtpMt2ReportDescriptor,
 				szCopy
 			);
 
