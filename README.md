@@ -16,6 +16,8 @@ It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Developm
 
 ## Device support
 
+There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking into it. If you have such device with Windows installed, please contact me so I can look into the issue remotely (as I don't have many devices).
+
 - [x] Apple Magic Trackpad 2
 - [x] MacBook, MacBook Pro 2011 (MacBook8 and more)
 - [x] MacBook Pro with Retina Display (MacBookPro 10,1, MacBookPro10,2 & MacBookPro11,1)
