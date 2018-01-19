@@ -446,7 +446,8 @@ AmtPtpServiceTouchInputInterruptType5(
 
 	// First things
 	report.ReportID = REPORTID_MULTITOUCH;
-	report.ScanTime = 10000;
+	// 60Hz in 100us unit
+	report.ScanTime = 167;
 	report.IsButtonClicked = 0;
 
 	// Check things to report
