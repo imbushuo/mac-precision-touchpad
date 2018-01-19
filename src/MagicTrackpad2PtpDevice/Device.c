@@ -206,6 +206,25 @@ AmtPtpEvtDevicePrepareHardware(
 		pDeviceContext->MuContactSizeQualLevel = SIZE_MU_LOWER_THRESHOLD;
 		pDeviceContext->PressureQualLevel = PRESSURE_QUALIFICATION_THRESHOLD;
 
+		pDeviceContext->TouchStateMachineInfo.HorizonalFuzz		= pDeviceContext->HorizonalFuzz;
+		pDeviceContext->TouchStateMachineInfo.VerticalFuzz		= pDeviceContext->VerticalFuzz;
+		pDeviceContext->TouchStateMachineInfo.WidthFuzz			= pDeviceContext->WidthFuzz;
+		pDeviceContext->TouchStateMachineInfo.OrientationFuzz	= pDeviceContext->OrientationFuzz;
+		pDeviceContext->TouchStateMachineInfo.PressureFuzz		= pDeviceContext->PressureFuzz;
+
+		status = SmResetState(&pDeviceContext->TouchStateMachineInfo);
+		if (!NT_SUCCESS(status)) {
+
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DEVICE,
+				"%!FUNC! SmResetState failed with %!STATUS!",
+				status
+			);
+			return status;
+
+		}
+
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 
 			TRACE_DEVICE, 

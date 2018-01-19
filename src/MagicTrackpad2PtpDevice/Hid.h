@@ -148,17 +148,30 @@ typedef struct _PTP_CONTACT {
 	USHORT		Y;
 } PTP_CONTACT, *PPTP_CONTACT;
 
+enum CONTACT_STATE {
+	CONTACT_NEW = 0,
+	CONTACT_CONTINUED = 1,
+	CONTACT_CONFIDENCE_CANCELLED = 2,
+	CONTACT_INVALID = 3
+};
+
 // Used for defuzz - not report
 typedef struct _PTP_CONTACT_RAW {
-	USHORT		X;
-	USHORT		Y;
-	UCHAR		Pressure;
-	UCHAR		Size;
-	UCHAR		ContactId;
-	USHORT		TouchMajor;
-	USHORT		TouchMinor;
-	USHORT		Orientation;
+	USHORT				X;
+	USHORT				Y;
+	UCHAR				Pressure;
+	UCHAR				Size;
+	UCHAR				ContactId;
+	USHORT				TouchMajor;
+	USHORT				TouchMinor;
+	USHORT				Orientation;
+	enum CONTACT_STATE	State;
 } PTP_CONTACT_RAW, *PPTP_CONTACT_RAW;
+
+typedef struct _PTP_CONTACT_RAW_LL {
+	PTP_CONTACT_RAW					ContactRaw;
+	struct _PTP_CONTACT_RAW_LL		*pNext;
+} PTP_CONTACT_RAW_LL, *PPTP_CONTACT_RAW_LL;
 
 typedef struct _PTP_REPORT {
 	UCHAR       ReportID;

@@ -451,11 +451,15 @@ AmtPtpServiceTouchInputInterruptType5(
 
 	// Check things to report
 	if (DeviceContext->IsSurfaceReportOn) {
+
+		SM_PROJECTED_INFORMATION projInfo;
+		PTP_CONTACT_RAW	rawPointers[MT2_MAX_SLOT];
+
 		// Iterations to read
 		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
 		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 
-		// Fingers
+		// Fingers to array
 		for (i = 0; i < raw_n; i++) {
 
 			UCHAR *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
@@ -468,39 +472,66 @@ AmtPtpServiceTouchInputInterruptType5(
 			x = (SHORT) (tmp_x << 3) >> 3;
 			y = -(INT) (tmp_y << 6) >> 19;
 
-			// Set ID.
-			report.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
+			// Set for state machine's reference
+			rawPointers[i].ContactId = f_type5->ContactIdentifier.Id;
+			rawPointers[i].X = (USHORT) (x - DeviceContext->DeviceInfo->x.min);
+			rawPointers[i].Y = (USHORT) (y - DeviceContext->DeviceInfo->y.min);
+			rawPointers[i].Size = f_type5->Size;
+			rawPointers[i].TouchMajor = (USHORT) (AmtRawToInteger(f_type5->TouchMajor) << 1);
+			rawPointers[i].TouchMinor = (USHORT) (AmtRawToInteger(f_type5->TouchMinor) << 1);
+			rawPointers[i].State = CONTACT_NEW;
 
-			// Adjust position. Apple uses different coordinate system.
-			report.Contacts[i].X = (USHORT) (x - DeviceContext->DeviceInfo->x.min);
-			report.Contacts[i].Y = (USHORT) (y - DeviceContext->DeviceInfo->y.min);
+		}
 
-			// Set flags
-			report.Contacts[i].TipSwitch = (AmtRawToInteger(f_type5->TouchMajor) << 1) >= 100;
+		// State machine
+		status = SmHandleInputRoutine(
+			rawPointers,
+			(int) raw_n,
+			&DeviceContext->TouchStateMachineInfo);
 
-			// Per guideline: set to off when >= 25mm
-			// https://docs.microsoft.com/en-us/windows-hardware/design/component-guidelines/touchpad-windows-precision-touchpad-collection
-			report.Contacts[i].Confidence = !((AmtRawToInteger(f_type5->TouchMajor) << 1) >= 350);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"%!FUNC! SmHandleInputRoutine failed with %!STATUS!",
+				status
+			);
+			goto exit;
+		}
+
+		// Retrieve result
+		SmGetPtpReportSlots(
+			&DeviceContext->TouchStateMachineInfo,
+			&projInfo
+		);
+
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_INPUT,
+			"%!FUNC!: SmGetPtpReportSlots returned %d contact(s).",
+			projInfo.ReportedContactsCount
+		);
+
+		// Set & trace contact
+		for (i = 0; i < projInfo.ReportedContactsCount; i++) {
+
+			report.Contacts[i] = projInfo.Contacts[i];
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
 				TRACE_INPUT,
-				"%!FUNC!: Point %llu, X = %d, Y = %d, TipSwitch = %d, Confidence = %d, tMajor = %d, tMinor = %d, origin = %d, PTP Origin = %d",
-				i,
+				"%!FUNC!: PTP Origin = %d, X = %d, Y = %d, TipSwitch = %d, Confidence = %d",
+				report.Contacts[i].ContactID,
 				report.Contacts[i].X,
 				report.Contacts[i].Y,
 				report.Contacts[i].TipSwitch,
-				report.Contacts[i].Confidence,
-				AmtRawToInteger(f_type5->TouchMajor) << 1,
-				AmtRawToInteger(f_type5->TouchMinor) << 1,
-				f_type5->ContactIdentifier.Id,
-				f_type5->ContactIdentifier.Id
+				report.Contacts[i].Confidence
 			);
 
 		}
 
-		// Set header information
-		report.ContactCount = (UCHAR) raw_n;
+		// Set count
+		report.ContactCount = projInfo.ReportedContactsCount;
 
 	}
 
@@ -553,30 +584,6 @@ exit:
 		"%!FUNC! Exit"
 	);
 	return status;
-
-}
-
-// Debuzz function from Linux Kernel: drivers/input/input.c
-_IRQL_requires_(PASSIVE_LEVEL)
-static INT AmtPtpDefuzzInput(
-	_In_ int NewValue,
-	_In_ int OldValue,
-	_In_ double Fuzz
-)
-{
-
-	if (Fuzz) {
-		if (NewValue > OldValue - Fuzz / 2 && NewValue < OldValue + Fuzz / 2)
-			return OldValue;
-
-		if (NewValue > OldValue - Fuzz && NewValue < OldValue + Fuzz)
-			return (OldValue * 3 + NewValue) / 4;
-
-		if (NewValue > OldValue - Fuzz * 2 && NewValue < OldValue + Fuzz * 2)
-			return (OldValue + NewValue) / 2;
-	}
-
-	return NewValue;
 
 }
 

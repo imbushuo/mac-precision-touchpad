@@ -55,6 +55,7 @@
     <ClCompile Include="Driver.c" />
     <ClCompile Include="Hid.c" />
     <ClCompile Include="InputInterrupt.c" />
+    <ClCompile Include="InputStateMachine.c" />
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +68,7 @@
     <ClInclude Include="Driver.h" />
     <ClInclude Include="Hid.h" />
     <ClInclude Include="HidCommon.h" />
+    <ClInclude Include="InputStateMachine.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />

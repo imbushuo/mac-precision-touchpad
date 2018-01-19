@@ -31,6 +31,7 @@ typedef struct _DEVICE_CONTEXT
 	double						OrientationFuzz;
 
 	PTP_CONTACT_RAW             ContactRepository[5];
+	SM_RUNTIME_INFORMATION		TouchStateMachineInfo;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -203,13 +204,6 @@ NTSTATUS
 RequestGetHidXferPacketToWriteToDevice(
 	_In_  WDFREQUEST        Request,
 	_Out_ HID_XFER_PACKET  *Packet
-);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-static INT AmtPtpDefuzzInput(
-	_In_ int NewValue,
-	_In_ int OldValue,
-	_In_ double Fuzz
 );
 
 // Helper function for numberic operation

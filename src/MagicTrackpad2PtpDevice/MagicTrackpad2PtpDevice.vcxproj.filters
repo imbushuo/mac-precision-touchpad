@@ -58,6 +58,9 @@
     <ClInclude Include="DeviceFamily\Wellspring5.h">
       <Filter>Device Specific Metadata Files</Filter>
     </ClInclude>
+    <ClInclude Include="InputStateMachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -73,6 +76,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Hid.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputStateMachine.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
