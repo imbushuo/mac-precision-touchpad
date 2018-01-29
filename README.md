@@ -6,6 +6,9 @@
 
 This project aims to implement Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10.
 
+## Installation
+To install, go to the Releases tab in Github and download the newest version. Double click the .cer certificate file included in the zip. Choose manual install, and choose trusted root.
+
 ## See it in action (YouTube video)
 
 [![Preview of Windows Precision Touchpad for MacBook Pro](https://img.youtube.com/vi/7dFqtcDArUg/0.jpg)](https://www.youtube.com/watch?v=7dFqtcDArUg)
