@@ -426,7 +426,9 @@ AmtPtpSetWellspringMode(
 	);
 
 	// Type 3 does not need a mode switch.
+	// However, turn mode on or off as requested.
 	if (DeviceContext->DeviceInfo->tp_type == TYPE3) {
+		DeviceContext->IsWellspringModeOn = IsWellspringModeOn;
 		return STATUS_SUCCESS;
 	}
 

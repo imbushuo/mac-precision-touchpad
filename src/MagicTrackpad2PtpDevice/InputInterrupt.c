@@ -129,7 +129,16 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 		return;
 	}
 
-	if (!pDeviceContext->IsWellspringModeOn) return;
+	if (!pDeviceContext->IsWellspringModeOn) {
+
+		TraceEvents(
+			TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"%!FUNC! Routine is called without enabling Wellspring mode"
+		);
+
+		return;
+	}
 
 	// Dispatch USB Interrupt routine by device family
 	switch (pDeviceContext->DeviceInfo->tp_type) {
