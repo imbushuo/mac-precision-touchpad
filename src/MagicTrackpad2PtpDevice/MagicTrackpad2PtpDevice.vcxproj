@@ -69,6 +69,7 @@
     <ClInclude Include="Hid.h" />
     <ClInclude Include="HidCommon.h" />
     <ClInclude Include="InputStateMachine.h" />
+    <ClInclude Include="ModernTrace.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
@@ -379,6 +380,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AmtPtpDevice.wprp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

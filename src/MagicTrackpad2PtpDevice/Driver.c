@@ -3,6 +3,11 @@
 #include "driver.h"
 #include "driver.tmh"
 
+// Declares Windows 10 TraceLogger provider here.
+TRACELOGGING_DEFINE_PROVIDER(
+	g_hAmtPtpDeviceTraceProvider,
+	"AmtPtpDeviceTraceProvider",
+	(0x871b1e2d, 0xcc5a, 0x4ade, 0xb7, 0x4e, 0x6c, 0xf1, 0x0, 0x4e, 0xf1, 0x49));
 
 NTSTATUS
 DriverEntry(
@@ -14,14 +19,12 @@ DriverEntry(
 	NTSTATUS status;
 	WDF_OBJECT_ATTRIBUTES attributes;
 
-	//
-	// Initialize WPP Tracing
-	//
-	WPP_INIT_TRACING(
-		DriverObject, 
+	// Initialize tracing
+	DriverTraceInit(
+		DriverObject,
 		RegistryPath
 	);
-
+	
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
 		TRACE_DRIVER, 
@@ -53,17 +56,49 @@ DriverEntry(
 			"%!FUNC! WdfDriverCreate failed %!STATUS!", 
 			status
 		);
-		WPP_CLEANUP(DriverObject);
+		TraceLoggingWrite(
+			g_hAmtPtpDeviceTraceProvider,
+			EVENT_DRIVER_FUNCTIONAL,
+			TraceLoggingString("DriverEntry", "Routine"),
+			TraceLoggingString("WdfDriverCreate", "Context"),
+			TraceLoggingInt32(status, "Status"),
+			TraceLoggingString(EVENT_DRIVER_FUNC_SUBTYPE_CRITFAIL, EVENT_DRIVER_FUNC_SUBTYPE)
+		);
+		DriverTraceCleanup(DriverObject);
 		return status;
 	}
 
 	TraceEvents(
-		TRACE_LEVEL_INFORMATION, 
-		TRACE_DRIVER, 
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
 		"%!FUNC! Exit"
 	);
 
 	return status;
+}
+
+VOID
+DriverTraceInit(
+	_In_ PDRIVER_OBJECT  DriverObject,
+	_In_ PUNICODE_STRING RegistryPath
+)
+{
+	// Initialize WPP Tracing
+	WPP_INIT_TRACING(
+		DriverObject,
+		RegistryPath
+	);
+
+	// Initialize TraceLogger Tracing
+	TraceLoggingRegister(g_hAmtPtpDeviceTraceProvider);
+}
+
+VOID
+DriverTraceCleanup(
+)
+{
+	WppCleanupUm();
+	TraceLoggingUnregister(g_hAmtPtpDeviceTraceProvider);
 }
 
 NTSTATUS
@@ -107,7 +142,6 @@ AmtPtpDeviceEvtDriverContextCleanup(
 )
 {
 	// TODO: Perform additional cleanup
-
 	UNREFERENCED_PARAMETER(DriverObject);
 
 	TraceEvents(
@@ -119,5 +153,5 @@ AmtPtpDeviceEvtDriverContextCleanup(
 	//
 	// Stop WPP Tracing
 	//
-	WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
+	DriverTraceCleanup();
 }

@@ -61,6 +61,9 @@
     <ClInclude Include="InputStateMachine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ModernTrace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -91,5 +94,10 @@
     <Inf Include="AmtPtpDevice.inf">
       <Filter>Driver Files</Filter>
     </Inf>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AmtPtpDevice.wprp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

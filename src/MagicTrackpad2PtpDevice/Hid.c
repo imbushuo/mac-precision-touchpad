@@ -265,11 +265,17 @@ AmtPtpGetHidDescriptor(
 		};
 		default: 
 		{
-
 			TraceEvents(
 				TRACE_LEVEL_WARNING,
 				TRACE_DRIVER,
 				"%!FUNC! Device HID registry is not found"
+			);
+			TraceLoggingWrite(
+				g_hAmtPtpDeviceTraceProvider,
+				EVENT_DEVICE_IDENTIFICATION,
+				TraceLoggingString("AmtPtpGetHidDescriptor", "Routine"),
+				TraceLoggingUInt16(pContext->DeviceDescriptor.idProduct, "idProduct"),
+				TraceLoggingString(EVENT_DEVICE_ID_SUBTYPE_HIDREG_NOTFOUND, EVENT_DRIVER_FUNC_SUBTYPE)
 			);
 			status = STATUS_INVALID_DEVICE_STATE;
 			break;
@@ -557,13 +563,18 @@ AmtPtpGetReportDescriptor(
 		}
 		default:
 		{
-
 			TraceEvents(
 				TRACE_LEVEL_WARNING,
 				TRACE_DRIVER,
 				"%!FUNC! Device HID registry is not found"
 			);
-
+			TraceLoggingWrite(
+				g_hAmtPtpDeviceTraceProvider,
+				EVENT_DEVICE_IDENTIFICATION,
+				TraceLoggingString("AmtPtpGetReportDescriptor", "Routine"),
+				TraceLoggingUInt16(pContext->DeviceDescriptor.idProduct, "idProduct"),
+				TraceLoggingString(EVENT_DEVICE_ID_SUBTYPE_HIDREG_NOTFOUND, EVENT_DRIVER_FUNC_SUBTYPE)
+			);
 			status = STATUS_INVALID_DEVICE_STATE;
 			break;
 

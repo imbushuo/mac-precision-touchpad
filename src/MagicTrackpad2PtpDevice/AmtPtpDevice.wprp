@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WindowsPerformanceRecorder Version="1.0" Author="AmtPtpDevice Authors" Copyright="AmtPtpDevice Authors" Company="AmtPtpDevice Authors">
+  <Profiles>
+    <EventCollector Id="EventCollector_AmtPtpDeviceTraceProvider" Name="AmtPtpDeviceTraceProvider">
+      <BufferSize Value="64" />
+      <Buffers Value="4" />
+    </EventCollector>
+    <EventProvider Id="EventProvider_AmtPtpDeviceTraceProvider" Name="871B1E2D-CC5A-4ADE-B74E-6CF1004EF149" />
+    <Profile Id="AmtPtpDeviceTraceProvider.Verbose.File" Name="AmtPtpDeviceTraceProvider" 
+             Description="AmtPtpDeviceTraceProvider" LoggingMode="File" DetailLevel="Verbose">
+      <Collectors>
+        <EventCollectorId Value="EventCollector_AmtPtpDeviceTraceProvider">
+          <EventProviders>
+            <EventProviderId Value="EventProvider_AmtPtpDeviceTraceProvider" />
+          </EventProviders>
+        </EventCollectorId>
+      </Collectors>
+    </Profile>
+    <Profile Id="AmtPtpDeviceTraceProvider.Light.File" Name="AmtPtpDeviceTraceProvider" 
+             Description="AmtPtpDeviceTraceProvider" Base="AmtPtpDeviceTraceProvider.Verbose.File" 
+             LoggingMode="File" DetailLevel="Light" />
+    <Profile Id="AmtPtpDeviceTraceProvider.Verbose.Memory" Name="AmtPtpDeviceTraceProvider" 
+             Description="AmtPtpDeviceTraceProvider" Base="AmtPtpDeviceTraceProvider.Verbose.File" 
+             LoggingMode="Memory" DetailLevel="Verbose" />
+    <Profile Id="AmtPtpDeviceTraceProvider.Light.Memory" Name="AmtPtpDeviceTraceProvider" 
+             Description="AmtPtpDeviceTraceProvider" Base="AmtPtpDeviceTraceProvider.Verbose.File" 
+             LoggingMode="Memory" DetailLevel="Light" />
+  </Profiles>
+</WindowsPerformanceRecorder>

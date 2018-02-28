@@ -173,11 +173,19 @@ AmtPtpEvtDevicePrepareHardware(
 		// Get correct configuration from conf store
 		pDeviceContext->DeviceInfo = AmtPtpGetDeviceConfig(pDeviceContext->DeviceDescriptor);
 		if (pDeviceContext->DeviceInfo == NULL) {
+			status = STATUS_INVALID_DEVICE_STATE;
 			TraceEvents(
 				TRACE_LEVEL_ERROR, 
 				TRACE_DEVICE, 
-				"%!FUNC! failed with %!STATUS!", 
-				status
+				"%!FUNC! failed because device is not found in registry."
+			);
+			TraceLoggingWrite(
+				g_hAmtPtpDeviceTraceProvider,
+				EVENT_DEVICE_IDENTIFICATION,
+				TraceLoggingString("AmtPtpEvtDevicePrepareHardware", "Routine"),
+				TraceLoggingUInt16(pDeviceContext->DeviceDescriptor.idProduct, "idProduct"),
+				TraceLoggingUInt16(pDeviceContext->DeviceDescriptor.idVendor, "idVendor"),
+				TraceLoggingString(EVENT_DEVICE_ID_SUBTYPE_NOTFOUND, EVENT_DRIVER_FUNC_SUBTYPE)
 			);
 			return status;
 		}

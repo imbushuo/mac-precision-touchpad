@@ -7,7 +7,11 @@
 #include <initguid.h>
 #include <hidport.h>
 
+// ModernTrace is for runtime debugging
+// Trace is WPP-based, development debugging
+#include "ModernTrace.h"
 #include "Trace.h"
+
 #include "AppleDefinition.h"
 #include "Hid.h"
 #include "InputStateMachine.h"
@@ -23,5 +27,20 @@ EXTERN_C_START
 DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD AmtPtpDeviceEvtDeviceAdd;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP AmtPtpDeviceEvtDriverContextCleanup;
+
+
+//
+// Driver initialization routines
+//
+
+VOID
+DriverTraceInit(
+	_In_ PDRIVER_OBJECT  DriverObject,
+	_In_ PUNICODE_STRING RegistryPath
+);
+
+VOID
+DriverTraceCleanup(
+);
 
 EXTERN_C_END
