@@ -21,6 +21,7 @@ AmtPtpGetDeviceConfig(
 	return NULL;
 }
 
+_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpCreateDevice(
 	_In_    WDFDRIVER       Driver,
