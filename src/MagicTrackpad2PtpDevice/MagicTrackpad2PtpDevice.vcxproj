@@ -195,75 +195,86 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IntDir>$(Platform)\$(ConfigurationName)\</IntDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <IntDir>$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
