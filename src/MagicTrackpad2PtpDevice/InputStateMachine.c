@@ -144,7 +144,7 @@ exit:
 
 _IRQL_requires_(PASSIVE_LEVEL)
 VOID SmGetPtpReportSlots(
-	_In_  PSM_RUNTIME_INFORMATION pState,
+	_In_ PSM_RUNTIME_INFORMATION pState,
 	_In_ PSM_PROJECTED_INFORMATION pProjectedInformation
 )
 {
