@@ -118,12 +118,15 @@ AmtPtpGetHidDescriptor(
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5A_JIS:
 		{
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
 				TRACE_DRIVER,
-				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 5 Series"
+				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 5/5A Series"
 			);
 
 			szCopy = AmtPtp5DefaultHidDescriptor.bLength;
@@ -375,6 +378,9 @@ AmtPtpGetReportDescriptor(
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING5A_JIS:
 		{
 
 			szCopy = AmtPtp5DefaultHidDescriptor.DescriptorList[0].wReportLength;
