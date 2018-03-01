@@ -95,10 +95,14 @@ DriverTraceInit(
 
 VOID
 DriverTraceCleanup(
+	_In_ WDFOBJECT DriverObject
 )
 {
-	WppCleanupUm();
+	UNREFERENCED_PARAMETER(DriverObject);
+
 	TraceLoggingUnregister(g_hAmtPtpDeviceTraceProvider);
+	// This actually directly calls WppCleanupUm() in UMDF drivers
+	WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER) Driver));
 }
 
 NTSTATUS
@@ -141,9 +145,6 @@ AmtPtpDeviceEvtDriverContextCleanup(
 	_In_ WDFOBJECT DriverObject
 )
 {
-	// TODO: Perform additional cleanup
-	UNREFERENCED_PARAMETER(DriverObject);
-
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
 		TRACE_DRIVER, 
@@ -153,5 +154,5 @@ AmtPtpDeviceEvtDriverContextCleanup(
 	//
 	// Stop WPP Tracing
 	//
-	DriverTraceCleanup();
+	DriverTraceCleanup(DriverObject);
 }
