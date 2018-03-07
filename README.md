@@ -7,7 +7,7 @@
 This project aims to implement Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10.
 
 ## Installation
-To install, go to the Releases tab in Github and download the newest version. Double click the .cer certificate file included in the zip. Choose manual install, and choose trusted root.
+To install, go to the Releases tab in Github and download the newest version, then directly install the INF file (you don't have to enable manual trust, as recent builds are cross-signed by DigiCert). If you want to try latest changes, you can click "Build Status" badge and download CI builds (tagged with commit ID and machine architecture) manually.
 
 ## See it in action (YouTube video)
 
@@ -40,11 +40,14 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Refine input experience (tip switch detection and pressure)
 - [x] Refine input experience (gesture experience)
 - [ ] More Models (I need donation)
+- [ ] Signal Processing Algorithm (Papers, papers!)
 
 ## Acknowledgements
 
-- [magictrackpad2-dkms](https://github.com/robbi5/magictrackpad2-dkms)
+People familiar with me know that I don't use Apple MacBook (so development work of this driver occurs on a Surface Pro 4). People probably think it doesn't make sense that I started this project. The motivation behind this project origin from complaints from my girlfriend. Hearing about frequent complains about Dell XPS 13's touchpad (though it passed Precision Touchpad certification), I decided to start this project, so by the time she switches to MacBook Pro, she will have excellent touchpad experience out-of-box, even on Windows. This driver is made for you, but also for everyone.
 
+I would like to thank projects like [magictrackpad2-dkms](https://github.com/robbi5/magictrackpad2-dkms) and [macbook12-spi-driver](https://github.com/cb22/macbook12-spi-driver) that inspire me. I would also like to thank my friends for providing me immense help on devices and testing.
+ 
 ## License
 
 [GPLv2](LICENSE.md)
@@ -52,4 +55,3 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 ## Donation
 
 - [PayPal](https://www.paypal.com/paypalme/imbushuo)
-- Chase QuickPay: ben.imbushuo#internal.ligstd.com
