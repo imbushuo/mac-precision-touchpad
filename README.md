@@ -7,7 +7,15 @@
 This project aims to implement Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10.
 
 ## Installation
-To install, go to the Releases tab in Github and download the newest version, then directly install the INF file (you don't have to enable manual trust, as recent builds are cross-signed by DigiCert). If you want to try latest changes, you can click "Build Status" badge and download CI builds (tagged with commit ID and machine architecture) manually.
+
+1. Go to the release tab in Github and download the newest version
+2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
+3. Install `AmtPtpDevice.cer` certificate to your machine's root authority store
+4. Go to `AmtPtpDevice` directory
+5. Right click `AmtPtpDevice.inf` and install it 
+
+You don't have to enable manual trust, as recent builds are cross-signed by DigiCert.
+If you want to try latest changes, you can click "Build Status" badge and download CI builds (tagged with commit ID and machine architecture) manually.
 
 ## See it in action (YouTube video)
 
