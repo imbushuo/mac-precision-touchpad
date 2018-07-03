@@ -5,6 +5,7 @@ EXTERN_C_START
 // Device context struct
 typedef struct _DEVICE_CONTEXT
 {
+	// USB specific
 	WDFUSBDEVICE                UsbDevice;
 	WDFUSBPIPE                  InterruptPipe;
 	WDFUSBINTERFACE             UsbInterface;
@@ -35,6 +36,7 @@ typedef struct _DEVICE_CONTEXT
 
 	// SPI specific
 	WDFIOTARGET					SpiTrackpadIoTarget;
+	BOOLEAN						IsSpiTrackpad;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 

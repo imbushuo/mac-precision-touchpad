@@ -50,6 +50,7 @@
   <ItemGroup>
     <ClInclude Include="AppleDefinition.h" />
     <ClInclude Include="Device.h" />
+    <ClInclude Include="DeviceFamily\SpiTrackpadSeries1.h" />
     <ClInclude Include="DeviceFamily\Wellspring5.h" />
     <ClInclude Include="DeviceFamily\Wellspring7A.h" />
     <ClInclude Include="DeviceFamily\Wellspring8.h" />

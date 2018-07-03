@@ -11,6 +11,7 @@
 #include "DeviceFamily\Wellspring7A.h"
 #include "DeviceFamily\Wellspring8.h"
 #include "DeviceFamily\WellspringMt2.h"
+#include "DeviceFamily\SpiTrackpadSeries1.h"
 
 typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 

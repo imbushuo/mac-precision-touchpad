@@ -30,16 +30,22 @@ HID_REPORT_DESCRIPTOR AmtPtpMt2ReportDescriptor[] = {
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
 };
 
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily1ReportDescriptor[] = {
+	AAPL_SPI_SERIES1_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
 CONST HID_DESCRIPTOR AmtPtp5DefaultHidDescriptor = {
 	0x09,   // bLength
 	0x21,   // bDescriptorType
 	0x0100, // bcdHID
 	0x00,   // bCountryCode
 	0x01,   // bNumDescriptors
-{
-	0x22,                               // bDescriptorType
-	sizeof(AmtPtp5ReportDescriptor)    // bDescriptorLength
-}
+	{
+		0x22,                               // bDescriptorType
+		sizeof(AmtPtp5ReportDescriptor)    // bDescriptorLength
+	}
 };
 
 CONST HID_DESCRIPTOR AmtPtp7aDefaultHidDescriptor = {
@@ -60,10 +66,10 @@ CONST HID_DESCRIPTOR AmtPtp8DefaultHidDescriptor = {
 	0x0100, // bcdHID
 	0x00,   // bCountryCode
 	0x01,   // bNumDescriptors
-{
-	0x22,                               // bDescriptorType
-	sizeof(AmtPtp8ReportDescriptor)    // bDescriptorLength
-}
+	{
+		0x22,                               // bDescriptorType
+		sizeof(AmtPtp8ReportDescriptor)    // bDescriptorLength
+	}
 };
 
 CONST HID_DESCRIPTOR AmtPtpMt2DefaultHidDescriptor = {
@@ -72,10 +78,22 @@ CONST HID_DESCRIPTOR AmtPtpMt2DefaultHidDescriptor = {
 	0x0100, // bcdHID
 	0x00,   // bCountryCode
 	0x01,   // bNumDescriptors
-{
-	0x22,                               // bDescriptorType
-	sizeof(AmtPtpMt2ReportDescriptor)    // bDescriptorLength
-}
+	{
+		0x22,                               // bDescriptorType
+		sizeof(AmtPtpMt2ReportDescriptor)    // bDescriptorLength
+	}
+};
+
+CONST HID_DESCRIPTOR AmtPtpSpiFamily1DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+	{
+		0x22,										// bDescriptorType
+		sizeof(AmtPtpSpiFamily1ReportDescriptor)    // bDescriptorLength
+	}
 };
 
 #endif
@@ -88,10 +106,11 @@ AmtPtpGetHidDescriptor(
 )
 {
 
-	NTSTATUS        status   = STATUS_SUCCESS;
+	NTSTATUS        Status   = STATUS_SUCCESS;
 	PDEVICE_CONTEXT pContext = DeviceGetContext(Device);
-	size_t			szCopy   = 0;
-	WDFMEMORY       reqMemory;
+	WDFMEMORY       RequestMemory;
+	BOOLEAN			HidDescriptorReported = FALSE;
+	size_t			CopiedSize = 0;
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -99,188 +118,232 @@ AmtPtpGetHidDescriptor(
 		"%!FUNC! Entry"
 	);
 
-	status = WdfRequestRetrieveOutputMemory(
+	Status = WdfRequestRetrieveOutputMemory(
 		Request, 
-		&reqMemory
+		&RequestMemory
 	);
 
-	if (!NT_SUCCESS(status)) {
+	if (!NT_SUCCESS(Status)) 
+	{
 		TraceEvents(
 			TRACE_LEVEL_ERROR, 
 			TRACE_DRIVER, 
 			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!", 
-			status
+			Status
 		);
-		return status;
+		return Status;
 	}
 
-	switch (pContext->DeviceDescriptor.idProduct) {
-		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5A_JIS:
+	// USB HID descriptor
+	if (!pContext->IsSpiTrackpad)
+	{
+		switch (pContext->DeviceDescriptor.idProduct) 
 		{
+			case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5A_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5A_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5A_JIS:
+			{
 
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_DRIVER,
-				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 5/5A Series"
-			);
-
-			szCopy = AmtPtp5DefaultHidDescriptor.bLength;
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID)&AmtPtp5DefaultHidDescriptor,
-				szCopy
-			);
-
-			if (!NT_SUCCESS(status)) {
 				TraceEvents(
-					TRACE_LEVEL_ERROR,
+					TRACE_LEVEL_INFORMATION,
 					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
+					"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 5/5A Series"
 				);
-				return status;
+
+				CopiedSize = AmtPtp5DefaultHidDescriptor.bLength;
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID)&AmtPtp5DefaultHidDescriptor,
+					CopiedSize
+				);
+
+				if (!NT_SUCCESS(Status)) {
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
+				}
+
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
+				);
+
+				HidDescriptorReported = TRUE;
+				break;
 			}
+			case USB_DEVICE_ID_APPLE_WELLSPRING7_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7_JIS:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
+			{
 
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
-
-		}
-		case USB_DEVICE_ID_APPLE_WELLSPRING7_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7_JIS:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
-		{
-
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_DRIVER,
-				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 7/7A Series"
-			);
-
-			szCopy = AmtPtp7aDefaultHidDescriptor.bLength;
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID)&AmtPtp7aDefaultHidDescriptor,
-				szCopy
-			);
-
-			if (!NT_SUCCESS(status)) {
 				TraceEvents(
-					TRACE_LEVEL_ERROR,
+					TRACE_LEVEL_INFORMATION,
 					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
+					"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 7/7A Series"
 				);
-				return status;
+
+				CopiedSize = AmtPtp7aDefaultHidDescriptor.bLength;
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID)&AmtPtp7aDefaultHidDescriptor,
+					CopiedSize
+				);
+
+				if (!NT_SUCCESS(Status)) {
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
+				}
+
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
+				);
+			
+				HidDescriptorReported = TRUE;
+				break;
 			}
+			case USB_DEVICE_ID_APPLE_WELLSPRING8_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING8_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING8_JIS:
+			{
 
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
-
-		}
-		case USB_DEVICE_ID_APPLE_WELLSPRING8_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING8_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING8_JIS:
-		{
-
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_DRIVER,
-				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 8 Series"
-			);
-
-			szCopy = AmtPtp8DefaultHidDescriptor.bLength;
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID)&AmtPtp8DefaultHidDescriptor,
-				szCopy
-			);
-
-			if (!NT_SUCCESS(status)) {
 				TraceEvents(
-					TRACE_LEVEL_ERROR,
+					TRACE_LEVEL_INFORMATION,
 					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
+					"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 8 Series"
 				);
-				return status;
+
+				CopiedSize = AmtPtp8DefaultHidDescriptor.bLength;
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID)&AmtPtp8DefaultHidDescriptor,
+					CopiedSize
+				);
+
+				if (!NT_SUCCESS(Status)) {
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
+				}
+
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
+				);
+			
+				HidDescriptorReported = TRUE;
+				break;
 			}
+			case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
+			{
 
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
-
-		}
-		case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
-		{
-
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_DRIVER,
-				"%!FUNC! Request HID Report Descriptor for Apple Magic Trackpad 2 Family"
-			);
-
-			szCopy = AmtPtpMt2DefaultHidDescriptor.bLength;
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID) &AmtPtpMt2DefaultHidDescriptor,
-				szCopy
-			);
-
-			if (!NT_SUCCESS(status)) {
 				TraceEvents(
-					TRACE_LEVEL_ERROR,
+					TRACE_LEVEL_INFORMATION,
 					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
+					"%!FUNC! Request HID Report Descriptor for Apple Magic Trackpad 2 Family"
 				);
-				return status;
-			}
 
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
+				CopiedSize = AmtPtpMt2DefaultHidDescriptor.bLength;
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID) &AmtPtpMt2DefaultHidDescriptor,
+					CopiedSize
+				);
 
-		};
-		default: 
-		{
-			TraceEvents(
-				TRACE_LEVEL_WARNING,
-				TRACE_DRIVER,
-				"%!FUNC! Device HID registry is not found"
-			);
-			TraceLoggingWrite(
-				g_hAmtPtpDeviceTraceProvider,
-				EVENT_DEVICE_IDENTIFICATION,
-				TraceLoggingString("AmtPtpGetHidDescriptor", "Routine"),
-				TraceLoggingUInt16(pContext->DeviceDescriptor.idProduct, "idProduct"),
-				TraceLoggingString(EVENT_DEVICE_ID_SUBTYPE_HIDREG_NOTFOUND, EVENT_DRIVER_FUNC_SUBTYPE)
-			);
-			status = STATUS_INVALID_DEVICE_STATE;
-			break;
+				if (!NT_SUCCESS(Status)) {
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
+				}
 
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
+				);
+			
+				HidDescriptorReported = TRUE;
+				break;
+			};
 		}
+	}
+	
+	// SPI HID descriptor
+	if (pContext->IsSpiTrackpad)
+	{
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 1"
+		);
+
+		CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.bLength;
+		Status = WdfMemoryCopyFromBuffer(
+			RequestMemory,
+			0,
+			(PVOID) &AmtPtpSpiFamily1DefaultHidDescriptor,
+			CopiedSize
+		);
+
+		if (!NT_SUCCESS(Status)) {
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+				Status
+			);
+			return Status;
+		}
+
+		WdfRequestSetInformation(
+			Request,
+			CopiedSize
+		);
+		HidDescriptorReported = TRUE;
+	}
+
+	// Check if descriptor is not found in global registry
+	if (!HidDescriptorReported)
+	{
+		TraceEvents(
+			TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"%!FUNC! USB/SPI Device HID registry is not found"
+		);
+		TraceLoggingWrite(
+			g_hAmtPtpDeviceTraceProvider,
+			EVENT_DEVICE_IDENTIFICATION,
+			TraceLoggingString("AmtPtpGetHidDescriptor", "Routine"),
+			TraceLoggingUInt16(pContext->DeviceDescriptor.idProduct, "idProduct"),
+			TraceLoggingString(EVENT_DEVICE_ID_SUBTYPE_HIDREG_NOTFOUND, EVENT_DRIVER_FUNC_SUBTYPE)
+		);
+		Status = STATUS_INVALID_DEVICE_STATE;
 	}
 
 	TraceEvents(
@@ -288,7 +351,7 @@ AmtPtpGetHidDescriptor(
 		TRACE_DRIVER, 
 		"%!FUNC! Exit"
 	);
-	return status;
+	return Status;
 
 }
 
@@ -326,10 +389,19 @@ AmtPtpGetDeviceAttribs(
 		return status;
 	}
 
-	pDeviceAttributes->Size          = sizeof(HID_DEVICE_ATTRIBUTES);
-	pDeviceAttributes->ProductID     = pContext->DeviceDescriptor.idProduct;
-	pDeviceAttributes->VendorID      = pContext->DeviceDescriptor.idVendor;
+	pDeviceAttributes->Size = sizeof(HID_DEVICE_ATTRIBUTES);
 	pDeviceAttributes->VersionNumber = DEVICE_VERSION;
+
+	if (!pContext->IsSpiTrackpad)
+	{
+		pDeviceAttributes->ProductID = pContext->DeviceDescriptor.idProduct;
+		pDeviceAttributes->VendorID = pContext->DeviceDescriptor.idVendor;
+	}
+	else
+	{
+		pDeviceAttributes->ProductID = 0x0272;
+		pDeviceAttributes->VendorID = 0x05ac;
+	}
 	
 	WdfRequestSetInformation(
 		Request, 
@@ -354,10 +426,11 @@ AmtPtpGetReportDescriptor(
 )
 {
 	
-	NTSTATUS               status            = STATUS_SUCCESS;
-	PDEVICE_CONTEXT        pContext          = DeviceGetContext(Device);
-	size_t			       szCopy            = 0;
-	WDFMEMORY              reqMemory;
+	NTSTATUS				Status            = STATUS_SUCCESS;
+	PDEVICE_CONTEXT			pContext          = DeviceGetContext(Device);
+	size_t					CopiedSize            = 0;
+	WDFMEMORY				RequestMemory;
+	BOOLEAN					IsHidDescriptorFound = FALSE;
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -365,220 +438,272 @@ AmtPtpGetReportDescriptor(
 		"%!FUNC! Entry"
 	);
 
-	status = WdfRequestRetrieveOutputMemory(
+	Status = WdfRequestRetrieveOutputMemory(
 		Request, 
-		&reqMemory
+		&RequestMemory
 	);
 
-	if (!NT_SUCCESS(status)) {
+	if (!NT_SUCCESS(Status)) 
+	{
 		TraceEvents(
 			TRACE_LEVEL_ERROR, 
 			TRACE_DRIVER, 
 			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!", 
-			status
+			Status
 		);
-		return status;
+		return Status;
 	}
 
-	switch (pContext->DeviceDescriptor.idProduct) {
-		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5A_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING5A_JIS:
+	if (!pContext->IsSpiTrackpad)
+	{
+		switch (pContext->DeviceDescriptor.idProduct)
 		{
+			case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5A_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5A_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING5A_JIS:
+			{
 
-			szCopy = AmtPtp5DefaultHidDescriptor.DescriptorList[0].wReportLength;
-			if (szCopy == 0) {
+				CopiedSize = AmtPtp5DefaultHidDescriptor.DescriptorList[0].wReportLength;
+				if (CopiedSize == 0) {
 
-				status = STATUS_INVALID_DEVICE_STATE;
-				TraceEvents(
-					TRACE_LEVEL_WARNING,
-					TRACE_DRIVER,
-					"%!FUNC! Device HID report length is zero"
+					Status = STATUS_INVALID_DEVICE_STATE;
+					TraceEvents(
+						TRACE_LEVEL_WARNING,
+						TRACE_DRIVER,
+						"%!FUNC! Device HID report length is zero"
+					);
+					return Status;
+
+				}
+
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID)&AmtPtp5ReportDescriptor,
+					CopiedSize
 				);
-				return status;
 
-			}
+				if (!NT_SUCCESS(Status)) {
 
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID)&AmtPtp5ReportDescriptor,
-				szCopy
-			);
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
 
-			if (!NT_SUCCESS(status)) {
+				}
 
-				TraceEvents(
-					TRACE_LEVEL_ERROR,
-					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
 				);
-				return status;
-
+				
+				IsHidDescriptorFound = TRUE;
+				break;
 			}
+			case USB_DEVICE_ID_APPLE_WELLSPRING7_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7_JIS:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
+			{
 
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
+				CopiedSize = AmtPtp7aDefaultHidDescriptor.DescriptorList[0].wReportLength;
+				if (CopiedSize == 0) {
 
+					Status = STATUS_INVALID_DEVICE_STATE;
+					TraceEvents(
+						TRACE_LEVEL_WARNING,
+						TRACE_DRIVER,
+						"%!FUNC! Device HID report length is zero"
+					);
+					return Status;
+
+				}
+
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID)&AmtPtp7aReportDescriptor,
+					CopiedSize
+				);
+
+				if (!NT_SUCCESS(Status)) {
+
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
+
+				}
+
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
+				);
+				
+				IsHidDescriptorFound = TRUE;
+				break;
+			}
+			case USB_DEVICE_ID_APPLE_WELLSPRING8_ANSI:
+			case USB_DEVICE_ID_APPLE_WELLSPRING8_ISO:
+			case USB_DEVICE_ID_APPLE_WELLSPRING8_JIS:
+			{
+
+				CopiedSize = AmtPtp8DefaultHidDescriptor.DescriptorList[0].wReportLength;
+				if (CopiedSize == 0) {
+
+					Status = STATUS_INVALID_DEVICE_STATE;
+					TraceEvents(
+						TRACE_LEVEL_WARNING,
+						TRACE_DRIVER,
+						"%!FUNC! Device HID report length is zero"
+					);
+					return Status;
+
+				}
+
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID)&AmtPtp8ReportDescriptor,
+					CopiedSize
+				);
+
+				if (!NT_SUCCESS(Status)) {
+
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
+
+				}
+
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
+				);
+				
+				IsHidDescriptorFound = TRUE;
+				break;
+			}
+			case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
+			{
+
+				CopiedSize = AmtPtpMt2DefaultHidDescriptor.DescriptorList[0].wReportLength;
+				if (CopiedSize == 0) {
+
+					Status = STATUS_INVALID_DEVICE_STATE;
+					TraceEvents(
+						TRACE_LEVEL_WARNING,
+						TRACE_DRIVER,
+						"%!FUNC! Device HID report length is zero"
+					);
+					return Status;
+
+				}
+
+				Status = WdfMemoryCopyFromBuffer(
+					RequestMemory,
+					0,
+					(PVOID)&AmtPtpMt2ReportDescriptor,
+					CopiedSize
+				);
+
+				if (!NT_SUCCESS(Status)) {
+
+					TraceEvents(
+						TRACE_LEVEL_ERROR,
+						TRACE_DRIVER,
+						"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+						Status
+					);
+					return Status;
+
+				}
+
+				WdfRequestSetInformation(
+					Request,
+					CopiedSize
+				);
+
+				IsHidDescriptorFound = TRUE;
+				break;
+			}
 		}
-		case USB_DEVICE_ID_APPLE_WELLSPRING7_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7_JIS:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7A_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING7A_JIS:
+	}
+
+	if (pContext->IsSpiTrackpad)
+	{
+		CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.DescriptorList[0].wReportLength;
+
+		if (CopiedSize == 0) 
 		{
 
-			szCopy = AmtPtp7aDefaultHidDescriptor.DescriptorList[0].wReportLength;
-			if (szCopy == 0) {
-
-				status = STATUS_INVALID_DEVICE_STATE;
-				TraceEvents(
-					TRACE_LEVEL_WARNING,
-					TRACE_DRIVER,
-					"%!FUNC! Device HID report length is zero"
-				);
-				return status;
-
-			}
-
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID)&AmtPtp7aReportDescriptor,
-				szCopy
-			);
-
-			if (!NT_SUCCESS(status)) {
-
-				TraceEvents(
-					TRACE_LEVEL_ERROR,
-					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
-				);
-				return status;
-
-			}
-
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
-
-		}
-		case USB_DEVICE_ID_APPLE_WELLSPRING8_ANSI:
-		case USB_DEVICE_ID_APPLE_WELLSPRING8_ISO:
-		case USB_DEVICE_ID_APPLE_WELLSPRING8_JIS:
-		{
-
-			szCopy = AmtPtp8DefaultHidDescriptor.DescriptorList[0].wReportLength;
-			if (szCopy == 0) {
-
-				status = STATUS_INVALID_DEVICE_STATE;
-				TraceEvents(
-					TRACE_LEVEL_WARNING,
-					TRACE_DRIVER,
-					"%!FUNC! Device HID report length is zero"
-				);
-				return status;
-
-			}
-
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID)&AmtPtp8ReportDescriptor,
-				szCopy
-			);
-
-			if (!NT_SUCCESS(status)) {
-
-				TraceEvents(
-					TRACE_LEVEL_ERROR,
-					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
-				);
-				return status;
-
-			}
-
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
-
-		}
-		case USB_DEVICE_ID_APPLE_MAGICTRACKPAD2:
-		{
-
-			szCopy = AmtPtpMt2DefaultHidDescriptor.DescriptorList[0].wReportLength;
-			if (szCopy == 0) {
-
-				status = STATUS_INVALID_DEVICE_STATE;
-				TraceEvents(
-					TRACE_LEVEL_WARNING,
-					TRACE_DRIVER,
-					"%!FUNC! Device HID report length is zero"
-				);
-				return status;
-
-			}
-
-			status = WdfMemoryCopyFromBuffer(
-				reqMemory,
-				0,
-				(PVOID)&AmtPtpMt2ReportDescriptor,
-				szCopy
-			);
-
-			if (!NT_SUCCESS(status)) {
-
-				TraceEvents(
-					TRACE_LEVEL_ERROR,
-					TRACE_DRIVER,
-					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-					status
-				);
-				return status;
-
-			}
-
-			WdfRequestSetInformation(
-				Request,
-				szCopy
-			);
-			break;
-
-		}
-		default:
-		{
+			Status = STATUS_INVALID_DEVICE_STATE;
 			TraceEvents(
 				TRACE_LEVEL_WARNING,
 				TRACE_DRIVER,
-				"%!FUNC! Device HID registry is not found"
+				"%!FUNC! Device HID report length is zero"
 			);
-			TraceLoggingWrite(
-				g_hAmtPtpDeviceTraceProvider,
-				EVENT_DEVICE_IDENTIFICATION,
-				TraceLoggingString("AmtPtpGetReportDescriptor", "Routine"),
-				TraceLoggingUInt16(pContext->DeviceDescriptor.idProduct, "idProduct"),
-				TraceLoggingString(EVENT_DEVICE_ID_SUBTYPE_HIDREG_NOTFOUND, EVENT_DRIVER_FUNC_SUBTYPE)
-			);
-			status = STATUS_INVALID_DEVICE_STATE;
-			break;
+			return Status;
 
 		}
+
+		Status = WdfMemoryCopyFromBuffer(
+			RequestMemory,
+			0,
+			(PVOID) &AmtPtpSpiFamily1ReportDescriptor,
+			CopiedSize
+		);
+
+		if (!NT_SUCCESS(Status)) {
+
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+				Status
+			);
+			return Status;
+
+		}
+
+		WdfRequestSetInformation(
+			Request,
+			CopiedSize
+		);
+
+		IsHidDescriptorFound = TRUE;
+	}
+
+	if (!IsHidDescriptorFound)
+	{
+		TraceEvents(
+			TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"%!FUNC! USB / SPI Device HID registry is not found"
+		);
+		TraceLoggingWrite(
+			g_hAmtPtpDeviceTraceProvider,
+			EVENT_DEVICE_IDENTIFICATION,
+			TraceLoggingString("AmtPtpGetReportDescriptor", "Routine"),
+			TraceLoggingUInt16(pContext->DeviceDescriptor.idProduct, "idProduct"),
+			TraceLoggingString(EVENT_DEVICE_ID_SUBTYPE_HIDREG_NOTFOUND, EVENT_DRIVER_FUNC_SUBTYPE)
+		);
+		Status = STATUS_INVALID_DEVICE_STATE;
 	}
 
 	TraceEvents(
@@ -586,7 +711,7 @@ AmtPtpGetReportDescriptor(
 		TRACE_DRIVER, 
 		"%!FUNC! Exit"
 	);
-	return status;
+	return Status;
 
 }
 
@@ -641,7 +766,8 @@ AmtPtpGetStrings(
 	//
 	// make sure buffer is big enough.
 	//
-	if (inputBufferLength < sizeof(ULONG)) {
+	if (inputBufferLength < sizeof(ULONG)) 
+	{
 		status = STATUS_INVALID_BUFFER_SIZE;
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION, 
@@ -658,80 +784,89 @@ AmtPtpGetStrings(
 	languageId = (inputValue >> 16);
 
 	// Get actual string from USB device
-	switch (stringId)
+	if (!pContext->IsSpiTrackpad)
 	{
-		case HID_STRING_ID_IMANUFACTURER:
-			strIndex = pContext->DeviceDescriptor.iManufacturer;
-			break;
-		case HID_STRING_ID_IPRODUCT:
-			strIndex = pContext->DeviceDescriptor.iProduct;
-			break;
-		case HID_STRING_ID_ISERIALNUMBER:
-			strIndex = pContext->DeviceDescriptor.iSerialNumber;
-			break;
-		default:
+		switch (stringId)
+		{
+			case HID_STRING_ID_IMANUFACTURER:
+				strIndex = pContext->DeviceDescriptor.iManufacturer;
+				break;
+			case HID_STRING_ID_IPRODUCT:
+				strIndex = pContext->DeviceDescriptor.iProduct;
+				break;
+			case HID_STRING_ID_ISERIALNUMBER:
+				strIndex = pContext->DeviceDescriptor.iSerialNumber;
+				break;
+			default:
+				TraceEvents(
+					TRACE_LEVEL_WARNING,
+					TRACE_DRIVER,
+					"%!FUNC! gets invalid string type"
+				);
+				return status;
+		}
+
+		status = WdfUsbTargetDeviceAllocAndQueryString(
+			pContext->UsbDevice,
+			WDF_NO_OBJECT_ATTRIBUTES,
+			&memHandle,
+			&wcharCount,
+			strIndex,
+			(USHORT)languageId
+		);
+
+		if (!NT_SUCCESS(status))
+		{
 			TraceEvents(
-				TRACE_LEVEL_WARNING, 
-				TRACE_DRIVER, 
-				"%!FUNC! gets invalid string type"
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER, "%!FUNC! WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!",
+				status
 			);
 			return status;
-	}
+		}
 
-	status = WdfUsbTargetDeviceAllocAndQueryString(
-		pContext->UsbDevice, 
-		WDF_NO_OBJECT_ATTRIBUTES, 
-		&memHandle, 
-		&wcharCount, 
-		strIndex, 
-		(USHORT) languageId
-	);
-
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(
-			TRACE_LEVEL_ERROR, 
-			TRACE_DRIVER, "%!FUNC! WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!", 
-			status
+		status = WdfRequestRetrieveOutputBuffer(
+			Request,
+			wcharCount * sizeof(WCHAR),
+			&pStringBuffer,
+			&actualSize
 		);
-		return status;
-	}
 
-	status = WdfRequestRetrieveOutputBuffer(
-		Request, 
-		wcharCount * sizeof(WCHAR), 
-		&pStringBuffer, 
-		&actualSize
-	);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+				status
+			);
+			return status;
+		}
 
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(
-			TRACE_LEVEL_ERROR, 
-			TRACE_DRIVER, 
-			"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", 
-			status
+		WdfMemoryCopyToBuffer(
+			memHandle,
+			0,
+			&pStringBuffer,
+			actualSize
 		);
-		return status;
+
+		WdfRequestSetInformation(
+			Request,
+			actualSize
+		);
 	}
-
-	WdfMemoryCopyToBuffer(
-		memHandle,
-		0, 
-		&pStringBuffer, 
-		actualSize
-	);
-
-	WdfRequestSetInformation(
-		Request, 
-		actualSize
-	);
-
+	else
+	{
+		// Not supported at this moment
+		return STATUS_NOT_SUPPORTED;
+	}
+	
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
 		TRACE_DRIVER, 
 		"%!FUNC! Exit"
 	);
-	return status;
 
+	return status;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)

@@ -321,6 +321,9 @@ AmtPtpEvtDevicePrepareHardware(
 	pDeviceContext->IsButtonReportOn = TRUE;
 	pDeviceContext->IsSurfaceReportOn = TRUE;
 
+	// TODO: Only set for SPI
+	pDeviceContext->IsSpiTrackpad = TRUE;
+
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 	return status;
 }
