@@ -129,8 +129,7 @@ AmtPtpEvtDevicePrepareHardware(
 	NTSTATUS								status;
 	PDEVICE_CONTEXT							pDeviceContext;
 	ULONG									waitWakeEnable;
-	WDF_USB_DEVICE_INFORMATION				deviceInfo;
-
+	
 	waitWakeEnable = FALSE;
 
 	UNREFERENCED_PARAMETER(ResourceList);
@@ -145,6 +144,9 @@ AmtPtpEvtDevicePrepareHardware(
 
 	status = STATUS_SUCCESS;
 	pDeviceContext = DeviceGetContext(Device);
+
+#if USB_TRACKPAD
+	WDF_USB_DEVICE_INFORMATION				deviceInfo;
 
 	if (pDeviceContext->UsbDevice == NULL) {
 		status = WdfUsbTargetDeviceCreate(Device,
@@ -299,6 +301,21 @@ AmtPtpEvtDevicePrepareHardware(
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! AmtPtpConfigContReaderForInterruptEndPoint failed with %!STATUS!", status);
 		return status;
 	}
+#endif
+#if SPI_TRACKPAD
+
+	// Get a IO target
+	pDeviceContext->SpiTrackpadIoTarget = WdfDeviceGetIoTarget(Device);
+
+	if (pDeviceContext->SpiTrackpadIoTarget == NULL)
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDeviceGetIoTarget failed");
+		return STATUS_INVALID_DEVICE_STATE;
+	}
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Open IO target for SPI trackpad. Device is ready to be configured.");
+
+#endif
 
 	// Set default settings
 	pDeviceContext->IsButtonReportOn = TRUE;
@@ -308,6 +325,7 @@ AmtPtpEvtDevicePrepareHardware(
 	return status;
 }
 
+#if USB_TRACKPAD
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpGetWellspringMode(
@@ -550,6 +568,83 @@ cleanup:
 	return status;
 
 }
+#endif
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpSpiTrackpadSetStatus(
+	_In_ WDFDEVICE Device,
+	_In_ BOOLEAN Enabled
+)
+{
+	NTSTATUS Status;
+	UCHAR HidPacketBuffer[HID_XFER_PACKET_SIZE];
+	WDF_MEMORY_DESCRIPTOR SetStatusMemoryDescriptor;
+
+	PDEVICE_CONTEXT  pDeviceContext;
+	PHID_XFER_PACKET pHidPacket;
+	PSPI_SET_FEATURE pSpiSetStatus;
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Entry"
+	);
+	
+	pDeviceContext = DeviceGetContext(Device);
+	pHidPacket = (PHID_XFER_PACKET) &HidPacketBuffer;
+
+	WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
+		&SetStatusMemoryDescriptor,
+		(PVOID) &HidPacketBuffer,
+		HID_XFER_PACKET_SIZE
+	);
+
+	pHidPacket->reportId = HID_REPORTID_MOUSE;
+	pHidPacket->reportBufferLen = sizeof(SPI_SET_FEATURE);
+	pHidPacket->reportBuffer = (PUCHAR) pHidPacket + sizeof(HID_XFER_PACKET);
+	pSpiSetStatus = (PSPI_SET_FEATURE) pHidPacket->reportBuffer;
+
+	pSpiSetStatus->BusLocation = 2;
+	pSpiSetStatus->Status = Enabled;
+
+	Status = WdfIoTargetSendIoctlSynchronously(
+		pDeviceContext->SpiTrackpadIoTarget,
+		NULL,
+		IOCTL_HID_SET_FEATURE,
+		NULL,
+		&SetStatusMemoryDescriptor,
+		NULL,
+		NULL
+	);
+
+	if (!NT_SUCCESS(Status))
+	{
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfIoTargetSendInternalIoctlSynchronously failed with %!STATUS!",
+			Status
+		);
+	}
+	else
+	{
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! Changed trackpad status to %d",
+			Enabled
+		);
+	}
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Exit"
+	);
+
+	return Status;
+}
 
 // D0 Entry & Exit
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -573,6 +668,7 @@ AmtPtpEvtDeviceD0Entry(
 		DbgDevicePowerString(PreviousState)
 	);
 
+#if USB_TRACKPAD
 	// Check wellspring mode
 	if (pDeviceContext->IsButtonReportOn || pDeviceContext->IsWellspringModeOn) {
 		TraceEvents(
@@ -627,6 +723,20 @@ End:
 			);
 		}
 	}
+#endif
+#if SPI_TRACKPAD
+	// Enable trackpad
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Configure Trackpad device to enable mode."
+	);
+
+	status = AmtPtpSpiTrackpadSetStatus(
+		Device,
+		TRUE
+	);
+#endif
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -659,6 +769,8 @@ AmtPtpEvtDeviceD0Exit(
 
 	pDeviceContext = DeviceGetContext(Device);
 
+#if USB_TRACKPAD
+	
 	// Stop IO Pipe.
 	WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(
 		pDeviceContext->InterruptPipe),
@@ -685,6 +797,20 @@ AmtPtpEvtDeviceD0Exit(
 			status
 		);
 	}
+#endif
+#if SPI_TRACKPAD
+	// Enable trackpad
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Configure Trackpad device to disabled mode."
+	);
+
+	status = AmtPtpSpiTrackpadSetStatus(
+		Device,
+		FALSE
+	);
+#endif
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -695,6 +821,7 @@ AmtPtpEvtDeviceD0Exit(
 	return status;
 }
 
+#if USB_TRACKPAD
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 SelectInterruptInterface(
@@ -779,6 +906,7 @@ SelectInterruptInterface(
 
 	return status;
 }
+#endif
 
 _IRQL_requires_(PASSIVE_LEVEL)
 PCHAR
@@ -816,11 +944,15 @@ AmtPtpEmergResetDevice(
 )
 {
 
-	NTSTATUS status;
+	NTSTATUS status = STATUS_SUCCESS;
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
 		TRACE_DRIVER,
 		"%!FUNC! Entry");
+
+	UNREFERENCED_PARAMETER(DeviceContext);
+
+#if USB_TRACKPAD
 
 	status = AmtPtpSetWellspringMode(
 		DeviceContext, 
@@ -845,6 +977,8 @@ AmtPtpEmergResetDevice(
 			"%!FUNC! AmtPtpSetWellspringMode failed with %!STATUS!",
 			status);
 	}
+
+#endif
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 

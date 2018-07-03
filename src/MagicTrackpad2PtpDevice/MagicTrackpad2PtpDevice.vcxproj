@@ -45,6 +45,7 @@
     <ClCompile Include="InputInterrupt.c" />
     <ClCompile Include="InputStateMachine.c" />
     <ClCompile Include="Queue.c" />
+    <ClCompile Include="Spb.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppleDefinition.h" />
@@ -59,6 +60,7 @@
     <ClInclude Include="InputStateMachine.h" />
     <ClInclude Include="ModernTrace.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Spb.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
   </ItemGroup>
@@ -73,7 +75,7 @@
     <Configuration>Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootNamespace>MagicTrackpad2PtpDevice</RootNamespace>
-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>AmtPtpDevice</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -253,6 +255,7 @@
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <PreprocessorDefinitions>SPI_TRACKPAD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -260,6 +263,7 @@
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <PreprocessorDefinitions>SPI_TRACKPAD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
@@ -267,6 +271,7 @@
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <PreprocessorDefinitions>SPI_TRACKPAD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>

@@ -1138,10 +1138,12 @@ AmtPtpSetFeatures(
 
 			// Get current WellSpring mode
 			BOOL bWellspringMode = FALSE;
+#if USB_TRACKPAD
 			status = AmtPtpGetWellspringMode(
 				deviceContext,
 				&bWellspringMode
 			);
+#endif
 
 			if (!NT_SUCCESS(status)) {
 
@@ -1167,11 +1169,12 @@ AmtPtpSetFeatures(
 					);
 
 					if (bWellspringMode) {
-
+#if USB_TRACKPAD
 						status = AmtPtpSetWellspringMode(
 							deviceContext,
 							FALSE
 						);
+#endif
 
 						if (!NT_SUCCESS(status)) {
 							TraceEvents(
@@ -1198,11 +1201,12 @@ AmtPtpSetFeatures(
 					);
 
 					if (!bWellspringMode) {
-						
+#if USB_TRACKPAD
 						status = AmtPtpSetWellspringMode(
 							deviceContext,
 							TRUE
 						);
+#endif
 
 						if (!NT_SUCCESS(status)) {
 							TraceEvents(

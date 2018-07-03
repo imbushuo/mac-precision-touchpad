@@ -33,6 +33,9 @@ typedef struct _DEVICE_CONTEXT
 	PTP_CONTACT_RAW             ContactRepository[5];
 	SM_RUNTIME_INFORMATION		TouchStateMachineInfo;
 
+	// SPI specific
+	WDFIOTARGET					SpiTrackpadIoTarget;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //
@@ -140,6 +143,13 @@ _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEmergResetDevice(
 	_In_ PDEVICE_CONTEXT DeviceContext
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+BOOLEAN OnSpiInterruptIsr
+(
+	_In_ WDFINTERRUPT Interrupt,
+	_In_ ULONG MessageID
 );
 
 ///

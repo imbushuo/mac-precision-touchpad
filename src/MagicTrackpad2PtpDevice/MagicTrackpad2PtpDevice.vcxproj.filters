@@ -64,6 +64,9 @@
     <ClInclude Include="ModernTrace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Spb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -82,6 +85,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputStateMachine.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Spb.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
