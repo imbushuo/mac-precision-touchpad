@@ -202,7 +202,8 @@ AmtPtpDeviceEvtIoDeviceControl(
 			break;
 	}
 
-	if (requestPending != TRUE) {
+	if (requestPending != TRUE) 
+	{
 		WdfRequestComplete(
 			Request, 
 			status

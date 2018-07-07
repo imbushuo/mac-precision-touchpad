@@ -422,7 +422,7 @@ typedef struct _SPI_TRACKPAD_PACKET
 	UINT8 Reserved1[16];
 	UINT8 FingerDataLength;
 	UINT8 Reserved2[5];
-	UINT8 NumOfNumbers;
+	UINT8 NumOfFingers;
 	UINT8 ClickOccurred2;
 	UINT8 State1;
 	UINT8 State2;

@@ -26,3 +26,4 @@ EXTERN_C_END
 #define EVENT_DRIVER_FUNC_SUBTYPE_CRITFAIL	"CriticalFailure"
 #define EVENT_DEVICE_ID_SUBTYPE_NOTFOUND	"DeviceNotFoundInRegistry"
 #define EVENT_DEVICE_ID_SUBTYPE_HIDREG_NOTFOUND		"DeviceDescriptorNotFoundInRegistry"
+#define EVENT_DRIVER_HID_DUMP "HidDump"

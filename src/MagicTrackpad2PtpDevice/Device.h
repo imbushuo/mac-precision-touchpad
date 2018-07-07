@@ -5,6 +5,10 @@ EXTERN_C_START
 // Device context struct
 typedef struct _DEVICE_CONTEXT
 {
+	// Alignment trick for SPI
+	WDFWAITLOCK					SpiReadLock;
+	WDFTIMER					SpiTimer;
+
 	// USB specific
 	WDFUSBDEVICE                UsbDevice;
 	WDFUSBPIPE                  InterruptPipe;
@@ -221,6 +225,21 @@ RequestGetHidXferPacketToWriteToDevice(
 // Helper function for numberic operation
 static inline INT AmtRawToInteger(
 	_In_ USHORT x
+);
+
+//
+// SPI routine
+//
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpSpiStartInternalReportReadLoop(
+	_In_ WDFDEVICE Device
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+static VOID
+AmtPtpSpiTimerRoutine(
+	WDFTIMER Timer
 );
 
 EXTERN_C_END
