@@ -33,6 +33,8 @@ typedef struct _DEVICE_CONTEXT
 	PTP_CONTACT_RAW             ContactRepository[5];
 	SM_RUNTIME_INFORMATION		TouchStateMachineInfo;
 
+	LARGE_INTEGER				PerfCounter;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //

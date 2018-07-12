@@ -596,6 +596,11 @@ AmtPtpEvtDeviceD0Entry(
 		}
 	}
 
+	// Get current time counter
+	QueryPerformanceCounter(
+		&pDeviceContext->PerfCounter
+	);
+
 	//
 	// Since continuous reader is configured for this interrupt-pipe, we must explicitly start
 	// the I/O target to get the framework to post read requests.

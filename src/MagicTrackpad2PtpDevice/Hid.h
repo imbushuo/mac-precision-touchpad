@@ -137,6 +137,7 @@ typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT {
 	UCHAR SurfaceReport : 1;
 	UCHAR Padding : 6;
 } PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT, *PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT;
+#pragma pack()
 
 #pragma pack(1)
 typedef struct _PTP_CONTACT {
@@ -147,6 +148,7 @@ typedef struct _PTP_CONTACT {
 	USHORT		X;
 	USHORT		Y;
 } PTP_CONTACT, *PPTP_CONTACT;
+#pragma pack()
 
 enum CONTACT_STATE {
 	CONTACT_NEW = 0,
