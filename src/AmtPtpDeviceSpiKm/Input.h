@@ -10,7 +10,9 @@ AmtPtpSpiInputRoutineWorker(
 
 _IRQL_requires_(PASSIVE_LEVEL)
 VOID
-AmtPtpSpiInputRoutineInternal(
-	WDFDEVICE Device,
-	WDFREQUEST Request
+AmtPtpRequestCompletionRoutine(
+	WDFREQUEST Request,
+	WDFIOTARGET Target,
+	PWDF_REQUEST_COMPLETION_PARAMS Params,
+	WDFCONTEXT Context
 );

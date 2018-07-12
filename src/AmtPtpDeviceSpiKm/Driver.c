@@ -167,7 +167,6 @@ Return Value:
 --*/
 {
     UNREFERENCED_PARAMETER(DriverObject);
-
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
@@ -175,5 +174,5 @@ Return Value:
     //
     // Stop WPP Tracing
     //
-    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
+    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER) DriverObject));
 }

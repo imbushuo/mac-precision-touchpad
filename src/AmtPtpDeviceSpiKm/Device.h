@@ -44,6 +44,13 @@ typedef struct _DEVICE_CONTEXT
 	// Timer
 	LARGE_INTEGER LastReportTime;
 
+	// Asynchronous & Reuse content
+	WDFREQUEST SpiHidReadRequest;
+	WDFMEMORY SpiHidReadBuffer;
+	KEVENT PtpRequestRoutineEvent;
+	BOOLEAN DelayedRequest;
+	BOOLEAN InitialCompleted;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //

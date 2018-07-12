@@ -91,6 +91,7 @@ Return Value:
 		// Put itself in
 		//
 		pDeviceContext->SpiDevice = Device;
+		pDeviceContext->DelayedRequest = FALSE;
 
 		//
 		// Retrieve IO target.
@@ -99,6 +100,32 @@ Return Value:
 		if (pDeviceContext->SpiTrackpadIoTarget == NULL) 
 		{
 			Status = STATUS_INVALID_DEVICE_STATE;
+			goto exit;
+		}
+
+		//
+		// Initialize kernel event.
+		//
+		KeInitializeEvent(
+			&pDeviceContext->PtpRequestRoutineEvent, 
+			NotificationEvent, 
+			TRUE
+		);
+
+		//
+		// Initialize buffer.
+		//
+		Status = WdfMemoryCreate(
+			WDF_NO_OBJECT_ATTRIBUTES,
+			NonPagedPool,
+			PTP_POOL_TAG,
+			REPORT_BUFFER_SIZE,
+			&pDeviceContext->SpiHidReadBuffer,
+			NULL
+		);
+
+		if (!NT_SUCCESS(Status))
+		{
 			goto exit;
 		}
 
@@ -331,6 +358,7 @@ AmtPtpEvtDeviceD0Exit(
 {
 	NTSTATUS Status = STATUS_SUCCESS;
 	PDEVICE_CONTEXT pDeviceContext;
+	WDFREQUEST RemainingRequest;
 
 	PAGED_CODE();
 
@@ -352,6 +380,37 @@ AmtPtpEvtDeviceD0Exit(
 
 	// Set flag & it will stop HID read loop thread
 	pDeviceContext->DeviceReady = FALSE;
+
+	// Cancel current device request
+	WdfRequestCancelSentRequest(
+		pDeviceContext->SpiHidReadRequest
+	);
+
+	// Wait for signaled state
+	KeWaitForSingleObject(
+		&pDeviceContext->PtpRequestRoutineEvent,
+		Executive,
+		KernelMode,
+		FALSE,
+		NULL
+	);
+
+	// Clean outstanding requests
+	while (Status == STATUS_SUCCESS)
+	{
+		Status = WdfIoQueueRetrieveNextRequest(
+			pDeviceContext->HidIoQueue,
+			&RemainingRequest
+		);
+
+		if (NT_SUCCESS(Status))
+		{
+			WdfRequestComplete(
+				RemainingRequest,
+				STATUS_CANCELLED
+			);
+		}
+	}
 
 	// Disable HID trackpad
 	Status = AmtPtpSpiSetState(
@@ -519,42 +578,27 @@ AmtPtpSpiInputThreadRoutine(
 {
 	PDEVICE_CONTEXT pDeviceContext;
 	LARGE_INTEGER WaitInterval;
-	WDFREQUEST Request;
-	NTSTATUS Status;
 
 	PAGED_CODE();
 
 	// Sanity check for the thing
 	if (StartContext == NULL) return;
 	pDeviceContext = (PDEVICE_CONTEXT) StartContext;
-	Status = STATUS_SUCCESS;
 
 	// Initialize wait interval
-	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(10);
+	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(100);
 
 	while (pDeviceContext->DeviceReady)
 	{
-		// Pass it to the worker.
-		AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice);
-
-		KeDelayExecutionThread(KernelMode, FALSE, &WaitInterval);
-	}
-
-	// Cleanup
-	while (Status == STATUS_SUCCESS)
-	{
-		Status = WdfIoQueueRetrieveNextRequest(
-			pDeviceContext->HidIoQueue,
-			&Request
-		);
-
-		if (NT_SUCCESS(Status))
+		if (pDeviceContext->DelayedRequest)
 		{
-			WdfRequestComplete(
-				Request,
-				STATUS_CANCELLED
-			);
+			pDeviceContext->DelayedRequest = FALSE;
+
+			// Delayed request: Pass it to the worker.
+			AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice);
 		}
+		
+		KeDelayExecutionThread(KernelMode, FALSE, &WaitInterval);
 	}
 
 	// Goodbye
