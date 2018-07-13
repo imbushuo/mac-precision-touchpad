@@ -142,6 +142,10 @@ DbgIoControlGetString(
 		return "IOCTL_HID_DEACTIVATE_DEVICE";
 	case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:
 		return "IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST";
+	case IOCTL_HID_GET_FEATURE:
+		return "IOCTL_HID_GET_FEATURE";
+	case IOCTL_HID_SET_FEATURE:
+		return "IOCTL_HID_SET_FEATURE";
 	default:
 		return "IOCTL_UNKNOWN";
 	}
@@ -160,6 +164,7 @@ AmtPtpDeviceSpiKmEvtIoInternalDeviceControl(
 	NTSTATUS Status = STATUS_SUCCESS;
 	WDFDEVICE Device = WdfIoQueueGetDevice(Queue);
 	BOOLEAN RequestPending = FALSE;
+	PDEVICE_CONTEXT pDeviceContext = DeviceGetContext(Device);
 
     TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -174,13 +179,30 @@ AmtPtpDeviceSpiKmEvtIoInternalDeviceControl(
 	KdPrintEx((
 		DPFLTR_IHVDRIVER_ID,
 		DPFLTR_INFO_LEVEL,
-		"AmtPtpDeviceSpiKmEvtIoDeviceControl Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d \n",
+		"AmtPtpDeviceSpiKmEvtIoDeviceControl %s: Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d \n",
+		DbgIoControlGetString(IoControlCode),
 		Queue,
 		Request,
 		(int)OutputBufferLength,
 		(int)InputBufferLength,
 		IoControlCode
 	));
+
+	if (!pDeviceContext->DeviceReady)
+	{
+		KdPrintEx((
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_INFO_LEVEL,
+			"AmtPtpDeviceSpiKmEvtIoDeviceControl requested cancelled: device not ready \n"
+		));
+
+		WdfRequestComplete(
+			Request,
+			STATUS_CANCELLED
+		);
+
+		return;
+	}
 
 	// Dispatch IOCTL to handler
 	switch (IoControlCode)

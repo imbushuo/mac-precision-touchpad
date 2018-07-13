@@ -127,6 +127,7 @@ AmtPtpSpiInputRoutineWorker(
 		NULL
 	);
 
+	pDeviceContext->PendingRequest = RequestStatus;
 	pDeviceContext->DelayedRequest = !RequestStatus;
 }
 
@@ -196,6 +197,7 @@ AmtPtpRequestCompletionRoutine(
 			"No pending PTP request. Routine exit \n"
 		));
 
+		pDeviceContext->DelayedRequest = TRUE;
 		goto set_event;
 	}
 
@@ -290,6 +292,8 @@ AmtPtpRequestCompletionRoutine(
 		Request,
 		sizeof(PTP_REPORT)
 	);
+
+	pDeviceContext->PendingRequest = FALSE;
 
 exit:
 	WdfRequestComplete(

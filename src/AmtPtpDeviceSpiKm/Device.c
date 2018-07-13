@@ -112,6 +112,12 @@ Return Value:
 			TRUE
 		);
 
+		KeInitializeEvent(
+			&pDeviceContext->PtpLoopRoutineEvent,
+			NotificationEvent,
+			TRUE
+		);
+
 		//
 		// Initialize buffer.
 		//
@@ -382,13 +388,24 @@ AmtPtpEvtDeviceD0Exit(
 	pDeviceContext->DeviceReady = FALSE;
 
 	// Cancel current device request
-	WdfRequestCancelSentRequest(
-		pDeviceContext->SpiHidReadRequest
-	);
+	if (pDeviceContext->PendingRequest)
+	{
+		WdfRequestCancelSentRequest(
+			pDeviceContext->SpiHidReadRequest
+		);
+	}
 
 	// Wait for signaled state
 	KeWaitForSingleObject(
 		&pDeviceContext->PtpRequestRoutineEvent,
+		Executive,
+		KernelMode,
+		FALSE,
+		NULL
+	);
+
+	KeWaitForSingleObject(
+		&pDeviceContext->PtpLoopRoutineEvent,
 		Executive,
 		KernelMode,
 		FALSE,
@@ -585,8 +602,19 @@ AmtPtpSpiInputThreadRoutine(
 	if (StartContext == NULL) return;
 	pDeviceContext = (PDEVICE_CONTEXT) StartContext;
 
+	// Lock it up!
+	KeClearEvent(
+		&pDeviceContext->PtpLoopRoutineEvent
+	);
+
 	// Initialize wait interval
 	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(100);
+
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_INFO_LEVEL,
+		"AmtPtpSpiInputThreadRoutine: ready to loop. \n"
+	));
 
 	while (pDeviceContext->DeviceReady)
 	{
@@ -599,7 +627,26 @@ AmtPtpSpiInputThreadRoutine(
 		}
 		
 		KeDelayExecutionThread(KernelMode, FALSE, &WaitInterval);
+
+		KdPrintEx((
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_INFO_LEVEL,
+			"AmtPtpSpiInputThreadRoutine: loop routine. \n"
+		));
 	}
+
+	// Notify that we are safe to terminate
+	KeSetEvent(
+		&pDeviceContext->PtpLoopRoutineEvent,
+		0,
+		FALSE
+	);
+
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_INFO_LEVEL,
+		"AmtPtpSpiInputThreadRoutine: terminated. \n"
+	));
 
 	// Goodbye
 	PsTerminateSystemThread(STATUS_SUCCESS);
