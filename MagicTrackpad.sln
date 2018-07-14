@@ -8,6 +8,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contrib", "contrib", "{1C0E2F63-A3D6-4B44-BDC7-22F6E31EA9F2}"
 	ProjectSection(SolutionItems) = preProject
 		App Interface.md = App Interface.md
+		LICENSE-GPL.md = LICENSE-GPL.md
+		LICENSE-MIT.md = LICENSE-MIT.md
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
@@ -32,6 +34,36 @@ Global
 		ReleaseSigned|x86 = ReleaseSigned|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|ARM.ActiveCfg = Debug|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|ARM64.Build.0 = Debug|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|x64.ActiveCfg = Debug|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|x64.Build.0 = Debug|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|x64.Deploy.0 = Debug|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|x86.ActiveCfg = Debug|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|x86.Build.0 = Debug|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Debug|x86.Deploy.0 = Debug|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|ARM.ActiveCfg = Release|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|ARM64.ActiveCfg = Release|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|ARM64.Build.0 = Release|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|ARM64.Deploy.0 = Release|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|x64.ActiveCfg = Release|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|x64.Build.0 = Release|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|x64.Deploy.0 = Release|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|x86.ActiveCfg = Release|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|x86.Build.0 = Release|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.Release|x86.Deploy.0 = Release|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|ARM.ActiveCfg = ReleaseSigned|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|ARM64.ActiveCfg = ReleaseSigned|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|ARM64.Build.0 = ReleaseSigned|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|ARM64.Deploy.0 = ReleaseSigned|ARM64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|x64.ActiveCfg = ReleaseSigned|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|x64.Build.0 = ReleaseSigned|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|x64.Deploy.0 = ReleaseSigned|x64
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|x86.ActiveCfg = ReleaseSigned|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|x86.Build.0 = ReleaseSigned|Win32
+		{87EFA31B-25EB-4944-A30A-300171BFFF57}.ReleaseSigned|x86.Deploy.0 = ReleaseSigned|Win32
 		{FC08B706-5661-47FA-A840-053B06125750}.Debug|ARM.ActiveCfg = Debug|ARM
 		{FC08B706-5661-47FA-A840-053B06125750}.Debug|ARM.Build.0 = Debug|ARM
 		{FC08B706-5661-47FA-A840-053B06125750}.Debug|ARM.Deploy.0 = Debug|ARM
@@ -73,6 +105,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{87EFA31B-25EB-4944-A30A-300171BFFF57} = {2557B86E-6ED8-495A-B9A5-BF80CD5C4DAC}
 		{FC08B706-5661-47FA-A840-053B06125750} = {2557B86E-6ED8-495A-B9A5-BF80CD5C4DAC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

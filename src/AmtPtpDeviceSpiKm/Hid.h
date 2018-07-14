@@ -1,4 +1,3 @@
-// Hid.h: Device-related HID definitions
 #pragma once
 
 #include <hidport.h>
@@ -7,14 +6,14 @@
 #include "HidCommon.h"
 
 // Device family metadata
-#include "DeviceFamily\Wellspring5.h"
-#include "DeviceFamily\Wellspring7A.h"
-#include "DeviceFamily\Wellspring8.h"
-#include "DeviceFamily\WellspringMt2.h"
+#include "HID\SpiTrackpadSeries1.h"
+#include "HID\SpiTrackpadSeries2.h"
 
 typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 
+#define REPORT_BUFFER_SIZE   1024
 #define DEVICE_VERSION 0x01
+#define MAX_FINGERS	16
 
 #define AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC \
 	USAGE_PAGE_1, 0x00, 0xff, /* Usage Page: Vendor defined */ \
@@ -100,20 +99,6 @@ typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 #define PTP_CONTACT_CONFIDENCE_BIT   1
 #define PTP_CONTACT_TIPSWITCH_BIT    2
 
-typedef struct _HID_AAPL_MOUSE_REPORT {
-	struct {
-		UCHAR  bButtons;
-		UCHAR  wXData;
-		UCHAR  wYData;
-		UINT   Padding;
-	} InputReport;
-} HID_AAPL_MOUSE_REPORT, *PHID_AAPL_MOUSE_REPORT;
-
-typedef struct _HID_INPUT_REPORT {
-	UCHAR ReportID;
-	HID_AAPL_MOUSE_REPORT MouseReport;
-} HID_INPUT_REPORT, *PHID_INPUT_REPORT;
-
 typedef struct _PTP_DEVICE_CAPS_FEATURE_REPORT {
 	UCHAR ReportID;
 	UCHAR MaximumContactPoints;
@@ -130,25 +115,28 @@ typedef struct _PTP_DEVICE_INPUT_MODE_REPORT {
 	UCHAR Mode;
 } PTP_DEVICE_INPUT_MODE_REPORT, *PPTP_DEVICE_INPUT_MODE_REPORT;
 
+#pragma pack(push)
 #pragma pack(1)
 typedef struct _PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT {
 	UCHAR ReportID;
+	UCHAR DeviceMode;
 	UCHAR ButtonReport : 1;
 	UCHAR SurfaceReport : 1;
 	UCHAR Padding : 6;
 } PTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT, *PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT;
-#pragma pack()
+#pragma pack(pop)
 
+#pragma pack(push)
 #pragma pack(1)
 typedef struct _PTP_CONTACT {
 	UCHAR		Confidence : 1;
-	UCHAR		TipSwitch  : 1;
-	UCHAR		ContactID  : 3;
-	UCHAR		Padding    : 3;
+	UCHAR		TipSwitch : 1;
+	UCHAR		ContactID : 3;
+	UCHAR		Padding : 3;
 	USHORT		X;
 	USHORT		Y;
 } PTP_CONTACT, *PPTP_CONTACT;
-#pragma pack()
+#pragma pack(pop)
 
 enum CONTACT_STATE {
 	CONTACT_NEW = 0,
@@ -189,3 +177,47 @@ typedef struct _PTP_USERMODEAPP_CONF_REPORT {
 	UCHAR		SingleContactSizeQualificationLevel;
 	UCHAR		MultipleContactSizeQualificationLevel;
 } PTP_USERMODEAPP_CONF_REPORT, *PPTP_USERMODEAPP_CONF_REPORT;
+
+// HID routines
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetHidDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetDeviceAttribs(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetReportDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetStrings(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request,
+	_Out_ BOOLEAN *Pending
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpReportFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpSetFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
