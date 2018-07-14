@@ -8,7 +8,7 @@ This project aims to implement Windows Precision Touchpad Protocol for Apple Mac
 
 Both USB and SPI trackpads are supported.
 
-## Installation
+## USB Installation
 
 1. Go to the release tab in Github and download the newest version
 2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
@@ -18,6 +18,10 @@ Both USB and SPI trackpads are supported.
 
 You don't have to enable manual trust, as recent builds are cross-signed by DigiCert.
 If you want to try latest changes, you can click "Build Status" badge and download CI builds (tagged with commit ID and machine architecture) manually.
+
+## SPI Installation
+
+(Coming soon)
 
 **Note: SPI version needs at least Windows 10, version 1709 to work.**
 
