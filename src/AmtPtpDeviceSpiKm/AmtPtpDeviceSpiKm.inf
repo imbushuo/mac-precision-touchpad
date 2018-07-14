@@ -1,0 +1,97 @@
+;
+; AmtPtpDeviceSpiKm.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=HIDClass
+ClassGuid={745a17a0-74d3-11d0-b6fe-00a0c90f57da}
+Provider=%ManufacturerName%
+CatalogFile=AmtPtpDeviceSpiKm.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+AmtPtpDeviceSpiKm_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+AmtPtpDeviceSpiKm.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+; MacBookPro11,1 / MacBookPro12,1
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0272&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0273&MI_02
+; MacBook9,1 (MacBook 12-inch, Early 2016)
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0275&MI_02
+; MacBook10,1 (MacBook 12-inch, Early 2017)
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0279&MI_02
+
+[AmtPtpDeviceSpiKm_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+AmtPtpDeviceSpiKm.sys
+
+;-------------- Service installation
+[AmtPtpDeviceSpiKm_Device.NT.Services]
+AddService = AmtPtpDeviceSpiKm,, AmtPtpDeviceSpiKm_Service_Inst
+AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst ;flag 0x2 sets this as the service for the device
+
+[AmtPtpDeviceSpiKm_Device.NT.HW]
+AddReg = AmtPtpDeviceSpiKm_Device.NT.AddReg
+
+[AmtPtpDeviceSpiKm_Device.NT.AddReg]
+HKR,,"LowerFilters",0x00010008,"AmtPtpDeviceSpiKm"
+
+; -------------- Microsoft HID KMDF driver install sections
+[mshidkmdf_Service_Inst]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\mshidkmdf.sys
+
+; -------------- AmtPtpDeviceSpiKm driver install sections
+[AmtPtpDeviceSpiKm_Service_Inst]
+DisplayName    = %AmtPtpDeviceSpiKm.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\AmtPtpDeviceSpiKm.sys
+LoadOrderGroup = Extended Base
+
+;
+;--- AmtPtpDeviceSpiKm_Device Coinstaller installation ------
+;
+
+[AmtPtpDeviceSpiKm_Device.NT.CoInstallers]
+AddReg=AmtPtpDeviceSpiKm_Device_CoInstaller_AddReg
+CopyFiles=AmtPtpDeviceSpiKm_Device_CoInstaller_CopyFiles
+
+[AmtPtpDeviceSpiKm_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[AmtPtpDeviceSpiKm_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[AmtPtpDeviceSpiKm_Device.NT.Wdf]
+KmdfService =  AmtPtpDeviceSpiKm, AmtPtpDeviceSpiKm_wdfsect
+[AmtPtpDeviceSpiKm_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="Bingxing Wang"
+DiskName = "AmtPtpDeviceSpiKm Installation Disk"
+AmtPtpDeviceSpiKm.DeviceDesc = "Apple SPI Precision Touchpad Device"
+AmtPtpDeviceSpiKm.SVCDESC = "Apple SPI Precision Touchpad Driver Service"
