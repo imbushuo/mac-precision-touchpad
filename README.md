@@ -6,6 +6,8 @@
 
 This project aims to implement Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10.
 
+Both USB and SPI trackpads are supported.
+
 ## Installation
 
 1. Go to the release tab in Github and download the newest version
@@ -54,6 +56,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] More Models (I need donation)
 - [x] SPI
 - [ ] Signal Processing Algorithm (Papers, papers!)
+- [ ] KM Driver EV & WHQL
 
 ## Acknowledgements
 
@@ -63,7 +66,8 @@ I would like to thank projects like [magictrackpad2-dkms](https://github.com/rob
  
 ## License
 
-[GPLv2](LICENSE.md)
+- USB driver is licensed under [GPLv2](LICENSE-GPL.md).
+- SPI driver is licensed under [MIT](LICENSE-MIT.md).
 
 ## Donation
 
