@@ -91,13 +91,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="AmtPtpDevice.inf">
-      <Filter>Driver Files</Filter>
-    </Inf>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="AmtPtpDevice.wprp">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="AmtPtpDeviceUsbUm.inf">
+      <Filter>Driver Files</Filter>
+    </Inf>
   </ItemGroup>
 </Project>
