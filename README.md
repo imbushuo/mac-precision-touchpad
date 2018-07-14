@@ -31,7 +31,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Apple Magic Trackpad 2 (Not stable)
 - [ ] _(Work in progress)_ MacBook Pro with Retina Display (2014, 2015)
 - [x] New MacBook (12-inch)
-- [] _(Work in progress)_ MacBook Pro 2015, 2016, 2017
+- [ ] _(Work in progress)_ MacBook Pro 2015, 2016, 2017
 
 ## Roadmap
 
