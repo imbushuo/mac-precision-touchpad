@@ -300,11 +300,16 @@ _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpGetStrings(
 	_In_ WDFDEVICE Device,
-	_In_ WDFREQUEST Request
+	_In_ WDFREQUEST Request,
+	_Out_ BOOLEAN *Pending
 )
 {
-	UNREFERENCED_PARAMETER(Device);
-	UNREFERENCED_PARAMETER(Request);
+	NTSTATUS Status = STATUS_SUCCESS;
+	PDEVICE_CONTEXT pDeviceContext;
+	BOOLEAN RequestSent;
+	WDF_REQUEST_SEND_OPTIONS SendOptions;
+
+	PAGED_CODE();
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
@@ -318,10 +323,38 @@ AmtPtpGetStrings(
 		"AmtPtpGetStrings called \n"
 	));
 
-	// Not really see a case that HID device string is
-	// being read for a trackpad. Trace requests and decide
-	// whether we should do it in the future.
-	return STATUS_NOT_SUPPORTED;
+	pDeviceContext = DeviceGetContext(Device);
+
+	// Forward the IRP to our upstream IO target
+	// We don't really care about the content
+	WdfRequestFormatRequestUsingCurrentType(Request);
+	WDF_REQUEST_SEND_OPTIONS_INIT(
+		&SendOptions,
+		WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET
+	);
+
+	RequestSent = WdfRequestSend(
+		Request,
+		pDeviceContext->SpiTrackpadIoTarget,
+		&SendOptions
+	);
+
+	*Pending = TRUE;
+
+	if (!RequestSent)
+	{
+		Status = WdfRequestGetStatus(Request);
+		*Pending = FALSE;
+	}
+
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_INFO_LEVEL,
+		"AmtPtpGetStrings exit, Status = 0x%x \n",
+		Status
+	));
+
+	return Status;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)

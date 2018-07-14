@@ -228,7 +228,8 @@ AmtPtpDeviceSpiKmEvtIoInternalDeviceControl(
 	case IOCTL_HID_GET_STRING:
 		Status = AmtPtpGetStrings(
 			Device,
-			Request
+			Request,
+			&RequestPending
 		);
 		break;
 	case IOCTL_HID_READ_REPORT:

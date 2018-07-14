@@ -155,7 +155,12 @@ Return Value:
     }
 
 exit:
-	KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "AmtPtpDeviceSpiKmCreateDevice Exit \n"));
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID, 
+		DPFLTR_INFO_LEVEL, 
+		"AmtPtpDeviceSpiKmCreateDevice Exit, Status = 0x%x \n",
+		Status
+	));
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
@@ -312,6 +317,7 @@ AmtPtpEvtDeviceD0Entry(
 
 	// Set flag
 	pDeviceContext->DeviceReady = TRUE;
+	pDeviceContext->DelayedRequest = TRUE;
 
 	// Set time
 	KeQueryPerformanceCounter(
@@ -621,6 +627,12 @@ AmtPtpSpiInputThreadRoutine(
 		if (pDeviceContext->DelayedRequest)
 		{
 			pDeviceContext->DelayedRequest = FALSE;
+
+			KdPrintEx((
+				DPFLTR_IHVDRIVER_ID,
+				DPFLTR_INFO_LEVEL,
+				"AmtPtpSpiInputThreadRoutine: AmtPtpSpiInputRoutineWorker entry. \n"
+			));
 
 			// Delayed request: Pass it to the worker.
 			AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice);

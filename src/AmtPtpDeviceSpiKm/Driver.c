@@ -139,6 +139,7 @@ Return Value:
 	);
 
 	WdfFdoInitSetFilter(DeviceInit);
+	WdfPdoInitAllowForwardingRequestToParent(DeviceInit);
 
     status = AmtPtpDeviceSpiKmCreateDevice(DeviceInit);
 

@@ -15,6 +15,12 @@ AmtPtpSpiInputRoutineWorker(
 
 	PAGED_CODE();
 
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_INFO_LEVEL,
+		"AmtPtpSpiInputRoutineWorker entry. \n"
+	));
+
 	pDeviceContext = DeviceGetContext(Device);
 
 	if (!pDeviceContext->InitialCompleted)
@@ -127,6 +133,21 @@ AmtPtpSpiInputRoutineWorker(
 		NULL
 	);
 
+	if (!RequestStatus)
+	{
+		KdPrintEx((
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_INFO_LEVEL,
+			"AmtPtpSpiInputRoutineWorker request not sent! \n"
+		));
+	}
+
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_INFO_LEVEL,
+		"AmtPtpSpiInputRoutineWorker exit. \n"
+	));
+
 	pDeviceContext->PendingRequest = RequestStatus;
 	pDeviceContext->DelayedRequest = !RequestStatus;
 }
@@ -134,7 +155,7 @@ AmtPtpSpiInputRoutineWorker(
 _IRQL_requires_(PASSIVE_LEVEL)
 VOID
 AmtPtpRequestCompletionRoutine(
-	WDFREQUEST Request,
+	WDFREQUEST SpiRequest,
 	WDFIOTARGET Target,
 	PWDF_REQUEST_COMPLETION_PARAMS Params,
 	WDFCONTEXT Context
@@ -156,6 +177,12 @@ AmtPtpRequestCompletionRoutine(
 	PAGED_CODE();
 	UNREFERENCED_PARAMETER(Target);
 	UNREFERENCED_PARAMETER(Params);
+
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_INFO_LEVEL,
+		"AmtPtpRequestCompletionRoutine entry \n"
+	));
 
 	// Get context
 	pDeviceContext = (PDEVICE_CONTEXT) Context;
@@ -201,7 +228,7 @@ AmtPtpRequestCompletionRoutine(
 		goto set_event;
 	}
 
-	SpiRequestLength = (LONG)WdfRequestGetInformation(Request);
+	SpiRequestLength = (LONG) WdfRequestGetInformation(SpiRequest);
 	pSpiTrackpadPacket = (PSPI_TRACKPAD_PACKET) WdfMemoryGetBuffer(pDeviceContext->SpiHidReadBuffer, NULL);
 
 	// Get Counter
@@ -238,7 +265,7 @@ AmtPtpRequestCompletionRoutine(
 	}
 
 	Status = WdfRequestRetrieveOutputMemory(
-		Request,
+		PtpRequest,
 		&PtpRequestMemory
 	);
 
@@ -264,7 +291,7 @@ AmtPtpRequestCompletionRoutine(
 	Status = WdfMemoryCopyFromBuffer(
 		PtpRequestMemory,
 		0,
-		(PVOID)&PtpReport,
+		(PVOID) &PtpReport,
 		sizeof(PTP_REPORT)
 	);
 
@@ -289,7 +316,7 @@ AmtPtpRequestCompletionRoutine(
 
 	// Set information
 	WdfRequestSetInformation(
-		Request,
+		PtpRequest,
 		sizeof(PTP_REPORT)
 	);
 
@@ -297,7 +324,7 @@ AmtPtpRequestCompletionRoutine(
 
 exit:
 	WdfRequestComplete(
-		Request,
+		PtpRequest,
 		Status
 	);
 
@@ -314,4 +341,10 @@ set_event:
 	AmtPtpSpiInputRoutineWorker(
 		pDeviceContext->SpiDevice
 	);
+
+	KdPrintEx((
+		DPFLTR_IHVDRIVER_ID,
+		DPFLTR_INFO_LEVEL,
+		"AmtPtpRequestCompletionRoutine exit \n"
+	));
 }
