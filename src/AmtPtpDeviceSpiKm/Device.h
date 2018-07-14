@@ -18,6 +18,15 @@ Environment:
 
 EXTERN_C_START
 
+typedef struct _SPI_TRACKPAD_INFO {
+	USHORT VendorId;
+	USHORT ProductId;
+	SHORT XMin;
+	SHORT XMax;
+	SHORT YMin;
+	SHORT YMax;
+} SPI_TRACKPAD_INFO, *PSPI_TRACKPAD_INFO;
+
 //
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
@@ -35,6 +44,7 @@ typedef struct _DEVICE_CONTEXT
 	USHORT HidVendorID;
 	USHORT HidProductID;
 	USHORT HidVersionNumber;
+	SPI_TRACKPAD_INFO TrackpadInfo;
 
 	// Windows PTP context
 	BOOLEAN PtpInputOn;

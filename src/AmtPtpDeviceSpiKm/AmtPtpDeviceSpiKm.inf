@@ -29,11 +29,13 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with
 %ManufacturerName%=Standard,NT$ARCH$
 
 [Standard.NT$ARCH$]
+; MacBookPro11,1 / MacBookPro12,1
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0272&MI_02
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0273&MI_02
+; MacBook9,1 (MacBook 12-inch, Early 2016)
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0275&MI_02
-%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0290&MI_02
-%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0291&MI_02
+; MacBook10,1 (MacBook 12-inch, Early 2017)
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0279&MI_02
 
 [AmtPtpDeviceSpiKm_Device.NT]
 CopyFiles=Drivers_Dir

@@ -24,6 +24,24 @@ CONST HID_DESCRIPTOR AmtPtpSpiFamily1DefaultHidDescriptor = {
 	}
 };
 
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily2ReportDescriptor[] = {
+	AAPL_SPI_SERIES2_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+CONST HID_DESCRIPTOR AmtPtpSpiFamily2DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+	{
+		0x22,										// bDescriptorType
+		sizeof(AmtPtpSpiFamily2ReportDescriptor)    // bDescriptorLength
+	}
+};
+
 #endif
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -36,9 +54,10 @@ AmtPtpGetHidDescriptor(
 	NTSTATUS Status = STATUS_SUCCESS;
 	WDFMEMORY RequestMemory;
 	size_t CopiedSize = 0;
+	PDEVICE_CONTEXT pDeviceContext;
+	BOOLEAN DescriptorFound = TRUE;
 
 	PAGED_CODE();
-	UNREFERENCED_PARAMETER(Device);
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
@@ -52,6 +71,7 @@ AmtPtpGetHidDescriptor(
 		"AmtPtpGetHidDescriptor Entry \n"
 	));
 
+	pDeviceContext = DeviceGetContext(Device);
 	Status = WdfRequestRetrieveOutputMemory(
 		Request,
 		&RequestMemory
@@ -75,42 +95,111 @@ AmtPtpGetHidDescriptor(
 		goto exit;
 	}
 
-	// 05AC, 0275: Hard-coded for now.
-	TraceEvents(
-		TRACE_LEVEL_INFORMATION,
-		TRACE_DRIVER,
-		"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 1"
-	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 1 \n"
-	));
-
-	CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.bLength;
-	Status = WdfMemoryCopyFromBuffer(
-		RequestMemory,
-		0,
-		(PVOID) &AmtPtpSpiFamily1DefaultHidDescriptor,
-		CopiedSize
-	);
-
-	if (!NT_SUCCESS(Status)) 
+	// Get HID descriptor from registry
+	switch (pDeviceContext->HidProductID)
 	{
-		TraceEvents(
-			TRACE_LEVEL_ERROR,
-			TRACE_DRIVER,
-			"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-			Status
-		);
-		return Status;
+		// MacBook 9, 10
+		case 0x0275:
+		case 0x0279:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 1"
+			);
+
+			KdPrintEx((
+				DPFLTR_IHVDRIVER_ID,
+				DPFLTR_INFO_LEVEL,
+				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 1 \n"
+				));
+
+			CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.bLength;
+			Status = WdfMemoryCopyFromBuffer(
+				RequestMemory,
+				0,
+				(PVOID)&AmtPtpSpiFamily1DefaultHidDescriptor,
+				CopiedSize
+			);
+
+			if (!NT_SUCCESS(Status))
+			{
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					Status
+				);
+				return Status;
+			}
+			break;
+		}
+		// MacBook 11, 12
+		case 0x0272:
+		case 0x0273:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 2"
+			);
+
+			KdPrintEx((
+				DPFLTR_IHVDRIVER_ID,
+				DPFLTR_INFO_LEVEL,
+				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 2 \n"
+				));
+
+			CopiedSize = AmtPtpSpiFamily2DefaultHidDescriptor.bLength;
+			Status = WdfMemoryCopyFromBuffer(
+				RequestMemory,
+				0,
+				(PVOID)&AmtPtpSpiFamily2DefaultHidDescriptor,
+				CopiedSize
+			);
+
+			if (!NT_SUCCESS(Status))
+			{
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					Status
+				);
+				return Status;
+			}
+			break;
+		}
+		default:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor not found"
+			);
+
+			KdPrintEx((
+				DPFLTR_IHVDRIVER_ID,
+				DPFLTR_INFO_LEVEL,
+				"AmtPtpGetHidDescriptor Request HID Report Descriptor not found \n"
+			));
+
+			DescriptorFound = FALSE;
+			break;
+		}
 	}
 
-	WdfRequestSetInformation(
-		Request,
-		CopiedSize
-	);
+	if (DescriptorFound)
+	{
+		WdfRequestSetInformation(
+			Request,
+			CopiedSize
+		);
+	}
+	else
+	{
+		Status = STATUS_NOT_FOUND;
+	}
 
 exit:
 	TraceEvents(
@@ -206,9 +295,10 @@ AmtPtpGetReportDescriptor(
 	NTSTATUS Status = STATUS_SUCCESS;
 	size_t CopiedSize = 0;
 	WDFMEMORY RequestMemory;
+	PDEVICE_CONTEXT pDeviceContext;
+	PVOID Descriptor = NULL;
 
 	PAGED_CODE();
-	UNREFERENCED_PARAMETER(Device);
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
@@ -222,6 +312,7 @@ AmtPtpGetReportDescriptor(
 		"AmtPtpGetReportDescriptor Entry \n"
 	));
 
+	pDeviceContext = DeviceGetContext(Device);
 	Status = WdfRequestRetrieveOutputMemory(
 		Request,
 		&RequestMemory
@@ -236,15 +327,46 @@ AmtPtpGetReportDescriptor(
 			Status
 		);
 		
-
 		goto exit;
 	}
 
-	CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.DescriptorList[0].wReportLength;
+	switch (pDeviceContext->HidProductID)
+	{
+		// MacBook 9, 10
+		case 0x0275:
+		case 0x0279:
+		{
+			CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			Descriptor = (PVOID) &AmtPtpSpiFamily1ReportDescriptor;
+			break;
+		}
+		// MacBookPro 11, 12
+		case 0x0272:
+		case 0x0273:
+		{
+			CopiedSize = AmtPtpSpiFamily2DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			Descriptor = (PVOID) &AmtPtpSpiFamily2ReportDescriptor;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	if (Descriptor == NULL)
+	{
+		Status = STATUS_NOT_FOUND;
+		TraceEvents(
+			TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"%!FUNC! Device HID descriptor not found"
+		);
+		return Status;
+	}
 
 	if (CopiedSize == 0)
 	{
-
 		Status = STATUS_INVALID_DEVICE_STATE;
 		TraceEvents(
 			TRACE_LEVEL_WARNING,
@@ -252,13 +374,12 @@ AmtPtpGetReportDescriptor(
 			"%!FUNC! Device HID report length is zero"
 		);
 		return Status;
-
 	}
 
 	Status = WdfMemoryCopyFromBuffer(
 		RequestMemory,
 		0,
-		(PVOID)&AmtPtpSpiFamily1ReportDescriptor,
+		Descriptor,
 		CopiedSize
 	);
 
@@ -289,7 +410,7 @@ exit:
 	KdPrintEx((
 		DPFLTR_IHVDRIVER_ID,
 		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetDeviceAttribs Exit, Status = 0x%x \n",
+		"AmtPtpGetReportDescriptor Exit, Status = 0x%x \n",
 		Status
 	));
 

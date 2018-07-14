@@ -1,10 +1,10 @@
-// Trackpad HID definition for MacBook8, 9, 10
+// Trackpad HID definition for MacBookPro 10, 11
 
 #pragma once
 
 #include "..\HidCommon.h"
 
-#define AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_1 \
+#define AAPL_SPI_SERIES2_PTP_FINGER_COLLECTION_1 \
 	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
 		/* Begin a byte */ \
 		LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 1 */ \
@@ -24,18 +24,18 @@
 		/* End of a byte */ \
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
-		/* This hard-coded size is designed for MacBookAir 7,2 */ \
+		/* This hard-coded size is designed for MacBookPro 11,1 */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xaa, 0x29, /* Logical Maximum: 10666 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0x2e, 0x27, /* Logical Maximum: 10030 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x5e, 0x04, /* Physical Maximum: 1118 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x28, 0x04, /* Physical Maximum: 1064 (See Apple Spec) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0xc7, 0x02, /* Physical Maximum: 711 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0xaf, 0x1e, /* Logical Maximum: 7855 (See definition) */ \
+		PHYSICAL_MAXIMUM_2, 0x05, 0x03, /* Physical Maximum: 773 (See Apple Spec) */ \
+		LOGICAL_MAXIMUM_2, 0xe0, 0x1a, /* Logical Maximum: 6880 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM, 0x00, /* Physical Maximum: 0 */ \
@@ -44,7 +44,7 @@
 		/* End of 4 bytes */ \
 	END_COLLECTION /* End Collection */ \
 
-#define AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_2 \
+#define AAPL_SPI_SERIES2_PTP_FINGER_COLLECTION_2 \
 	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
 		/* Begin a byte */ \
 		LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 1 */ \
@@ -65,40 +65,40 @@
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0xaa, 0x29, /* Logical Maximum: 10666 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0x2e, 0x27, /* Logical Maximum: 10030 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x5e, 0x04, /* Physical Maximum: 1118 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x28, 0x04, /* Physical Maximum: 1064 (See Apple Spec) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0xc7, 0x02, /* Physical Maximum: 711 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0xaf, 0x1e, /* Logical Maximum: 7855 (See definition) */ \
+		PHYSICAL_MAXIMUM_2, 0x05, 0x03, /* Physical Maximum: 773 (See Apple Spec) */ \
+		LOGICAL_MAXIMUM_2, 0xe0, 0x1a, /* Logical Maximum: 6880 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		/* End of 4 bytes */ \
 	END_COLLECTION /* End Collection */ \
 
-#define AAPL_SPI_SERIES1_PTP_TLC \
+#define AAPL_SPI_SERIES2_PTP_TLC \
 	USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 	USAGE, 0x05, /* Usage: Touch Pad */ \
 	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
 		REPORT_ID, REPORTID_MULTITOUCH, /* Report ID: Multi-touch */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_1, /* 1 */ \
+		AAPL_SPI_SERIES2_PTP_FINGER_COLLECTION_1, /* 1 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_1, /* 2 */ \
+		AAPL_SPI_SERIES2_PTP_FINGER_COLLECTION_1, /* 2 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_2, /* 3 */ \
+		AAPL_SPI_SERIES2_PTP_FINGER_COLLECTION_2, /* 3 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_1, /* 4 */ \
+		AAPL_SPI_SERIES2_PTP_FINGER_COLLECTION_1, /* 4 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_2, /* 5 */ \
+		AAPL_SPI_SERIES2_PTP_FINGER_COLLECTION_2, /* 5 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		UNIT_EXPONENT, 0x0c, /* Unit exponent: -4 */ \
 		UNIT_2, 0x01, 0x10, /* Time: Second */ \

@@ -47,3 +47,16 @@ typedef struct _SPI_SET_FEATURE {
 
 #define HID_REPORTID_MOUSE  2
 #define HID_XFER_PACKET_SIZE 255
+
+static const SPI_TRACKPAD_INFO SpiTrackpadConfigTable[] = 
+{
+	/* MacBook9 */
+	{ 0x05ac, 0x0275, -5087, 5579, -128, 6089 },
+	/* MacBook10 */
+	{ 0x05ac, 0x0279, -5087, 5579, -128, 6089 },
+	/* MacBookPro11,1 / MacBookPro12,1 */
+	{ 0x05ac, 0x0272, -4750, 5280, -150, 6730 },
+	{ 0x05ac, 0x0273, -4750, 5280, -150, 6730 },
+	/* Terminator */
+	{ 0 }
+};

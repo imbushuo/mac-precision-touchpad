@@ -257,6 +257,29 @@ AmtPtpEvtDevicePrepareHardware(
 	pDeviceContext->HidProductID = DeviceAttributes.ProductID;
 	pDeviceContext->HidVersionNumber = DeviceAttributes.VersionNumber;
 
+	// Find proper metadata in HID registry
+	const SPI_TRACKPAD_INFO* pTrackpadInfo;
+	BOOLEAN DeviceFound = FALSE;
+
+	for (pTrackpadInfo = SpiTrackpadConfigTable; pTrackpadInfo->VendorId; ++pTrackpadInfo)
+	{
+		if (pTrackpadInfo->VendorId == DeviceAttributes.VendorID &&
+			pTrackpadInfo->ProductId == DeviceAttributes.ProductID)
+		{
+			pDeviceContext->TrackpadInfo.ProductId = pTrackpadInfo->ProductId;
+			pDeviceContext->TrackpadInfo.VendorId = pTrackpadInfo->VendorId;
+			pDeviceContext->TrackpadInfo.XMin = pTrackpadInfo->XMin;
+			pDeviceContext->TrackpadInfo.XMax = pTrackpadInfo->XMax;
+			pDeviceContext->TrackpadInfo.YMin = pTrackpadInfo->YMin;
+			pDeviceContext->TrackpadInfo.YMax = pTrackpadInfo->YMax;
+
+			DeviceFound = TRUE;
+			break;
+		}
+	}
+
+	if (!DeviceFound) Status = STATUS_NOT_FOUND;
+
 exit:
 	KdPrintEx((
 		DPFLTR_IHVDRIVER_ID,

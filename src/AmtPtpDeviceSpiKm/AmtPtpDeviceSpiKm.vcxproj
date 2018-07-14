@@ -48,6 +48,7 @@
     <ClInclude Include="Hid.h" />
     <ClInclude Include="HidCommon.h" />
     <ClInclude Include="HID\SpiTrackpadSeries1.h" />
+    <ClInclude Include="HID\SpiTrackpadSeries2.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="Queue.h" />

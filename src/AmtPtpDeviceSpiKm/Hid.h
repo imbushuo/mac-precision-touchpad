@@ -7,6 +7,7 @@
 
 // Device family metadata
 #include "HID\SpiTrackpadSeries1.h"
+#include "HID\SpiTrackpadSeries2.h"
 
 typedef UCHAR HID_REPORT_DESCRIPTOR, *PHID_REPORT_DESCRIPTOR;
 
