@@ -168,6 +168,13 @@ AmtPtpEvtDevicePrepareHardware(
 
 	WDF_MEMORY_DESCRIPTOR HidAttributeMemoryDescriptor;
 	HID_DEVICE_ATTRIBUTES DeviceAttributes;
+	
+	const SPI_TRACKPAD_INFO* pTrackpadInfo;
+	BOOLEAN DeviceFound = FALSE;
+
+	WDFKEY ParamRegistryKey;
+	DECLARE_CONST_UNICODE_STRING(DesiredReportTypeKey, L"DesiredReportType");
+	ULONG DesiredReportTypeValue, Length, ValueType = 0;
 
 	PAGED_CODE();
 	UNREFERENCED_PARAMETER(ResourceList);
@@ -241,9 +248,6 @@ AmtPtpEvtDevicePrepareHardware(
 	pDeviceContext->HidVersionNumber = DeviceAttributes.VersionNumber;
 
 	// Find proper metadata in HID registry
-	const SPI_TRACKPAD_INFO* pTrackpadInfo;
-	BOOLEAN DeviceFound = FALSE;
-
 	for (pTrackpadInfo = SpiTrackpadConfigTable; pTrackpadInfo->VendorId; ++pTrackpadInfo)
 	{
 		if (pTrackpadInfo->VendorId == DeviceAttributes.VendorID &&
@@ -261,7 +265,52 @@ AmtPtpEvtDevicePrepareHardware(
 		}
 	}
 
-	if (!DeviceFound) Status = STATUS_NOT_FOUND;
+	if (!DeviceFound)
+	{
+		Status = STATUS_NOT_FOUND;
+		goto exit;
+	}
+
+	// Check the desired report type.
+	Status = WdfDriverOpenParametersRegistryKey(
+		WdfDeviceGetDriver(Device),
+		KEY_READ,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&ParamRegistryKey
+	);
+
+	if (NT_SUCCESS(Status))
+	{
+		Status = WdfRegistryQueryValue(
+			ParamRegistryKey,
+			&DesiredReportTypeKey,
+			sizeof(ULONG),
+			&DesiredReportTypeValue,
+			&Length,
+			&ValueType
+		);
+
+		if (NT_SUCCESS(Status))
+		{
+			switch (DesiredReportTypeValue)
+			{
+			case 0:
+				pDeviceContext->ReportType = PrecisionTouchpad;
+				break;
+			case 1:
+				pDeviceContext->ReportType = Touchscreen;
+				break;
+			default:
+				Status = STATUS_INVALID_PARAMETER;
+				break;
+			}
+		}
+
+		WdfRegistryClose(ParamRegistryKey);
+	}
+
+	// We don't really care if that param read fails.
+	Status = STATUS_SUCCESS;
 
 exit:
 	KdPrintEx((

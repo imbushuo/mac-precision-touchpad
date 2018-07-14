@@ -27,6 +27,12 @@ typedef struct _SPI_TRACKPAD_INFO {
 	SHORT YMax;
 } SPI_TRACKPAD_INFO, *PSPI_TRACKPAD_INFO;
 
+typedef enum _REPORT_TYPE {
+	PrecisionTouchpad = 0,
+	Touchscreen = 1,
+	InvalidReportType = 0x7fffffff,
+} REPORT_TYPE;
+
 //
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
@@ -45,6 +51,7 @@ typedef struct _DEVICE_CONTEXT
 	USHORT HidProductID;
 	USHORT HidVersionNumber;
 	SPI_TRACKPAD_INFO TrackpadInfo;
+	REPORT_TYPE ReportType;
 
 	// Windows PTP context
 	BOOLEAN PtpInputOn;

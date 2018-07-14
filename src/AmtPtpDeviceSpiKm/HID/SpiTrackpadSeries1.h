@@ -135,3 +135,59 @@
 		REPORT_COUNT_2, 0x00, 0x01, \
 		FEATURE, 0x02, \
 	END_COLLECTION /* End Collection */
+
+#define AAPL_SPI_SERIES1_TOUCHSCREEN_TLC \
+	USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+	USAGE, 0x04, /* Usage: Touch Screen */ \
+	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
+		REPORT_ID, REPORTID_MULTITOUCH, /* Report ID: Multi-touch */ \
+		USAGE, 0x22, /* Usage: Finger */ \
+		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_1, /* 1 */ \
+		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+		USAGE, 0x22, /* Usage: Finger */ \
+		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_1, /* 2 */ \
+		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+		USAGE, 0x22, /* Usage: Finger */ \
+		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_2, /* 3 */ \
+		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+		USAGE, 0x22, /* Usage: Finger */ \
+		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_1, /* 4 */ \
+		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+		USAGE, 0x22, /* Usage: Finger */ \
+		AAPL_SPI_SERIES1_PTP_FINGER_COLLECTION_2, /* 5 */ \
+		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+		UNIT_EXPONENT, 0x0c, /* Unit exponent: -4 */ \
+		UNIT_2, 0x01, 0x10, /* Time: Second */ \
+		PHYSICAL_MAXIMUM_3, 0xff, 0xff, 0x00, 0x00, \
+		LOGICAL_MAXIMUM_3, 0xff, 0xff, 0x00, 0x00, \
+		USAGE, 0x56, /* Usage: Scan Time */ \
+		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
+		USAGE, 0x54, /* Usage: Contact Count */ \
+		LOGICAL_MAXIMUM, 0x7f, \
+		REPORT_SIZE, 0x08, \
+		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
+		USAGE_PAGE, 0x09, /* Usage Page: Button */ \
+		USAGE, 0x01, /* Button 1 */ \
+		LOGICAL_MAXIMUM, 0x01, \
+		REPORT_SIZE, 0x01, \
+		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
+		REPORT_COUNT, 0x07, \
+		INPUT, 0x03, /* Input: (Const, Var, Abs) */ \
+		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
+		REPORT_ID, REPORTID_DEVICE_CAPS, \
+		USAGE, 0x55, /* Usage: Maximum Contacts */ \
+		USAGE, 0x59, /* Usage: Touchpad Button Type*/ \
+		LOGICAL_MINIMUM, 0x00, \
+		LOGICAL_MAXIMUM_2, 0xff, 0x00, \
+		REPORT_SIZE, 0x08, \
+		REPORT_COUNT, 0x02, \
+		FEATURE, 0x02, \
+		USAGE_PAGE_1, 0x00, 0xff, \
+		REPORT_ID, REPORTID_PTPHQA, \
+		USAGE, 0xc5, \
+		LOGICAL_MINIMUM, 0x00, \
+		LOGICAL_MAXIMUM_2, 0xff, 0x00, \
+		REPORT_SIZE, 0x08, \
+		REPORT_COUNT_2, 0x00, 0x01, \
+		FEATURE, 0x02, \
+	END_COLLECTION /* End Collection */

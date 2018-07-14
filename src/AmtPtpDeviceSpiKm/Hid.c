@@ -12,6 +12,12 @@ HID_REPORT_DESCRIPTOR AmtPtpSpiFamily1ReportDescriptor[] = {
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
 };
 
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily1TouchscreenReportDescriptor[] = {
+	AAPL_SPI_SERIES1_TOUCHSCREEN_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
 CONST HID_DESCRIPTOR AmtPtpSpiFamily1DefaultHidDescriptor = {
 	0x09,   // bLength
 	0x21,   // bDescriptorType
@@ -25,7 +31,13 @@ CONST HID_DESCRIPTOR AmtPtpSpiFamily1DefaultHidDescriptor = {
 };
 
 HID_REPORT_DESCRIPTOR AmtPtpSpiFamily2ReportDescriptor[] = {
-	AAPL_SPI_SERIES2_PTP_TLC,
+	AAPL_SPI_SERIES2_TOUCHSCREEN_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily2TouchscreenReportDescriptor[] = {
+	AAPL_SPI_SERIES2_TOUCHSCREEN_TLC,
 	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
 };
@@ -336,16 +348,32 @@ AmtPtpGetReportDescriptor(
 		case 0x0275:
 		case 0x0279:
 		{
-			CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.DescriptorList[0].wReportLength;
-			Descriptor = (PVOID) &AmtPtpSpiFamily1ReportDescriptor;
+			if (pDeviceContext->ReportType == PrecisionTouchpad)
+			{
+				CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID) &AmtPtpSpiFamily1ReportDescriptor;
+			}
+			else if (pDeviceContext->ReportType == Touchscreen)
+			{
+				CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID) &AmtPtpSpiFamily1TouchscreenReportDescriptor;
+			}
 			break;
 		}
 		// MacBookPro 11, 12
 		case 0x0272:
 		case 0x0273:
 		{
-			CopiedSize = AmtPtpSpiFamily2DefaultHidDescriptor.DescriptorList[0].wReportLength;
-			Descriptor = (PVOID) &AmtPtpSpiFamily2ReportDescriptor;
+			if (pDeviceContext->ReportType == PrecisionTouchpad)
+			{
+				CopiedSize = AmtPtpSpiFamily2DefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID)&AmtPtpSpiFamily2ReportDescriptor;
+			}
+			else if (pDeviceContext->ReportType == Touchscreen)
+			{
+				CopiedSize = AmtPtpSpiFamily2DefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID)&AmtPtpSpiFamily2TouchscreenReportDescriptor;
+			}
 			break;
 		}
 		default:
