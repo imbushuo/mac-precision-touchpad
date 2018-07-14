@@ -9,9 +9,10 @@ AmtPtpSpiInputRoutineWorker(
 {
 	NTSTATUS Status;
 	PDEVICE_CONTEXT pDeviceContext;
-	WDF_REQUEST_REUSE_PARAMS ReuseParams;
-	WDF_OBJECT_ATTRIBUTES RequestAttributes;
+	WDF_OBJECT_ATTRIBUTES Attributes;
 	BOOLEAN RequestStatus;
+	WDFREQUEST SpiHidReadRequest;
+	WDFMEMORY SpiHidReadOutputMemory;
 
 	PAGED_CODE();
 
@@ -22,82 +23,75 @@ AmtPtpSpiInputRoutineWorker(
 	));
 
 	pDeviceContext = DeviceGetContext(Device);
+	WDF_OBJECT_ATTRIBUTES_INIT(&Attributes);
+	Attributes.ParentObject = pDeviceContext->SpiDevice;
 
-	if (!pDeviceContext->InitialCompleted)
+	Status = WdfRequestCreate(
+		&Attributes,
+		pDeviceContext->SpiTrackpadIoTarget,
+		&SpiHidReadRequest
+	);
+
+	if (!NT_SUCCESS(Status))
 	{
-		WDF_OBJECT_ATTRIBUTES_INIT(&RequestAttributes);
-		RequestAttributes.ParentObject = pDeviceContext->SpiDevice;
-
-		Status = WdfRequestCreate(
-			&RequestAttributes,
-			pDeviceContext->SpiTrackpadIoTarget,
-			&pDeviceContext->SpiHidReadRequest
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! WdfRequestCreate fails, status = %!STATUS!",
+			Status
 		);
 
-		if (!NT_SUCCESS(Status))
-		{
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_DRIVER,
-				"%!FUNC! WdfRequestCreate fails, status = %!STATUS!",
-				Status
-			);
-
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"WdfRequestCreate fails, status = 0x%x \n",
-				Status
+		KdPrintEx((
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_INFO_LEVEL,
+			"WdfRequestCreate fails, status = 0x%x \n",
+			Status
 			));
 
-			pDeviceContext->DelayedRequest = TRUE;
-			return;
-		}
-
-		pDeviceContext->InitialCompleted = TRUE;
+		pDeviceContext->DelayedRequest = TRUE;
+		return;
 	}
-	else
+
+	WDF_OBJECT_ATTRIBUTES_INIT(&Attributes);
+	Attributes.ParentObject = SpiHidReadRequest;
+
+	Status = WdfMemoryCreate(
+		&Attributes,
+		NonPagedPoolNx,
+		PTP_POOL_TAG,
+		REPORT_BUFFER_SIZE,
+		&SpiHidReadOutputMemory,
+		NULL
+	);
+
+	if (!NT_SUCCESS(Status))
 	{
-		WDF_REQUEST_REUSE_PARAMS_INIT(
-			&ReuseParams,
-			WDF_REQUEST_REUSE_NO_FLAGS,
-			STATUS_NOT_SUPPORTED
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! WdfMemoryCreate fails, status = %!STATUS!",
+			Status
 		);
 
-		Status = WdfRequestReuse(
-			pDeviceContext->SpiHidReadRequest,
-			&ReuseParams
-		);
+		KdPrintEx((
+			DPFLTR_IHVDRIVER_ID,
+			DPFLTR_INFO_LEVEL,
+			"WdfMemoryCreate fails, status = 0x%x \n",
+			Status
+			));
 
-		if (!NT_SUCCESS(Status))
-		{
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_DRIVER,
-				"%!FUNC! WdfRequestReuse fails, status = %!STATUS!",
-				Status
-			);
-
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"WdfRequestReuse fails, status = 0x%x \n",
-				Status
-				));
-
-			pDeviceContext->DelayedRequest = TRUE;
-			return;
-		}
+		pDeviceContext->DelayedRequest = TRUE;
+		return;
 	}
 
 	// Invoke HID read request to the device.
 	Status = WdfIoTargetFormatRequestForInternalIoctl(
 		pDeviceContext->SpiTrackpadIoTarget,
-		pDeviceContext->SpiHidReadRequest,
+		SpiHidReadRequest,
 		IOCTL_HID_READ_REPORT,
-		pDeviceContext->SpiHidReadBuffer,
+		SpiHidReadOutputMemory,
 		0,
-		pDeviceContext->SpiHidReadBuffer,
+		SpiHidReadOutputMemory,
 		0
 	);
 
@@ -122,13 +116,13 @@ AmtPtpSpiInputRoutineWorker(
 	}
 
 	WdfRequestSetCompletionRoutine(
-		pDeviceContext->SpiHidReadRequest,
+		SpiHidReadRequest,
 		AmtPtpRequestCompletionRoutine,
 		pDeviceContext
 	);
 
 	RequestStatus = WdfRequestSend(
-		pDeviceContext->SpiHidReadRequest,
+		SpiHidReadRequest,
 		pDeviceContext->SpiTrackpadIoTarget,
 		NULL
 	);
@@ -176,7 +170,6 @@ AmtPtpRequestCompletionRoutine(
 
 	PAGED_CODE();
 	UNREFERENCED_PARAMETER(Target);
-	UNREFERENCED_PARAMETER(Params);
 
 	KdPrintEx((
 		DPFLTR_IHVDRIVER_ID,
@@ -229,7 +222,7 @@ AmtPtpRequestCompletionRoutine(
 	}
 
 	SpiRequestLength = (LONG) WdfRequestGetInformation(SpiRequest);
-	pSpiTrackpadPacket = (PSPI_TRACKPAD_PACKET) WdfMemoryGetBuffer(pDeviceContext->SpiHidReadBuffer, NULL);
+	pSpiTrackpadPacket = (PSPI_TRACKPAD_PACKET) WdfMemoryGetBuffer(Params->Parameters.Ioctl.Output.Buffer, NULL);
 
 	// Get Counter
 	KeQueryPerformanceCounter(
@@ -263,6 +256,9 @@ AmtPtpRequestCompletionRoutine(
 	{
 		PtpReport.ScanTime = (USHORT) CounterDelta;
 	}
+
+	// Done with the prev memory
+	WdfObjectDelete(SpiRequest);
 
 	Status = WdfRequestRetrieveOutputMemory(
 		PtpRequest,

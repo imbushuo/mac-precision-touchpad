@@ -118,23 +118,6 @@ Return Value:
 			TRUE
 		);
 
-		//
-		// Initialize buffer.
-		//
-		Status = WdfMemoryCreate(
-			WDF_NO_OBJECT_ATTRIBUTES,
-			NonPagedPool,
-			PTP_POOL_TAG,
-			REPORT_BUFFER_SIZE,
-			&pDeviceContext->SpiHidReadBuffer,
-			NULL
-		);
-
-		if (!NT_SUCCESS(Status))
-		{
-			goto exit;
-		}
-
         //
         // Create a device interface so that applications can find and talk
         // to us.
@@ -416,14 +399,6 @@ AmtPtpEvtDeviceD0Exit(
 	// Set flag & it will stop HID read loop thread
 	pDeviceContext->DeviceReady = FALSE;
 
-	// Cancel current device request
-	if (pDeviceContext->PendingRequest)
-	{
-		WdfRequestCancelSentRequest(
-			pDeviceContext->SpiHidReadRequest
-		);
-	}
-
 	// Wait for signaled state
 	KeWaitForSingleObject(
 		&pDeviceContext->PtpRequestRoutineEvent,
@@ -662,12 +637,6 @@ AmtPtpSpiInputThreadRoutine(
 		}
 		
 		KeDelayExecutionThread(KernelMode, FALSE, &WaitInterval);
-
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"AmtPtpSpiInputThreadRoutine: loop routine. \n"
-		));
 	}
 
 	// Notify that we are safe to terminate
