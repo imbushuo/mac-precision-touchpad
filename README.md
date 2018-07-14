@@ -9,13 +9,16 @@ This project aims to implement Windows Precision Touchpad Protocol for Apple Mac
 ## Installation
 To install, go to the Releases tab in Github and download the newest version, then directly install the INF file (you don't have to enable manual trust, as recent builds are cross-signed by DigiCert). If you want to try latest changes, you can click "Build Status" badge and download CI builds (tagged with commit ID and machine architecture) manually.
 
+**Note: SPI version needs at least Windows 10, version 1709 to work.**
+
 ## See it in action (YouTube video)
 
 [![Preview of Windows Precision Touchpad for MacBook Pro](https://img.youtube.com/vi/7dFqtcDArUg/0.jpg)](https://www.youtube.com/watch?v=7dFqtcDArUg)
 
 ## For developers
 
-It is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit (at least Creators Update version) is required for development and testing.
+- SPI version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit (at least 1709) is required for development and testing.
+- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit (at least Creators Update version) is required for development and testing.
 
 ## Device support
 
@@ -27,7 +30,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] All recent MacBook Air (Please report if your model is not supported)
 - [x] Apple Magic Trackpad 2 (Not stable)
 - [ ] _(Work in progress)_ MacBook Pro with Retina Display (2014, 2015)
-- [ ] _(Work in progress)_ MacBook Pro 2015, 2016, 2017
+- [x] New MacBook (12-inch)
+- [] _(Work in progress)_ MacBook Pro 2015, 2016, 2017
 
 ## Roadmap
 
@@ -39,7 +43,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Device Test (Magic Trackpad 2)
 - [x] Refine input experience (tip switch detection and pressure)
 - [x] Refine input experience (gesture experience)
-- [ ] More Models (I need donation)
+- [x] More Models (I need donation)
+- [x] SPI
 - [ ] Signal Processing Algorithm (Papers, papers!)
 
 ## Acknowledgements
