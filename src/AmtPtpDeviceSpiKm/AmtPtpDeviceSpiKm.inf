@@ -36,10 +36,10 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0275&MI_02
 ; MacBook10,1 (MacBook 12-inch, Early 2017)
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0279&MI_02
-; MacBookPro 14,1 / 14,2 (MacBook Pro 13-inch, 2017)
+; MacBookPro 13,1 / 13,2 / 14,1 / 14,2 (MacBook Pro 13-inch, 2017)
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0276&MI_02
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0277&MI_02
-; MacBookPro 14,1 / 14,2 (MacBook Pro 15-inch, 2017)
+; MacBookPro 13,3 / 14,3 (MacBook Pro 15-inch, 2017)
 %AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0278&MI_02
 
 [AmtPtpDeviceSpiKm_Device.NT]
