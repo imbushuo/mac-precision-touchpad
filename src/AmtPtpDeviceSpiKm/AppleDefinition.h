@@ -57,6 +57,11 @@ static const SPI_TRACKPAD_INFO SpiTrackpadConfigTable[] =
 	/* MacBookPro11,1 / MacBookPro12,1 */
 	{ 0x05ac, 0x0272, -4750, 5280, -150, 6730 },
 	{ 0x05ac, 0x0273, -4750, 5280, -150, 6730 },
+	/* MacBookPro14,1 / MacBookPro14,2 */
+	{ 0x05ac, 0x0276, -6243, 6749, -170, 7685 },
+	{ 0x05ac, 0x0277, -6243, 6749, -170, 7685 },
+	/* MacBookPro14,3 */
+	{ 0x05ac, 0x0278, -7456, 7976, -163, 9283 },
 	/* Terminator */
 	{ 0 }
 };

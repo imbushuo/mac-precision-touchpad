@@ -54,6 +54,54 @@ CONST HID_DESCRIPTOR AmtPtpSpiFamily2DefaultHidDescriptor = {
 	}
 };
 
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily3aReportDescriptor[] = {
+	AAPL_SPI_SERIES3_13_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily3aTouchscreenReportDescriptor[] = {
+	AAPL_SPI_SERIES3_13_TOUCHSCREEN_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+CONST HID_DESCRIPTOR AmtPtpSpiFamily3aDefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+	{
+		0x22,										// bDescriptorType
+		sizeof(AmtPtpSpiFamily3aReportDescriptor)    // bDescriptorLength
+	}
+};
+
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily3bReportDescriptor[] = {
+	AAPL_SPI_SERIES3_15_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+HID_REPORT_DESCRIPTOR AmtPtpSpiFamily3bTouchscreenReportDescriptor[] = {
+	AAPL_SPI_SERIES3_15_TOUCHSCREEN_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+CONST HID_DESCRIPTOR AmtPtpSpiFamily3bDefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+	{
+		0x22,										// bDescriptorType
+		sizeof(AmtPtpSpiFamily3bReportDescriptor)    // bDescriptorLength
+	}
+};
+
 #endif
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -146,7 +194,7 @@ AmtPtpGetHidDescriptor(
 			}
 			break;
 		}
-		// MacBook 11, 12
+		// MacBookPro 11, 12 (13-inch). 15-inch is USB trackpad
 		case 0x0272:
 		case 0x0273:
 		{
@@ -167,6 +215,77 @@ AmtPtpGetHidDescriptor(
 				RequestMemory,
 				0,
 				(PVOID)&AmtPtpSpiFamily2DefaultHidDescriptor,
+				CopiedSize
+			);
+
+			if (!NT_SUCCESS(Status))
+			{
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					Status
+				);
+				return Status;
+			}
+			break;
+		}
+		// MacBookPro 13, 14 (13-inch)
+		case 0x0276:
+		case 0x0277:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 3A"
+			);
+
+			KdPrintEx((
+				DPFLTR_IHVDRIVER_ID,
+				DPFLTR_INFO_LEVEL,
+				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 3A \n"
+			));
+
+			CopiedSize = AmtPtpSpiFamily3aDefaultHidDescriptor.bLength;
+			Status = WdfMemoryCopyFromBuffer(
+				RequestMemory,
+				0,
+				(PVOID)&AmtPtpSpiFamily3aDefaultHidDescriptor,
+				CopiedSize
+			);
+
+			if (!NT_SUCCESS(Status))
+			{
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					Status
+				);
+				return Status;
+			}
+			break;
+		}
+		// MacBookPro 13, 14 (15-inch)
+		case 0x0278:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 3B"
+			);
+
+			KdPrintEx((
+				DPFLTR_IHVDRIVER_ID,
+				DPFLTR_INFO_LEVEL,
+				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 3B \n"
+				));
+
+			CopiedSize = AmtPtpSpiFamily3bDefaultHidDescriptor.bLength;
+			Status = WdfMemoryCopyFromBuffer(
+				RequestMemory,
+				0,
+				(PVOID)&AmtPtpSpiFamily3bDefaultHidDescriptor,
 				CopiedSize
 			);
 
@@ -360,7 +479,7 @@ AmtPtpGetReportDescriptor(
 			}
 			break;
 		}
-		// MacBookPro 11, 12
+		// MacBookPro 11, 12 (13-inch)
 		case 0x0272:
 		case 0x0273:
 		{
@@ -373,6 +492,37 @@ AmtPtpGetReportDescriptor(
 			{
 				CopiedSize = AmtPtpSpiFamily2DefaultHidDescriptor.DescriptorList[0].wReportLength;
 				Descriptor = (PVOID)&AmtPtpSpiFamily2TouchscreenReportDescriptor;
+			}
+			break;
+		}
+		// MacBookPro 13, 14 (13-inch)
+		case 0x0276:
+		case 0x0277:
+		{
+			if (pDeviceContext->ReportType == PrecisionTouchpad)
+			{
+				CopiedSize = AmtPtpSpiFamily3aDefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID)&AmtPtpSpiFamily3aReportDescriptor;
+			}
+			else if (pDeviceContext->ReportType == Touchscreen)
+			{
+				CopiedSize = AmtPtpSpiFamily3aDefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID)&AmtPtpSpiFamily3aTouchscreenReportDescriptor;
+			}
+			break;
+		}
+		// MacBookPro 13, 14 (15-inch)
+		case 0x0278:
+		{
+			if (pDeviceContext->ReportType == PrecisionTouchpad)
+			{
+				CopiedSize = AmtPtpSpiFamily3bDefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID)&AmtPtpSpiFamily3bReportDescriptor;
+			}
+			else if (pDeviceContext->ReportType == Touchscreen)
+			{
+				CopiedSize = AmtPtpSpiFamily3bDefaultHidDescriptor.DescriptorList[0].wReportLength;
+				Descriptor = (PVOID)&AmtPtpSpiFamily3bTouchscreenReportDescriptor;
 			}
 			break;
 		}

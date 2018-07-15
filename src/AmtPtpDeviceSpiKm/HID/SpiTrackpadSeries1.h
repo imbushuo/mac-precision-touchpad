@@ -24,7 +24,7 @@
 		/* End of a byte */ \
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
-		/* This hard-coded size is designed for MacBookAir 7,2 */ \
+		/* This hard-coded size is designed for MacBook 8/9/10 */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
 		LOGICAL_MAXIMUM_2, 0xaa, 0x29, /* Logical Maximum: 10666 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \

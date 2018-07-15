@@ -60,6 +60,9 @@
     <ClInclude Include="HID\SpiTrackpadSeries2.h">
       <Filter>Device Specific Metadata Files</Filter>
     </ClInclude>
+    <ClInclude Include="HID\SpiTrackpadSeries3.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
