@@ -8,6 +8,22 @@ This project aims to implement Windows Precision Touchpad Protocol for Apple Mac
 
 Both USB and SPI trackpads are supported.
 
+## See it in action (YouTube video)
+
+[![Preview of Windows Precision Touchpad for MacBook Pro](https://img.youtube.com/vi/7dFqtcDArUg/0.jpg)](https://www.youtube.com/watch?v=7dFqtcDArUg)
+
+## Help needed!
+
+Please open an issue for model support. In the issue, attach your MacBook model identifier (e.g. MacBook9,1) and HID device ID (you can view it in System Report in macOS, or Properties Window of the "Apple SPI Trackpad" or "Apple USB Trackpad" in Device Manager of Windows). Here is an example in macOS:
+
+![image_2018-07-15_22-59-15.png](https://i.loli.net/2018/07/15/5b4b616019799.png)
+
+If you like my work, please consider buying me a coffee. Thank you for your support!
+
+<a href="https://www.buymeacoffee.com/imbushuo" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
+Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
+
 ## USB Installation
 
 1. Go to the release tab in Github and download the newest version
@@ -24,10 +40,6 @@ If you want to try latest changes, you can click "Build Status" badge and downlo
 (Coming soon)
 
 **Note: SPI version needs at least Windows 10, version 1709 to work.**
-
-## See it in action (YouTube video)
-
-[![Preview of Windows Precision Touchpad for MacBook Pro](https://img.youtube.com/vi/7dFqtcDArUg/0.jpg)](https://www.youtube.com/watch?v=7dFqtcDArUg)
 
 ## For developers
 
@@ -73,6 +85,3 @@ I would like to thank projects like [magictrackpad2-dkms](https://github.com/rob
 - USB driver is licensed under [GPLv2](LICENSE-GPL.md).
 - SPI driver is licensed under [MIT](LICENSE-MIT.md).
 
-## Donation
-
-- [PayPal](https://www.paypal.com/paypalme/imbushuo)
