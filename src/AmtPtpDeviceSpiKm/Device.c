@@ -661,7 +661,8 @@ AmtPtpSpiInputThreadRoutine(
 	);
 
 	// Initialize wait interval
-	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(100);
+	// This is not likely to be triggered: set it to 5 secs
+	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(5000);
 
 	KdPrintEx((
 		DPFLTR_IHVDRIVER_ID,
