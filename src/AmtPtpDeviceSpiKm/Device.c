@@ -661,8 +661,8 @@ AmtPtpSpiInputThreadRoutine(
 	);
 
 	// Initialize wait interval
-	// This is not likely to be triggered: set it to 5 secs
-	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(5000);
+	// This is not likely to be triggered: set it to 10 ms
+	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(10);
 
 	KdPrintEx((
 		DPFLTR_IHVDRIVER_ID,
@@ -672,20 +672,7 @@ AmtPtpSpiInputThreadRoutine(
 
 	while (pDeviceContext->DeviceReady)
 	{
-		if (pDeviceContext->DelayedRequest)
-		{
-			pDeviceContext->DelayedRequest = FALSE;
-
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"AmtPtpSpiInputThreadRoutine: AmtPtpSpiInputRoutineWorker entry. \n"
-			));
-
-			// Delayed request: Pass it to the worker.
-			AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice);
-		}
-		
+		AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice);
 		KeDelayExecutionThread(KernelMode, FALSE, &WaitInterval);
 	}
 

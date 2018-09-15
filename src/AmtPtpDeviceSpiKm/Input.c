@@ -333,11 +333,6 @@ set_event:
 		FALSE
 	);
 
-	// Invoke next request; not really care about the result
-	AmtPtpSpiInputRoutineWorker(
-		pDeviceContext->SpiDevice
-	);
-
 	KdPrintEx((
 		DPFLTR_IHVDRIVER_ID,
 		DPFLTR_INFO_LEVEL,

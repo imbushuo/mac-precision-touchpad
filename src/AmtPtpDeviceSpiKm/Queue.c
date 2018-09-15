@@ -149,7 +149,6 @@ DbgIoControlGetString(
 	default:
 		return "IOCTL_UNKNOWN";
 	}
-
 }
 
 VOID
