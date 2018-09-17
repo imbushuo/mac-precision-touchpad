@@ -374,6 +374,14 @@ AmtPtpEvtDeviceD0Entry(
 	pDeviceContext->DeviceReady = TRUE;
 	pDeviceContext->DelayedRequest = TRUE;
 
+	// Reset mapping
+	for (UINT8 i = 0; i < MAPPING_MAX; i++)
+	{
+		pDeviceContext->PtpMapping[i].ContactID = -1;
+		pDeviceContext->PtpMapping[i].OriginalX = -1;
+		pDeviceContext->PtpMapping[i].OriginalY = -1;
+	}
+
 	// Set time
 	KeQueryPerformanceCounter(
 		&pDeviceContext->LastReportTime
@@ -487,6 +495,14 @@ AmtPtpEvtDeviceD0Exit(
 		Device,
 		FALSE
 	);
+
+	// Reset mapping
+	for (UINT8 i = 0; i < MAPPING_MAX; i++)
+	{
+		pDeviceContext->PtpMapping[i].ContactID = -1;
+		pDeviceContext->PtpMapping[i].OriginalX = -1;
+		pDeviceContext->PtpMapping[i].OriginalY = -1;
+	}
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,

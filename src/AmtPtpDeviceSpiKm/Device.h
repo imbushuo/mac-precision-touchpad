@@ -27,6 +27,16 @@ typedef struct _SPI_TRACKPAD_INFO {
 	SHORT YMax;
 } SPI_TRACKPAD_INFO, *PSPI_TRACKPAD_INFO;
 
+// Stupid Microsoft only assigns a UCHAR for touch ID
+// we could have a better approach
+typedef struct _PTP_AAPL_MAPPING {
+	SHORT OriginalX;
+	SHORT OriginalY;
+	INT8 ContactID;
+} PTP_AAPL_MAPPING, *PPTP_AAPL_MAPPING;
+
+#define MAPPING_MAX 10
+
 typedef enum _REPORT_TYPE {
 	PrecisionTouchpad = 0,
 	Touchscreen = 1,
@@ -57,6 +67,8 @@ typedef struct _DEVICE_CONTEXT
 	BOOLEAN PtpInputOn;
 	BOOLEAN PtpReportTouch;
 	BOOLEAN PtpReportButton;
+	// Should be PTP_MAX_CONTACT * 2
+	PTP_AAPL_MAPPING PtpMapping[MAPPING_MAX];
 
 	// Timer
 	LARGE_INTEGER LastReportTime;

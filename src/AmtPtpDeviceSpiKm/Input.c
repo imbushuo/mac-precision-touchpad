@@ -16,12 +16,6 @@ AmtPtpSpiInputRoutineWorker(
 
 	PAGED_CODE();
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSpiInputRoutineWorker entry. \n"
-	));
-
 	pDeviceContext = DeviceGetContext(Device);
 	WDF_OBJECT_ATTRIBUTES_INIT(&Attributes);
 	Attributes.ParentObject = pDeviceContext->SpiDevice;
@@ -136,12 +130,6 @@ AmtPtpSpiInputRoutineWorker(
 		));
 	}
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSpiInputRoutineWorker exit. \n"
-	));
-
 	pDeviceContext->PendingRequest = RequestStatus;
 	pDeviceContext->DelayedRequest = !RequestStatus;
 }
@@ -167,15 +155,10 @@ AmtPtpRequestCompletionRoutine(
 
 	LARGE_INTEGER CurrentCounter;
 	LONGLONG CounterDelta;
+	BOOLEAN SessionEnded = TRUE;
 
 	PAGED_CODE();
 	UNREFERENCED_PARAMETER(Target);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpRequestCompletionRoutine entry \n"
-	));
 
 	// Get context
 	pDeviceContext = (PDEVICE_CONTEXT) Context;
@@ -240,12 +223,73 @@ AmtPtpRequestCompletionRoutine(
 	UINT8 AdjustedCount = (pSpiTrackpadPacket->NumOfFingers > 5) ? 5 : pSpiTrackpadPacket->NumOfFingers;
 	for (UINT8 Count = 0; Count < AdjustedCount; Count++)
 	{
-		PtpReport.Contacts[Count].ContactID = Count;
+		INT8 MappedContactPoint = -1;
+		for (UINT8 i = 0; i < MAPPING_MAX; i++)
+		{
+			if (pDeviceContext->PtpMapping[i].OriginalX == pSpiTrackpadPacket->Fingers[Count].OriginalX &&
+				pDeviceContext->PtpMapping[i].OriginalY == pSpiTrackpadPacket->Fingers[Count].OriginalY)
+			{
+				MappedContactPoint = pDeviceContext->PtpMapping[i].ContactID;
+				break;
+			}
+		}
+
+		// Failed? Assign a slot
+		if (MappedContactPoint == -1)
+		{
+			for (UINT8 i = 0; i < MAPPING_MAX; i++)
+			{
+				if (pDeviceContext->PtpMapping[i].OriginalX == -1)
+				{
+					MappedContactPoint = i;
+					pDeviceContext->PtpMapping[i].OriginalX = pSpiTrackpadPacket->Fingers[Count].OriginalX;
+					pDeviceContext->PtpMapping[i].OriginalY = pSpiTrackpadPacket->Fingers[Count].OriginalY;
+					break;
+				}
+			}
+		}
+
+		// Should never happen
+		if (MappedContactPoint == -1)
+		{
+			Status = STATUS_INVALID_DEVICE_STATE;
+			goto exit;
+		}
+
+		PtpReport.Contacts[Count].ContactID = (UINT8) MappedContactPoint;
 		PtpReport.Contacts[Count].X = (USHORT) (pSpiTrackpadPacket->Fingers[Count].X - pDeviceContext->TrackpadInfo.XMin);
 		PtpReport.Contacts[Count].Y = (USHORT) (pDeviceContext->TrackpadInfo.YMax - pSpiTrackpadPacket->Fingers[Count].Y);
 		PtpReport.Contacts[Count].TipSwitch = (pSpiTrackpadPacket->Fingers[Count].Pressure > 0) ? 1 : 0;
+
+		// $S = \pi * (Touch_{Major} * Touch_{Minor}) / 4$
+		// $S = \pi * r^2$
+		// $r^2 = (Touch_{Major} * Touch_{Minor}) / 4$
+		// Using i386 in 2018 is evil
 		PtpReport.Contacts[Count].Confidence = (pSpiTrackpadPacket->Fingers[Count].TouchMajor < 2500 &&
 			pSpiTrackpadPacket->Fingers[Count].TouchMinor < 2500) ? 1 : 0;
+
+		if (!SessionEnded && PtpReport.Contacts[Count].TipSwitch) SessionEnded = FALSE;
+
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_HID_INPUT,
+			"%!FUNC! PTP Contact %d OX %d, OY %d, X %d, Y %d",
+			Count,
+			pSpiTrackpadPacket->Fingers[Count].OriginalX,
+			pSpiTrackpadPacket->Fingers[Count].OriginalY,
+			pSpiTrackpadPacket->Fingers[Count].X,
+			pSpiTrackpadPacket->Fingers[Count].Y
+		);
+	}
+
+	if (SessionEnded)
+	{
+		for (UINT8 i = 0; i < MAPPING_MAX; i++)
+		{
+			pDeviceContext->PtpMapping[i].ContactID = -1;
+			pDeviceContext->PtpMapping[i].OriginalX = -1;
+			pDeviceContext->PtpMapping[i].OriginalY = -1;
+		}
 	}
 
 	if (CounterDelta >= 0xFF)
@@ -316,6 +360,7 @@ AmtPtpRequestCompletionRoutine(
 		sizeof(PTP_REPORT)
 	);
 
+	// Clear flag
 	pDeviceContext->PendingRequest = FALSE;
 
 exit:
@@ -332,10 +377,4 @@ set_event:
 		0, 
 		FALSE
 	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpRequestCompletionRoutine exit \n"
-	));
 }

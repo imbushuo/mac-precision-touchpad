@@ -175,17 +175,6 @@ AmtPtpDeviceSpiKmEvtIoInternalDeviceControl(
 		(int) InputBufferLength, 
 		IoControlCode
 	);
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpDeviceSpiKmEvtIoDeviceControl %s: Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d \n",
-		DbgIoControlGetString(IoControlCode),
-		Queue,
-		Request,
-		(int)OutputBufferLength,
-		(int)InputBufferLength,
-		IoControlCode
-	));
 
 	if (!pDeviceContext->DeviceReady)
 	{
