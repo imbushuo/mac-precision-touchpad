@@ -241,8 +241,8 @@ AmtPtpRequestCompletionRoutine(
 	for (UINT8 Count = 0; Count < AdjustedCount; Count++)
 	{
 		PtpReport.Contacts[Count].ContactID = Count;
-		PtpReport.Contacts[Count].X = (USHORT) (pSpiTrackpadPacket->Fingers[Count].X - pDeviceContext->TrackpadInfo.XMin);
-		PtpReport.Contacts[Count].Y = (USHORT) (pDeviceContext->TrackpadInfo.YMax - pSpiTrackpadPacket->Fingers[Count].Y);
+		PtpReport.Contacts[Count].X = ((pSpiTrackpadPacket->Fingers[Count].X - pDeviceContext->TrackpadInfo.XMin) > 0) ? (USHORT)(pSpiTrackpadPacket->Fingers[Count].X - pDeviceContext->TrackpadInfo.XMin) : 0;
+		PtpReport.Contacts[Count].Y = ((pDeviceContext->TrackpadInfo.YMax - pSpiTrackpadPacket->Fingers[Count].Y) > 0) ? (USHORT)(pDeviceContext->TrackpadInfo.YMax - pSpiTrackpadPacket->Fingers[Count].Y) : 0;
 		PtpReport.Contacts[Count].TipSwitch = (pSpiTrackpadPacket->Fingers[Count].Pressure > 0) ? 1 : 0;
 		PtpReport.Contacts[Count].Confidence = (pSpiTrackpadPacket->Fingers[Count].TouchMajor < 2500 &&
 			pSpiTrackpadPacket->Fingers[Count].TouchMinor < 2500) ? 1 : 0;
