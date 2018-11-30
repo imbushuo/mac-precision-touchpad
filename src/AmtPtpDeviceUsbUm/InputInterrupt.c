@@ -328,8 +328,8 @@ AmtPtpServiceTouchInputInterrupt(
 			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
 
 			// Translate X and Y
-			x = (USHORT) (AmtRawToInteger(f->abs_x) - DeviceContext->DeviceInfo->x.min);
-			y = (USHORT) (DeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y));
+			x = (AmtRawToInteger(f->abs_x) - DeviceContext->DeviceInfo->x.min) > 0 ? ((USHORT)(AmtRawToInteger(f->abs_x) - DeviceContext->DeviceInfo->x.min)) : 0;
+			y = (DeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y)) > 0 ? ((USHORT)(DeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y))) : 0;
 
 			// Defuzz functions remain the same
 			// TODO: Implement defuzz later
