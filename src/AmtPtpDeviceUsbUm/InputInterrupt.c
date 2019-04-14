@@ -143,7 +143,7 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	// Dispatch USB Interrupt routine by device family
 	switch (pDeviceContext->DeviceInfo->tp_type) {
 			case TYPE1:
-			case TYPE4:
+			// case TYPE4:
 			{
 				TraceEvents(
 					TRACE_LEVEL_WARNING,
@@ -155,6 +155,7 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 			// Universal routine handler
 			case TYPE2:
 			case TYPE3:
+			case TYPE4:
 			{
 
 				szBuffer = WdfMemoryGetBuffer(
