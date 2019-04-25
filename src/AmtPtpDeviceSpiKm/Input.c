@@ -223,42 +223,9 @@ AmtPtpRequestCompletionRoutine(
 	UINT8 AdjustedCount = (pSpiTrackpadPacket->NumOfFingers > 5) ? 5 : pSpiTrackpadPacket->NumOfFingers;
 	for (UINT8 Count = 0; Count < AdjustedCount; Count++)
 	{
-		INT8 MappedContactPoint = -1;
-		for (UINT8 i = 0; i < MAPPING_MAX; i++)
-		{
-			if (pDeviceContext->PtpMapping[i].OriginalX == pSpiTrackpadPacket->Fingers[Count].OriginalX &&
-				pDeviceContext->PtpMapping[i].OriginalY == pSpiTrackpadPacket->Fingers[Count].OriginalY)
-			{
-				MappedContactPoint = pDeviceContext->PtpMapping[i].ContactID;
-				break;
-			}
-		}
-
-		// Failed? Assign a slot
-		if (MappedContactPoint == -1)
-		{
-			for (UINT8 i = 0; i < MAPPING_MAX; i++)
-			{
-				if (pDeviceContext->PtpMapping[i].OriginalX == -1)
-				{
-					MappedContactPoint = i;
-					pDeviceContext->PtpMapping[i].OriginalX = pSpiTrackpadPacket->Fingers[Count].OriginalX;
-					pDeviceContext->PtpMapping[i].OriginalY = pSpiTrackpadPacket->Fingers[Count].OriginalY;
-					break;
-				}
-			}
-		}
-
-		// Should never happen
-		if (MappedContactPoint == -1)
-		{
-			Status = STATUS_INVALID_DEVICE_STATE;
-			goto exit;
-		}
-
-		PtpReport.Contacts[Count].ContactID = (UINT8) MappedContactPoint;
-		PtpReport.Contacts[Count].X = (USHORT) (pSpiTrackpadPacket->Fingers[Count].X - pDeviceContext->TrackpadInfo.XMin);
-		PtpReport.Contacts[Count].Y = (USHORT) (pDeviceContext->TrackpadInfo.YMax - pSpiTrackpadPacket->Fingers[Count].Y);
+		PtpReport.Contacts[Count].ContactID = Count;
+		PtpReport.Contacts[Count].X = ((pSpiTrackpadPacket->Fingers[Count].X - pDeviceContext->TrackpadInfo.XMin) > 0) ? (USHORT)(pSpiTrackpadPacket->Fingers[Count].X - pDeviceContext->TrackpadInfo.XMin) : 0;
+		PtpReport.Contacts[Count].Y = ((pDeviceContext->TrackpadInfo.YMax - pSpiTrackpadPacket->Fingers[Count].Y) > 0) ? (USHORT)(pDeviceContext->TrackpadInfo.YMax - pSpiTrackpadPacket->Fingers[Count].Y) : 0;
 		PtpReport.Contacts[Count].TipSwitch = (pSpiTrackpadPacket->Fingers[Count].Pressure > 0) ? 1 : 0;
 
 		// $S = \pi * (Touch_{Major} * Touch_{Minor}) / 4$
