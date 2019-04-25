@@ -55,9 +55,10 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] MacBook Pro with Retina Display (MacBookPro 10,1, MacBookPro10,2 & MacBookPro11,1)
 - [x] All recent MacBook Air (Please report if your model is not supported)
 - [x] Apple Magic Trackpad 2 (Not stable)
-- [x] _(Work in progress)_ MacBook Pro with Retina Display (2014, 2015)
+- [x] MacBook Pro with Retina Display (2014, 2015, 13-inch & 15-inch)
 - [x] New MacBook (12-inch)
 - [x] _(Work in progress)_ MacBook Pro 2015, 2016, 2017 (**I need the device ID for 2016 model**)
+- [ ] _(Needs triage)_ T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018
 
 ## Roadmap
 
