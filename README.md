@@ -43,8 +43,8 @@ If you want to try latest changes, you can click "Build Status" badge and downlo
 
 ## For developers
 
-- SPI version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit (at least 1709) is required for development and testing.
-- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit (at least Creators Update version) is required for development and testing.
+- SPI version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
+- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
 
 ## Device support
 
