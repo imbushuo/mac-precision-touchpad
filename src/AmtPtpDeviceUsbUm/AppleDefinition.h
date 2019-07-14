@@ -56,6 +56,8 @@
 #define USB_DEVICE_ID_APPLE_WELLSPRING9_JIS	0x0274
 /* MagicTrackpad2 (2015) */
 #define USB_DEVICE_ID_APPLE_MAGICTRACKPAD2	0x0265
+/* Apple T2 USB trackpad */
+#define USB_DEVICE_ID_APPLE_T2 0x027d
 
 /* button data structure */
 struct TRACKPAD_BUTTON_DATA {
@@ -398,5 +400,19 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_COORD, -3678, 3934 },
 		{ SN_COORD, -2479, 2586 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
-	}
+	},
+	{
+		USB_DEVICE_ID_APPLE_T2,
+		USB_DEVICE_ID_APPLE_T2,
+		USB_DEVICE_ID_APPLE_T2,
+		HAS_INTEGRATED_BUTTON,
+		0, sizeof(struct TRACKPAD_BUTTON_DATA),
+		0x83, DATAFORMAT(TYPE4),
+		{ SN_PRESSURE, 0, 300 },
+		/* This is incorrect; check actual data later */
+		{ SN_WIDTH, 0, 2048 },
+		{ SN_COORD, -4828, 5345 },
+		{ SN_COORD, -203, 6803 },
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+	},
 };
