@@ -19,9 +19,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Inf Include="AmtPtpDeviceUsbKm.inf">
       <Filter>Driver Files</Filter>
     </Inf>
