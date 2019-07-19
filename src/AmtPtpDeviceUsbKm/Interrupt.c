@@ -105,11 +105,20 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	UNREFERENCED_PARAMETER(Buffer);
 
 	PDEVICE_CONTEXT pDeviceContext = Context;
-	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
-	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
+	size_t headerSize = (unsigned int)pDeviceContext->DeviceInfo->tp_header;
+	size_t fingerprintSize = (unsigned int)pDeviceContext->DeviceInfo->tp_fsize;
 	size_t raw_n, i;
-	UCHAR* szBuffer = NULL;
+	USHORT x = 0, y = 0;
+	UCHAR* TouchBuffer = NULL;
 	const struct TRACKPAD_FINGER* f = NULL;
+
+	LONGLONG PerfCounterDelta;
+	LARGE_INTEGER CurrentPerfCounter;
+	NTSTATUS Status;
+	PTP_REPORT PtpReport;
+
+	WDFREQUEST Request;
+	WDFMEMORY  RequestMemory;
 
 	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0) {
 		TraceEvents(
@@ -121,27 +130,87 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 		return;
 	}
 
-	TraceEvents(
-		TRACE_LEVEL_INFORMATION,
-		TRACE_DRIVER,
-		"%!FUNC! Transferred packet size %lld",
-		NumBytesTransferred
-	);
-
-	szBuffer = WdfMemoryGetBuffer(
+	// Retrieve packet
+	TouchBuffer = WdfMemoryGetBuffer(
 		Buffer,
 		NULL
 	);
 
-	if (szBuffer != NULL) {
-		KeQueryPerformanceCounter(&pDeviceContext->LastReportTime);
-		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
-		UCHAR* f_base = szBuffer + headerSize + pDeviceContext->DeviceInfo->tp_delta;
+	if (TouchBuffer == NULL) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+			"%!FUNC! Failed to retrieve packet"
+		);
+		return;
+	}
+
+	// Retrieve next PTP touchpad request.
+	Status = WdfIoQueueRetrieveNextRequest(
+		pDeviceContext->InputQueue,
+		&Request
+	);
+
+	if (!NT_SUCCESS(Status)) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+			"%!FUNC! No pending PTP request. Disposed"
+		);
+		return;
+	}
+
+	Status = WdfRequestRetrieveOutputMemory(
+		Request,
+		&RequestMemory
+	);
+
+	if (!NT_SUCCESS(Status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, TRACE_DRIVER,
+			"%!FUNC! WdfRequestRetrieveOutputMemory failed with %!STATUS!",
+			Status
+		);
+		return;
+	}
+
+	// Prepare report
+	Status = STATUS_SUCCESS;
+	PtpReport.ReportID = REPORTID_MULTITOUCH;
+	PtpReport.IsButtonClicked = 0;
+	raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
+	UCHAR* f_base = TouchBuffer + headerSize + pDeviceContext->DeviceInfo->tp_delta;
+
+	// Scan time is in 100us
+	KeQueryPerformanceCounter(&CurrentPerfCounter);
+	PerfCounterDelta = (CurrentPerfCounter.QuadPart - pDeviceContext->LastReportTime.QuadPart) / 100;
+	if (PerfCounterDelta > 0xFF) {
+		PerfCounterDelta = 0xFF;
+	}
+
+	PtpReport.ScanTime = (USHORT) PerfCounterDelta;
+
+	if (pDeviceContext->PtpReportTouch) {
+		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
+		PtpReport.ContactCount = (UCHAR) raw_n;
+
 		for (i = 0; i < raw_n; i++) {
 			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
+			
+			// Translate X and Y
+			x = (AmtRawToInteger(f->abs_x) - pDeviceContext->DeviceInfo->x.min) > 0 ? 
+				((USHORT)(AmtRawToInteger(f->abs_x) - pDeviceContext->DeviceInfo->x.min)) : 0;
+			y = (pDeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y)) > 0 ? 
+				((USHORT)(pDeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y))) : 0;
+
+			// Defuzz functions remain the same
+			// TODO: Implement defuzz later
+			PtpReport.Contacts[i].ContactID = (UCHAR) i;
+			PtpReport.Contacts[i].X = x;
+			PtpReport.Contacts[i].Y = y;
+			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f->touch_major) << 1) >= 200;
+			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f->touch_minor) << 1) > 0;
+
 			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_DRIVER,
+				TRACE_LEVEL_INFORMATION, TRACE_INPUT,
 				"Finger %lld AbsX %d AbsY %d TMaj %d TMin %d Origin %d",
 				i,
 				AmtRawToInteger(f->abs_x),
@@ -152,6 +221,40 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 			);
 		}
 	}
+
+	if (pDeviceContext->PtpReportButton) {
+		// Handles trackpad button input here.
+		if (TouchBuffer[pDeviceContext->DeviceInfo->tp_button]) {
+			PtpReport.IsButtonClicked = TRUE;
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION, TRACE_INPUT,
+				"%!FUNC!: Trackpad button clicked"
+			);
+		}
+	}
+
+	// Compose final report and write it back
+	Status = WdfMemoryCopyFromBuffer(
+		RequestMemory,
+		0,
+		(PVOID) &PtpReport,
+		sizeof(PTP_REPORT)
+	);
+
+	if (!NT_SUCCESS(Status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, TRACE_DRIVER,
+			"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+			Status
+		);
+		return;
+	}
+
+	// Set result
+	WdfRequestSetInformation(Request, sizeof(PTP_REPORT));
+
+	// Set completion flag
+	WdfRequestComplete(Request,Status);
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -163,8 +266,13 @@ AmtPtpEvtUsbInterruptReadersFailed(
 )
 {
 	UNREFERENCED_PARAMETER(Pipe);
-	UNREFERENCED_PARAMETER(Status);
 	UNREFERENCED_PARAMETER(UsbdStatus);
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+		"%!FUNC! USB transfer failure %!STATUS!",
+		Status
+	);
 
 	return TRUE;
 }
