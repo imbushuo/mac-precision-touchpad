@@ -102,7 +102,6 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 )
 {
 	UNREFERENCED_PARAMETER(Pipe);
-	UNREFERENCED_PARAMETER(Buffer);
 
 	PDEVICE_CONTEXT pDeviceContext = Context;
 	size_t headerSize = (unsigned int)pDeviceContext->DeviceInfo->tp_header;
@@ -267,12 +266,7 @@ AmtPtpEvtUsbInterruptReadersFailed(
 {
 	UNREFERENCED_PARAMETER(Pipe);
 	UNREFERENCED_PARAMETER(UsbdStatus);
-
-	TraceEvents(
-		TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-		"%!FUNC! USB transfer failure %!STATUS!",
-		Status
-	);
+	UNREFERENCED_PARAMETER(Status);
 
 	return TRUE;
 }

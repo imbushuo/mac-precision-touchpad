@@ -193,7 +193,7 @@ Return Value:
 	pDeviceContext->DeviceInfo = AmtPtpGetDeviceConfig(pDeviceContext->DeviceDescriptor);
 	if (pDeviceContext->DeviceInfo == NULL) {
 		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-			"AmtPtpGetDeviceConfig failed to fine the device config");
+			"AmtPtpGetDeviceConfig failed to find the device config");
 		status = STATUS_INVALID_DEVICE_STATE;
 		return status;
 	}

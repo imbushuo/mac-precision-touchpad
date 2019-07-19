@@ -4,8 +4,8 @@
 
 [Version]
 Signature="$WINDOWS NT$"
-Class=USBDevice
-ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Class=HIDClass
+ClassGuid={745a17a0-74d3-11d0-b6fe-00a0c90f57da}
 Provider=%ManufacturerName%
 CatalogFile=AmtPtpDeviceUsbKm.cat
 DriverVer=
@@ -31,14 +31,17 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with
 [Standard.NT$ARCH$]
 ; T2 trackpad
 %AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_027d&MI_02
-; Test only - Magic Trackpad 2
-%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0265&MI_01
 
 [AmtPtpDeviceUsbKm_Device.NT]
 CopyFiles=Drivers_Dir
 
 [Drivers_Dir]
 AmtPtpDeviceUsbKm.sys
+
+;-------------- Service installation
+[AmtPtpDeviceUsbKm_Device.NT.Services]
+AddService = AmtPtpDeviceUsbKm,, AmtPtpDeviceUsbKm_Service_Inst
+AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst ; Flag 0x2 sets this as the service for the device
 
 [AmtPtpDeviceUsbKm_Device.NT.HW]
 AddReg=AmtPtpDeviceUsbKm_AddReg
@@ -48,10 +51,14 @@ AddReg=AmtPtpDeviceUsbKm_AddReg
 ; Device Manager on Windows 8 and higher.
 ; Uncomment for this device to use %DeviceName% on Windows 8 and higher:
 HKR,,FriendlyName,,%AmtPtpDeviceUsbKm.DeviceDesc%
+HKR,,"LowerFilters",0x00010008,"AmtPtpDeviceUsbKm"
 
-;-------------- Service installation
-[AmtPtpDeviceUsbKm_Device.NT.Services]
-AddService = AmtPtpDeviceUsbKm,%SPSVCINST_ASSOCSERVICE%, AmtPtpDeviceUsbKm_Service_Inst
+; -------------- Microsoft HID KMDF driver install sections
+[mshidkmdf_Service_Inst]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\mshidkmdf.sys
 
 ; -------------- AmtPtpDeviceUsbKm driver install sections
 [AmtPtpDeviceUsbKm_Service_Inst]

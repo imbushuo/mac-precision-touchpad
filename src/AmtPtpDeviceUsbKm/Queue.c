@@ -63,7 +63,7 @@ Return Value:
     //
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
 
-    queueConfig.EvtIoDeviceControl = AmtPtpDeviceUsbKmEvtIoDeviceControl;
+    queueConfig.EvtIoInternalDeviceControl = AmtPtpDeviceUsbKmEvtIoDeviceControl;
     queueConfig.EvtIoStop = AmtPtpDeviceUsbKmEvtIoStop;
 
     status = WdfIoQueueCreate(
@@ -139,10 +139,8 @@ Return Value:
 	WDFDEVICE device = WdfIoQueueGetDevice(Queue);
 	BOOLEAN requestPending = FALSE;
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
-                "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", 
-                Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
+	UNREFERENCED_PARAMETER(InputBufferLength);
+	UNREFERENCED_PARAMETER(OutputBufferLength);
 
 	switch (IoControlCode)
 	{
@@ -168,8 +166,8 @@ Return Value:
 		status = AmtPtpSetFeatures(device, Request);
 		break;
 	case IOCTL_HID_WRITE_REPORT:
-	case IOCTL_HID_SET_OUTPUT_REPORT:
-	case IOCTL_HID_GET_INPUT_REPORT:
+	case IOCTL_UMDF_HID_SET_OUTPUT_REPORT:
+	case IOCTL_UMDF_HID_GET_INPUT_REPORT:
 	case IOCTL_HID_ACTIVATE_DEVICE:
 	case IOCTL_HID_DEACTIVATE_DEVICE:
 	case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:
@@ -179,7 +177,7 @@ Return Value:
 	}
 
 	if (requestPending != TRUE) {
-		WdfRequestComplete(Request, STATUS_SUCCESS);
+		WdfRequestComplete(Request, status);
 	}
 
     return;
