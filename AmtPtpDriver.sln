@@ -96,9 +96,9 @@ Global
 		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|ARM64.ActiveCfg = Release|ARM64
 		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|ARM64.Build.0 = Release|ARM64
 		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|ARM64.Deploy.0 = Release|ARM64
-		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x64.ActiveCfg = Release|x64
-		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x64.Build.0 = Release|x64
-		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x64.Deploy.0 = Release|x64
+		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x64.ActiveCfg = ReleaseSigned|x64
+		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x64.Build.0 = ReleaseSigned|x64
+		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x64.Deploy.0 = ReleaseSigned|x64
 		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x86.ActiveCfg = Release|Win32
 		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x86.Build.0 = Release|Win32
 		{FC08B706-5661-47FA-A840-053B06125750}.ReleaseSigned|x86.Deploy.0 = Release|Win32
