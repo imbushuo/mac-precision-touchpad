@@ -115,6 +115,11 @@ DbgDevicePowerString(
 	_In_ WDF_POWER_DEVICE_STATE Type
 );
 
+PCHAR
+DbgIoControlGetString(
+	_In_ ULONG IoControlCode
+);
+
 //
 // Device functions
 //
@@ -123,6 +128,58 @@ NTSTATUS
 AmtPtpSetWellspringMode(
 	_In_ PDEVICE_CONTEXT DeviceContext,
 	_In_ BOOLEAN IsWellspringModeOn
+);
+
+//
+// HID routines
+//
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetHidDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetDeviceAttribs(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetReportDescriptor(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpGetStrings(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+NTSTATUS
+AmtPtpDispatchReadReportRequests(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request,
+	_Out_ BOOLEAN* Pending
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpReportFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
+);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS
+AmtPtpSetFeatures(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
 );
 
 EXTERN_C_END

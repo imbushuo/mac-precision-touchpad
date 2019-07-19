@@ -56,5 +56,8 @@
     <ClCompile Include="DebugUtils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Hid.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

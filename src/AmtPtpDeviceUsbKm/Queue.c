@@ -50,18 +50,18 @@ Return Value:
     WDFQUEUE queue;
     NTSTATUS status;
     WDF_IO_QUEUE_CONFIG    queueConfig;
+	PDEVICE_CONTEXT	       pDeviceContext;
 
     PAGED_CODE();
+
+	pDeviceContext = DeviceGetContext(Device);
     
     //
     // Configure a default queue so that requests that are not
     // configure-fowarded using WdfDeviceConfigureRequestDispatching to goto
     // other queues get dispatched here.
     //
-    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(
-         &queueConfig,
-        WdfIoQueueDispatchParallel
-        );
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
 
     queueConfig.EvtIoDeviceControl = AmtPtpDeviceUsbKmEvtIoDeviceControl;
     queueConfig.EvtIoStop = AmtPtpDeviceUsbKmEvtIoStop;
@@ -77,6 +77,27 @@ Return Value:
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
+
+	//
+	// Create secondary queues for touch read requests.
+	//
+	WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchManual);
+	queueConfig.PowerManaged = WdfFalse;
+
+	status = WdfIoQueueCreate(
+		Device,
+		&queueConfig,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&pDeviceContext->InputQueue
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR, TRACE_QUEUE,
+			"%!FUNC! WdfIoQueueCreate (Input) failed %!STATUS!",
+			status
+		);
+	}
 
     return status;
 }
@@ -114,14 +135,91 @@ Return Value:
 
 --*/
 {
+	NTSTATUS status;
+	WDFDEVICE device = WdfIoQueueGetDevice(Queue);
+	BOOLEAN requestPending = FALSE;
+
     TraceEvents(TRACE_LEVEL_INFORMATION, 
                 TRACE_QUEUE, 
                 "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", 
                 Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
 
-    WdfRequestComplete(Request, STATUS_SUCCESS);
+	switch (IoControlCode)
+	{
+	case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
+		status = AmtPtpGetHidDescriptor(device, Request);
+		break;
+	case IOCTL_HID_GET_DEVICE_ATTRIBUTES:
+		status = AmtPtpGetDeviceAttribs(device, Request);
+		break;
+	case IOCTL_HID_GET_REPORT_DESCRIPTOR:
+		status = AmtPtpGetReportDescriptor(device, Request);
+		break;
+	case IOCTL_HID_GET_STRING:
+		status = AmtPtpGetStrings(device, Request);
+		break;
+	case IOCTL_HID_READ_REPORT:
+		status = AmtPtpDispatchReadReportRequests(device, Request, &requestPending);
+		break;
+	case IOCTL_HID_GET_FEATURE:
+		status = AmtPtpReportFeatures(device, Request);
+		break;
+	case IOCTL_HID_SET_FEATURE:
+		status = AmtPtpSetFeatures(device, Request);
+		break;
+	case IOCTL_HID_WRITE_REPORT:
+	case IOCTL_HID_SET_OUTPUT_REPORT:
+	case IOCTL_HID_GET_INPUT_REPORT:
+	case IOCTL_HID_ACTIVATE_DEVICE:
+	case IOCTL_HID_DEACTIVATE_DEVICE:
+	case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:
+	default:
+		status = STATUS_NOT_SUPPORTED;
+		break;
+	}
+
+	if (requestPending != TRUE) {
+		WdfRequestComplete(Request, STATUS_SUCCESS);
+	}
 
     return;
+}
+
+NTSTATUS
+AmtPtpDispatchReadReportRequests(
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request,
+	_Out_ BOOLEAN* Pending
+)
+{
+
+	NTSTATUS status;
+	PDEVICE_CONTEXT pDevContext;
+
+	status = STATUS_SUCCESS;
+	pDevContext = DeviceGetContext(Device);
+
+	status = WdfRequestForwardToIoQueue(
+		Request,
+		pDevContext->InputQueue
+	);
+
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! WdfRequestForwardToIoQueue failed with %!STATUS!",
+			status
+		);
+		goto exit;
+	}
+
+	if (NULL != Pending) {
+		*Pending = TRUE;
+	}
+
+exit:
+	return status;
 }
 
 VOID

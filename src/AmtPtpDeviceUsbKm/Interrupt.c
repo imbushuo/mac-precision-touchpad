@@ -9,6 +9,14 @@
 #pragma alloc_text (PAGE, AmtPtpEvtUsbInterruptReadersFailed)
 #endif
 
+// Helper function for numberic operation
+static inline INT AmtRawToInteger(
+	_In_ USHORT x
+)
+{
+	return (signed short)x;
+}
+
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpConfigContReaderForInterruptEndPoint(
@@ -95,8 +103,55 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 {
 	UNREFERENCED_PARAMETER(Pipe);
 	UNREFERENCED_PARAMETER(Buffer);
-	UNREFERENCED_PARAMETER(NumBytesTransferred);
-	UNREFERENCED_PARAMETER(Context);
+
+	PDEVICE_CONTEXT pDeviceContext = Context;
+	size_t headerSize = (unsigned int) pDeviceContext->DeviceInfo->tp_header;
+	size_t fingerprintSize = (unsigned int) pDeviceContext->DeviceInfo->tp_fsize;
+	size_t raw_n, i;
+	UCHAR* szBuffer = NULL;
+	const struct TRACKPAD_FINGER* f = NULL;
+
+	if (NumBytesTransferred < headerSize || (NumBytesTransferred - headerSize) % fingerprintSize != 0) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! Malformed input received. Length = %llu",
+			NumBytesTransferred
+		);
+		return;
+	}
+
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION,
+		TRACE_DRIVER,
+		"%!FUNC! Transferred packet size %lld",
+		NumBytesTransferred
+	);
+
+	szBuffer = WdfMemoryGetBuffer(
+		Buffer,
+		NULL
+	);
+
+	if (szBuffer != NULL) {
+		KeQueryPerformanceCounter(&pDeviceContext->LastReportTime);
+		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
+		UCHAR* f_base = szBuffer + headerSize + pDeviceContext->DeviceInfo->tp_delta;
+		for (i = 0; i < raw_n; i++) {
+			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"Finger %lld AbsX %d AbsY %d TMaj %d TMin %d Origin %d",
+				i,
+				AmtRawToInteger(f->abs_x),
+				AmtRawToInteger(f->abs_y),
+				AmtRawToInteger(f->touch_major) << 1,
+				AmtRawToInteger(f->touch_minor) << 1,
+				f->origin
+			);
+		}
+	}
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
