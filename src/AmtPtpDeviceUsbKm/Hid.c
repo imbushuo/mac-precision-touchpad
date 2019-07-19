@@ -234,138 +234,6 @@ exit:
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
-AmtPtpGetStrings(
-	_In_ WDFDEVICE Device,
-	_In_ WDFREQUEST Request
-)
-{
-	NTSTATUS               status = STATUS_SUCCESS;
-	PDEVICE_CONTEXT        pContext = DeviceGetContext(Device);
-	void* pStringBuffer = NULL;
-	WDFMEMORY              memHandle;
-	USHORT                 wcharCount;
-	size_t                 actualSize;
-	UCHAR                  strIndex;
-
-	ULONG                  inputValue;
-	WDFMEMORY              inputMemory;
-	size_t                 inputBufferLength;
-	PVOID                  inputBuffer;
-	ULONG                  languageId, stringId;
-
-	TraceEvents(
-		TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-		"%!FUNC! Entry"
-	);
-
-	status = WdfRequestRetrieveInputMemory(
-		Request,
-		&inputMemory
-	);
-
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(
-			TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"%!FUNC! WdfRequestRetrieveInputMemory failed with status %!STATUS!",
-			status
-		);
-		goto exit;
-	}
-
-	inputBuffer = WdfMemoryGetBuffer(
-		inputMemory,
-		&inputBufferLength
-	);
-
-	// Make sure buffer is big enough.
-	if (inputBufferLength < sizeof(ULONG)) {
-		status = STATUS_INVALID_BUFFER_SIZE;
-		TraceEvents(
-			TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-			"%!FUNC! GetStringId: invalid input buffer. size %d, expect %d",
-			(int) inputBufferLength,
-			(int) sizeof(ULONG)
-		);
-		goto exit;
-	}
-
-	inputValue = (*(PULONG)inputBuffer);
-	stringId = (inputValue & 0x0ffff);
-	languageId = (inputValue >> 16);
-
-	// Get actual string from USB device
-	switch (stringId)
-	{
-	case HID_STRING_ID_IMANUFACTURER:
-		strIndex = pContext->DeviceDescriptor.iManufacturer;
-		break;
-	case HID_STRING_ID_IPRODUCT:
-		strIndex = pContext->DeviceDescriptor.iProduct;
-		break;
-	case HID_STRING_ID_ISERIALNUMBER:
-		strIndex = pContext->DeviceDescriptor.iSerialNumber;
-		break;
-	default:
-		TraceEvents(
-			TRACE_LEVEL_WARNING, TRACE_DRIVER,
-			"%!FUNC! gets invalid string type"
-		);
-		goto exit;
-	}
-
-	status = WdfUsbTargetDeviceAllocAndQueryString(
-		pContext->UsbDevice,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&memHandle,
-		&wcharCount,
-		strIndex,
-		(USHORT)languageId
-	);
-
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(
-			TRACE_LEVEL_ERROR, TRACE_DRIVER,
-			"%!FUNC! WdfUsbTargetDeviceAllocAndQueryString failed with %!STATUS!",
-			status
-		);
-		goto exit;
-	}
-
-	status = WdfRequestRetrieveOutputBuffer(
-		Request,
-		wcharCount * sizeof(WCHAR),
-		&pStringBuffer,
-		&actualSize
-	);
-
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(
-			TRACE_LEVEL_ERROR, TRACE_DRIVER,
-			"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
-			status
-		);
-		goto exit;
-	}
-
-	WdfMemoryCopyToBuffer(
-		memHandle,
-		0,
-		&pStringBuffer,
-		actualSize
-	);
-
-	WdfRequestSetInformation(Request, actualSize);
-
-exit:
-	TraceEvents(
-		TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-		"%!FUNC! Exit"
-	);
-	return status;
-}
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS
 AmtPtpReportFeatures(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
@@ -562,21 +430,11 @@ AmtPtpSetFeatures(
 				{
 					TraceEvents(
 						TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
-						"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input"
+						"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input but not supported"
 					);
 
-					if (bWellspringMode) {
-						status = AmtPtpSetWellspringMode(pDeviceContext, FALSE);
-						if (!NT_SUCCESS(status)) {
-							TraceEvents(
-								TRACE_LEVEL_ERROR, TRACE_DRIVER,
-								"%!FUNC! -> AmtPtpSetWellspringMode failed with status %!STATUS!",
-								status
-							);
-							goto exit;
-						}
-					}
-					break;
+					status = STATUS_NOT_SUPPORTED;
+					goto exit;
 				}
 				case PTP_COLLECTION_WINDOWS:
 				{
@@ -614,8 +472,6 @@ AmtPtpSetFeatures(
 			);
 
 			PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT secInput = (PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT) pHidPacket->reportBuffer;
-			pDeviceContext->PtpReportButton = secInput->ButtonReport;
-			pDeviceContext->PtpReportTouch = secInput->SurfaceReport;
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION, TRACE_DRIVER,

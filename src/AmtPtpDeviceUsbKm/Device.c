@@ -98,6 +98,8 @@ Return Value:
         //
         // Initialize the context.
         //
+		deviceContext->PtpReportButton = TRUE;
+		deviceContext->PtpReportTouch = TRUE;
 
         //
         // Create a device interface so that applications can find and talk
