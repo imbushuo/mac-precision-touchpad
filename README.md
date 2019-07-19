@@ -1,6 +1,6 @@
 # Windows Precision Touchpad Implementation for Apple MacBook family/Magic Trackpad 2
 
-[![Build Status](https://ligstd.visualstudio.com/_apis/public/build/definitions/7694e0d0-94e3-4fd2-b39a-ecd261e1ba2e/22/badge)](https://ptp-release.imbushuo.net/)
+[![Build Status](https://ligstd.visualstudio.com/_apis/public/build/definitions/7694e0d0-94e3-4fd2-b39a-ecd261e1ba2e/22/badge)](https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/_build?definitionId=22)
 
 **Warning: The project is under development, with some features incomplete yet.** See projects page for known issues and WIP(work-in-progress) items before opening a new issue.
 
@@ -12,11 +12,9 @@ Both USB and SPI trackpads are supported.
 
 [![Preview of Windows Precision Touchpad for MacBook Pro](https://img.youtube.com/vi/7dFqtcDArUg/0.jpg)](https://www.youtube.com/watch?v=7dFqtcDArUg)
 
-## Help needed!
+## T2 devices
 
-Please open an issue for model support. In the issue, attach your MacBook model identifier (e.g. MacBook9,1) and HID device ID (you can view it in System Report in macOS, or Properties Window of the "Apple SPI Trackpad" or "Apple USB Trackpad" in Device Manager of Windows). Here is an example in macOS:
-
-![image_2018-07-15_22-59-15.png](https://i.loli.net/2018/07/15/5b4b616019799.png)
+I got my T2 MacBook Pro :) Work is in progress. Eventually all USB devices will use the km driver (not only T2).
 
 If you like my work, please consider buying me a coffee. Thank you for your support!
 
@@ -46,6 +44,8 @@ If you want to try latest changes, you can click "Build Status" badge and downlo
 - SPI version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
 - USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
 
+**Note: I plan to target a higher version of KMDF and drop UMDF later this year.**
+
 ## Device support
 
 There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking into it. If you have such device with Windows installed, please contact me so I can look into the issue remotely (as I don't have many devices).
@@ -57,8 +57,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Apple Magic Trackpad 2 (Not stable)
 - [x] MacBook Pro with Retina Display (2013, 2014, 2015, 13-inch & 15-inch)
 - [x] New MacBook (12-inch)
-- [x] _(Work in progress)_ MacBook Pro 2015, 2016, 2017 (**I need the device ID for 2016 model**)
-- [ ] _(Needs triage)_ T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018
+- [x] MacBook Pro 2015, 2016, 2017 (**I need the device ID for 2016 model**)
+- [ ] _(Work in progress)_ T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019
 
 ## Roadmap
 
@@ -73,6 +73,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] More Models (I need donation)
 - [x] SPI
 - [ ] Signal Processing Algorithm (Papers, papers!)
+- [x] KM Driver cross-cert
 - [ ] KM Driver EV & WHQL
 
 ## Acknowledgements
