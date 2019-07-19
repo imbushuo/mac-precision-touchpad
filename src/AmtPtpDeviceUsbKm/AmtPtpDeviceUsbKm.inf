@@ -1,0 +1,97 @@
+;
+; AmtPtpDeviceUsbKm.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=HIDClass
+ClassGuid={745a17a0-74d3-11d0-b6fe-00a0c90f57da}
+Provider=%ManufacturerName%
+CatalogFile=AmtPtpDeviceUsbKm.cat
+DriverVer=
+
+[DestinationDirs]
+DefaultDestDir = 12
+AmtPtpDeviceUsbKm_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+AmtPtpDeviceUsbKm.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+; T2 trackpad
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_027d&MI_02
+
+[AmtPtpDeviceUsbKm_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+AmtPtpDeviceUsbKm.sys
+
+;-------------- Service installation
+[AmtPtpDeviceUsbKm_Device.NT.Services]
+AddService = AmtPtpDeviceUsbKm,, AmtPtpDeviceUsbKm_Service_Inst
+AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst ; Flag 0x2 sets this as the service for the device
+
+[AmtPtpDeviceUsbKm_Device.NT.HW]
+AddReg=AmtPtpDeviceUsbKm_AddReg
+
+[AmtPtpDeviceUsbKm_AddReg]
+; By default, USBDevice class uses iProduct descriptor to name the device in
+; Device Manager on Windows 8 and higher.
+; Uncomment for this device to use %DeviceName% on Windows 8 and higher:
+HKR,,FriendlyName,,%AmtPtpDeviceUsbKm.DeviceDesc%
+HKR,,"LowerFilters",0x00010008,"AmtPtpDeviceUsbKm"
+
+; -------------- Microsoft HID KMDF driver install sections
+[mshidkmdf_Service_Inst]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\mshidkmdf.sys
+
+; -------------- AmtPtpDeviceUsbKm driver install sections
+[AmtPtpDeviceUsbKm_Service_Inst]
+DisplayName    = %AmtPtpDeviceUsbKm.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\AmtPtpDeviceUsbKm.sys
+
+;
+;--- AmtPtpDeviceUsbKm_Device Coinstaller installation ------
+;
+
+[AmtPtpDeviceUsbKm_Device.NT.CoInstallers]
+AddReg=AmtPtpDeviceUsbKm_Device_CoInstaller_AddReg
+CopyFiles=AmtPtpDeviceUsbKm_Device_CoInstaller_CopyFiles
+
+[AmtPtpDeviceUsbKm_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[AmtPtpDeviceUsbKm_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[AmtPtpDeviceUsbKm_Device.NT.Wdf]
+KmdfService =  AmtPtpDeviceUsbKm, AmtPtpDeviceUsbKm_wdfsect
+[AmtPtpDeviceUsbKm_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="Bingxing Wang" ;TODO: Replace with your manufacturer name
+ClassName="Universal Serial Bus devices"
+DiskName = "AmtPtpDeviceUsbKm Installation Disk"
+AmtPtpDeviceUsbKm.DeviceDesc = "Apple USB Precision Touchpad Device (Kernel-mode)"
+AmtPtpDeviceUsbKm.SVCDESC = "Apple USB Precision Touchpad Service"
+REG_MULTI_SZ = 0x00010000
