@@ -22,22 +22,30 @@ If you like my work, please consider buying me a coffee. Thank you for your supp
 
 Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
 
-## USB Installation
+## USB-based model Installation
 
 1. Go to the release tab in Github and download the newest version
 2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
-3. Install `AmtPtpDevice.cer` certificate to your machine's root authority store
-4. Go to `AmtPtpDevice` directory
-5. Right click `AmtPtpDevice.inf` and install it 
+3. Go to `AmtPtpDevice` directory
+4. Right click `AmtPtpDevice.inf` and install it
+5. Confirm driver publisher
 
-You don't have to enable manual trust, as recent builds are cross-signed by DigiCert.
-If you want to try latest changes, you can click "Build Status" badge and download CI builds (tagged with commit ID and machine architecture) manually.
+## SPI-based model Installation
 
-## SPI Installation
+1. Go to the release tab in Github and download the newest version
+2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
+3. Go to `AmtPtpDeviceSpiKm` directory
+4. Right click `AmtPtpDeviceSpiKm.inf` and install it
+5. Confirm driver publisher
 
-(Coming soon)
+## Apple T2-based model Installation
 
-**Note: SPI version needs at least Windows 10, version 1709 to work.**
+0. **Disable Secure Boot as temporary mitigation**: Boot with Command + R, select Startup Security Tools and disable Secure Boot (No Boot Security)
+1. Go to the release tab in Github and download the newest version
+2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
+3. Go to `AmtPtpDeviceUsbKm` directory
+4. Right click `AmtPtpDeviceUsbKm.inf` and install it
+5. Confirm driver publisher
 
 ## For developers
 
