@@ -40,7 +40,7 @@ Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
 
 ## Apple T2-based model Installation
 
-0. **isable Secure Boot as temporary mitigation**: Boot with Command + R, select Startup Security Tools and disable Secure Boot (No Boot Security)
+0. **Disable Secure Boot as temporary mitigation**: Boot with Command + R, select Startup Security Tools and disable Secure Boot (No Boot Security)
 1. Go to the release tab in Github and download the newest version
 2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
 3. Go to `AmtPtpDeviceUsbKm` directory
