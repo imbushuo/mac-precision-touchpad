@@ -55,7 +55,8 @@ AmtPtpGetHidDescriptor(
 	}
 
 	switch (pContext->DeviceDescriptor.idProduct) {
-		case USB_DEVICE_ID_APPLE_T2:
+		case USB_DEVICE_ID_APPLE_T2_7C:
+		case USB_DEVICE_ID_APPLE_T2_7D:
 		{
 			szCopy = AmtPtpT2DefaultHidDescriptor.bLength;
 			status = WdfMemoryCopyFromBuffer(
@@ -178,7 +179,8 @@ AmtPtpGetReportDescriptor(
 	}
 
 	switch (pContext->DeviceDescriptor.idProduct) {
-		case USB_DEVICE_ID_APPLE_T2:
+		case USB_DEVICE_ID_APPLE_T2_7C:
+		case USB_DEVICE_ID_APPLE_T2_7D:
 		{
 
 			szCopy = AmtPtpT2DefaultHidDescriptor.DescriptorList[0].wReportLength;
