@@ -127,6 +127,14 @@ Return Value:
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
+	TraceEvents(
+		TRACE_LEVEL_INFORMATION, TRACE_DRIVER,
+		"%!FUNC! Set FDO driver filter"
+	);
+
+	WdfFdoInitSetFilter(DeviceInit);
+	WdfPdoInitAllowForwardingRequestToParent(DeviceInit);
+
     status = AmtPtpDeviceUsbKmCreateDevice(DeviceInit);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
