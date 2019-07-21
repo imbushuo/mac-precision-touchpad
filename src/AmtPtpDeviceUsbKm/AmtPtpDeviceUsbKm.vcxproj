@@ -226,7 +226,8 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -246,7 +247,8 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -266,7 +268,8 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
