@@ -244,6 +244,7 @@
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <SignMode>ProductionSign</SignMode>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -264,6 +265,7 @@
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <SignMode>ProductionSign</SignMode>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -284,6 +286,7 @@
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <SignMode>ProductionSign</SignMode>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -304,6 +307,7 @@
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
+    <SignMode>ProductionSign</SignMode>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
