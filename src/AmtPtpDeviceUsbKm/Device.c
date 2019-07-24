@@ -20,8 +20,6 @@ Environment:
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, AmtPtpDeviceUsbKmCreateDevice)
 #pragma alloc_text (PAGE, AmtPtpDeviceUsbKmEvtDevicePrepareHardware)
-#pragma alloc_text (PAGE, AmtPtpEvtDeviceD0Entry)
-#pragma alloc_text (PAGE, AmtPtpEvtDeviceD0Exit)
 #endif
 
 _IRQL_requires_(PASSIVE_LEVEL)

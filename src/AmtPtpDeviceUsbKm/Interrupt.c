@@ -3,10 +3,6 @@
 #include "Driver.h"
 #include "Interrupt.tmh"
 
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text (PAGE, AmtPtpConfigContReaderForInterruptEndPoint)
-#endif
-
 // Helper function for numberic operation
 static inline INT AmtRawToInteger(
 	_In_ USHORT x
