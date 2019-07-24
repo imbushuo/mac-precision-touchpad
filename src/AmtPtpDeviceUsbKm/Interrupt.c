@@ -92,7 +92,7 @@ exit:
 	return STATUS_SUCCESS;
 }
 
-_IRQL_requires_(PASSIVE_LEVEL)
+_IRQL_requires_max_(DISPATCH_LEVEL)
 VOID
 AmtPtpEvtUsbInterruptPipeReadComplete(
 	_In_ WDFUSBPIPE  Pipe,
@@ -173,6 +173,8 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 
 	// Prepare report
 	Status = STATUS_SUCCESS;
+
+	RtlZeroMemory(&PtpReport, sizeof(PTP_REPORT));
 	PtpReport.ReportID = REPORTID_MULTITOUCH;
 	PtpReport.IsButtonClicked = 0;
 	raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
@@ -189,6 +191,15 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 
 	if (pDeviceContext->PtpReportTouch) {
 		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
+		if (raw_n * fingerprintSize < (NumBytesTransferred - headerSize)) {
+			TraceEvents(
+				TRACE_LEVEL_ERROR, TRACE_DRIVER,
+				"%!FUNC! Buffer may have a problem"
+			);
+			WdfRequestComplete(Request, STATUS_DATA_ERROR);
+			return;
+		}
+
 		PtpReport.ContactCount = (UCHAR) raw_n;
 
 		for (i = 0; i < raw_n; i++) {
@@ -207,17 +218,6 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 			PtpReport.Contacts[i].Y = y;
 			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f->touch_major) << 1) >= 200;
 			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f->touch_minor) << 1) > 0;
-
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION, TRACE_INPUT,
-				"Finger %lld AbsX %d AbsY %d TMaj %d TMin %d Origin %d",
-				i,
-				AmtRawToInteger(f->abs_x),
-				AmtRawToInteger(f->abs_y),
-				AmtRawToInteger(f->touch_major) << 1,
-				AmtRawToInteger(f->touch_minor) << 1,
-				f->origin
-			);
 		}
 	}
 
@@ -253,10 +253,10 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	WdfRequestSetInformation(Request, sizeof(PTP_REPORT));
 
 	// Set completion flag
-	WdfRequestComplete(Request,Status);
+	WdfRequestComplete(Request, Status);
 }
 
-_IRQL_requires_(PASSIVE_LEVEL)
+_IRQL_requires_max_(DISPATCH_LEVEL)
 BOOLEAN
 AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
