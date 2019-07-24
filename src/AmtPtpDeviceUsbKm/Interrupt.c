@@ -5,8 +5,6 @@
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (PAGE, AmtPtpConfigContReaderForInterruptEndPoint)
-#pragma alloc_text (PAGE, AmtPtpEvtUsbInterruptPipeReadComplete)
-#pragma alloc_text (PAGE, AmtPtpEvtUsbInterruptReadersFailed)
 #endif
 
 // Helper function for numberic operation

@@ -90,7 +90,7 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 //
 // Functions to serve interrupt
 //
-_IRQL_requires_(PASSIVE_LEVEL)
+_IRQL_requires_max_(DISPATCH_LEVEL)
 VOID
 AmtPtpEvtUsbInterruptPipeReadComplete(
 	_In_ WDFUSBPIPE  Pipe,
@@ -99,7 +99,7 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	_In_ WDFCONTEXT  Context
 );
 
-_IRQL_requires_(PASSIVE_LEVEL)
+_IRQL_requires_max_(DISPATCH_LEVEL)
 BOOLEAN
 AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
