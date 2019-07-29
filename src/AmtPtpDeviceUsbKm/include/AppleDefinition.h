@@ -3,6 +3,8 @@
 #define USB_VENDOR_ID_APPLE		0x05ac
 
 /* Apple T2 USB trackpad */
+#define USB_DEVICE_ID_APPLE_T2_7A 0x027a
+#define USB_DEVICE_ID_APPLE_T2_7B 0x027b
 #define USB_DEVICE_ID_APPLE_T2_7C 0x027c
 #define USB_DEVICE_ID_APPLE_T2_7D 0x027d
 
@@ -97,7 +99,7 @@ struct BCM5974_PARAM {
 
 /* device-specific configuration */
 struct BCM5974_CONFIG {
-	int ansi, iso, jis;				/* the product id of this device */
+	int identification;				/* the product id of this device */
 	int caps;						/* device capability bitmask */
 	int bt_ep;						/* the endpoint of the button interface */
 	int bt_datalen;					/* data length of the button interface */
@@ -146,8 +148,28 @@ struct BCM5974_CONFIG {
 /* device constants */
 static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 	{
-		USB_DEVICE_ID_APPLE_T2_7C,
-		USB_DEVICE_ID_APPLE_T2_7C,
+		USB_DEVICE_ID_APPLE_T2_7A,
+		HAS_INTEGRATED_BUTTON,
+		0, sizeof(struct TRACKPAD_BUTTON_DATA),
+		0x83, DATAFORMAT(TYPE4),
+		{ SN_PRESSURE, 0, 300 },
+		{ SN_WIDTH, 0, 2048 },
+		{ SN_COORD, -6243, 6749 },
+		{ SN_COORD, -170, 7685 },
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+	},
+	{
+		USB_DEVICE_ID_APPLE_T2_7B,
+		HAS_INTEGRATED_BUTTON,
+		0, sizeof(struct TRACKPAD_BUTTON_DATA),
+		0x83, DATAFORMAT(TYPE4),
+		{ SN_PRESSURE, 0, 300 },
+		{ SN_WIDTH, 0, 2048 },
+		{ SN_COORD, -6243, 6749 },
+		{ SN_COORD, -170, 7685 },
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+	},
+	{
 		USB_DEVICE_ID_APPLE_T2_7C,
 		HAS_INTEGRATED_BUTTON,
 		0, sizeof(struct TRACKPAD_BUTTON_DATA),
@@ -160,8 +182,6 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 	},
 	{
 		USB_DEVICE_ID_APPLE_T2_7D,
-		USB_DEVICE_ID_APPLE_T2_7D,
-		USB_DEVICE_ID_APPLE_T2_7D,
 		HAS_INTEGRATED_BUTTON,
 		0, sizeof(struct TRACKPAD_BUTTON_DATA),
 		0x83, DATAFORMAT(TYPE4),
@@ -170,5 +190,8 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_COORD, -6243, 6749 },
 		{ SN_COORD, -170, 7685 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+	},
+	{
+		0
 	},
 };
