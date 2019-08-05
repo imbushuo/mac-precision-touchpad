@@ -25,23 +25,6 @@ NTSTATUS
 AmtPtpDeviceSpiKmCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
     )
-/*++
-
-Routine Description:
-
-    Worker routine called to create a device and its software resources.
-
-Arguments:
-
-    DeviceInit - Pointer to an opaque init structure. Memory for this
-                    structure will be freed by the framework when the WdfDeviceCreate
-                    succeeds. So don't access the structure after that point.
-
-Return Value:
-
-    NTSTATUS
-
---*/
 {
     WDF_OBJECT_ATTRIBUTES DeviceAttributes;
     PDEVICE_CONTEXT pDeviceContext;
@@ -57,8 +40,6 @@ Return Value:
 		TRACE_DRIVER,
 		"%!FUNC! Entry"
 	);
-
-	KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "AmtPtpDeviceSpiKmCreateDevice Entry \n"));
 
 	// Initialize Power Callback
 	WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
@@ -91,7 +72,28 @@ Return Value:
 		// Put itself in
 		//
 		pDeviceContext->SpiDevice = Device;
-		pDeviceContext->DelayedRequest = FALSE;
+
+		//
+		// Create a list of buffers
+		//
+		Status = WdfLookasideListCreate(
+			WDF_NO_OBJECT_ATTRIBUTES,
+			REPORT_BUFFER_SIZE,
+			NonPagedPoolNx,
+			WDF_NO_OBJECT_ATTRIBUTES,
+			PTP_LIST_POOL_TAG,
+			&pDeviceContext->HidReadBufferLookaside
+		);
+
+		if (!NT_SUCCESS(Status)) {
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! WdfLookasideListCreate failed with %!STATUS!",
+				Status
+			);
+			goto exit;
+		}
 
 		//
 		// Retrieve IO target.
@@ -102,21 +104,6 @@ Return Value:
 			Status = STATUS_INVALID_DEVICE_STATE;
 			goto exit;
 		}
-
-		//
-		// Initialize kernel event.
-		//
-		KeInitializeEvent(
-			&pDeviceContext->PtpRequestRoutineEvent, 
-			NotificationEvent, 
-			TRUE
-		);
-
-		KeInitializeEvent(
-			&pDeviceContext->PtpLoopRoutineEvent,
-			NotificationEvent,
-			TRUE
-		);
 
         //
         // Create a device interface so that applications can find and talk
@@ -138,13 +125,6 @@ Return Value:
     }
 
 exit:
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID, 
-		DPFLTR_INFO_LEVEL, 
-		"AmtPtpDeviceSpiKmCreateDevice Exit, Status = 0x%x \n",
-		Status
-	));
-
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
 		TRACE_DRIVER,
@@ -155,7 +135,6 @@ exit:
     return Status;
 }
 
-_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDevicePrepareHardware(
 	_In_ WDFDEVICE Device,
@@ -186,12 +165,6 @@ AmtPtpEvtDevicePrepareHardware(
 		"%!FUNC! Entry"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpEvtDevicePrepareHardware entry \n"
-	));
-
 	pDeviceContext = DeviceGetContext(Device);
 	if (pDeviceContext == NULL)
 	{
@@ -206,6 +179,7 @@ AmtPtpEvtDevicePrepareHardware(
 	}
 
 	// Request device attribute descriptor for self-identification.
+	RtlZeroMemory(&DeviceAttributes, sizeof(DeviceAttributes));
 	WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
 		&HidAttributeMemoryDescriptor,
 		(PVOID) &DeviceAttributes,
@@ -233,15 +207,6 @@ AmtPtpEvtDevicePrepareHardware(
 
 		goto exit;
 	}
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"Device Vendor ID: 0x%x, Product ID: 0x%x, Version: 0x%x \n",
-		DeviceAttributes.VendorID,
-		DeviceAttributes.ProductID,
-		DeviceAttributes.VersionNumber
-	));
 
 	pDeviceContext->HidVendorID = DeviceAttributes.VendorID;
 	pDeviceContext->HidProductID = DeviceAttributes.ProductID;
@@ -313,13 +278,6 @@ AmtPtpEvtDevicePrepareHardware(
 	Status = STATUS_SUCCESS;
 
 exit:
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpEvtDevicePrepareHardware exit, status = 0x%x \n",
-		Status
-	));
-
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
 		TRACE_DRIVER,
@@ -330,7 +288,6 @@ exit:
 	return Status;
 }
 
-_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDeviceD0Entry(
 	_In_ WDFDEVICE Device,
@@ -350,13 +307,6 @@ AmtPtpEvtDeviceD0Entry(
 		DbgDevicePowerString(PreviousState)
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL, 
-		"AmtPtpEvtDeviceD0Entry -->AmtPtpDeviceEvtDeviceD0Entry - coming from %s \n", 
-		DbgDevicePowerString(PreviousState)
-	));
-
 	pDeviceContext = DeviceGetContext(Device);
 
 	// Enable SPI trackpad
@@ -372,7 +322,6 @@ AmtPtpEvtDeviceD0Entry(
 
 	// Set flag
 	pDeviceContext->DeviceReady = TRUE;
-	pDeviceContext->DelayedRequest = TRUE;
 
 	// Reset mapping
 	for (UINT8 i = 0; i < MAPPING_MAX; i++)
@@ -387,27 +336,6 @@ AmtPtpEvtDeviceD0Entry(
 		&pDeviceContext->LastReportTime
 	);
 
-	// Start HID loop in a new thread
-	Status = PsCreateSystemThread(
-		&pDeviceContext->InputPollThreadHandle,
-		(ACCESS_MASK)0,
-		NULL,
-		(HANDLE)0,
-		NULL,
-		AmtPtpSpiInputThreadRoutine,
-		pDeviceContext
-	);
-
-	if (!NT_SUCCESS(Status))
-	{
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"PsCreateSystemThread failed, status = 0x%x \n",
-			Status
-		));
-	}
-
 exit:
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
@@ -415,16 +343,9 @@ exit:
 		"%!FUNC! <-- AmtPtpDeviceEvtDeviceD0Entry"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpEvtDeviceD0Entry <-- AmtPtpDeviceEvtDeviceD0Entry \n"
-	));
-
 	return Status;
 }
 
-_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpEvtDeviceD0Exit(
 	_In_ WDFDEVICE Device,
@@ -433,7 +354,7 @@ AmtPtpEvtDeviceD0Exit(
 {
 	NTSTATUS Status = STATUS_SUCCESS;
 	PDEVICE_CONTEXT pDeviceContext;
-	WDFREQUEST RemainingRequest;
+	WDFREQUEST OutstandingRequest;
 
 	PAGED_CODE();
 
@@ -444,49 +365,20 @@ AmtPtpEvtDeviceD0Exit(
 		DbgDevicePowerString(TargetState)
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpEvtDeviceD0Exit -->AmtPtpDeviceEvtDeviceD0Exit - moving to %s \n",
-		DbgDevicePowerString(TargetState)
-	));
-
 	pDeviceContext = DeviceGetContext(Device);
 
 	// Set flag & it will stop HID read loop thread
 	pDeviceContext->DeviceReady = FALSE;
 
-	// Wait for signaled state
-	KeWaitForSingleObject(
-		&pDeviceContext->PtpRequestRoutineEvent,
-		Executive,
-		KernelMode,
-		FALSE,
-		NULL
-	);
-
-	KeWaitForSingleObject(
-		&pDeviceContext->PtpLoopRoutineEvent,
-		Executive,
-		KernelMode,
-		FALSE,
-		NULL
-	);
-
-	// Clean outstanding requests
-	while (Status == STATUS_SUCCESS)
-	{
+	// Cancel all outstanding requests
+	while (NT_SUCCESS(Status)) {
 		Status = WdfIoQueueRetrieveNextRequest(
-			pDeviceContext->HidIoQueue,
-			&RemainingRequest
+			pDeviceContext->HidQueue, 
+			&OutstandingRequest
 		);
 
-		if (NT_SUCCESS(Status))
-		{
-			WdfRequestComplete(
-				RemainingRequest,
-				STATUS_CANCELLED
-			);
+		if (NT_SUCCESS(Status)) {
+			WdfRequestComplete(OutstandingRequest, STATUS_CANCELLED);
 		}
 	}
 
@@ -509,12 +401,6 @@ AmtPtpEvtDeviceD0Exit(
 		TRACE_DRIVER,
 		"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Exit"
 	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpEvtDeviceD0Exit <-- AmtPtpDeviceEvtDeviceD0Exit Exit \n"
-	));
 
 	return Status;
 }
@@ -562,12 +448,6 @@ AmtPtpSpiSetState(
 	PHID_XFER_PACKET pHidPacket;
 	PSPI_SET_FEATURE pSpiSetStatus;
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSpiSetState Entry \n"
-	));
-
 	pDeviceContext = DeviceGetContext(Device);
 	if (pDeviceContext == NULL)
 	{
@@ -581,8 +461,8 @@ AmtPtpSpiSetState(
 		goto exit;
 	}
 
+	RtlZeroMemory(HidPacketBuffer, sizeof(HidPacketBuffer));
 	pHidPacket = (PHID_XFER_PACKET) &HidPacketBuffer;
-
 	WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
 		&HidMemoryDescriptor,
 		(PVOID) &HidPacketBuffer,
@@ -617,12 +497,6 @@ AmtPtpSpiSetState(
 			"%!FUNC! WdfIoTargetSendIoctlSynchronously failed with %!STATUS!",
 			Status
 		);
-
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"WdfIoTargetSendIoctlSynchronously failed \n"
-		));
 	}
 	else
 	{
@@ -632,21 +506,9 @@ AmtPtpSpiSetState(
 			"%!FUNC! Changed trackpad status to %d",
 			DesiredState
 		);
-
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"AmtPtpSpiSetState Changed trackpad status to %d \n",
-			DesiredState
-		));
 	}
 
 exit:
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSpiSetState Exit \n"
-	));
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
 		TRACE_DRIVER,
@@ -655,56 +517,4 @@ exit:
 	);
 
 	return Status;
-}
-
-void
-AmtPtpSpiInputThreadRoutine(
-	PVOID StartContext
-)
-{
-	PDEVICE_CONTEXT pDeviceContext;
-	LARGE_INTEGER WaitInterval;
-
-	PAGED_CODE();
-
-	// Sanity check for the thing
-	if (StartContext == NULL) return;
-	pDeviceContext = (PDEVICE_CONTEXT) StartContext;
-
-	// Lock it up!
-	KeClearEvent(
-		&pDeviceContext->PtpLoopRoutineEvent
-	);
-
-	// Initialize wait interval
-	// This is not likely to be triggered: set it to 10 ms
-	WaitInterval.QuadPart = WDF_REL_TIMEOUT_IN_MS(10);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSpiInputThreadRoutine: ready to loop. \n"
-	));
-
-	while (pDeviceContext->DeviceReady)
-	{
-		AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice);
-		KeDelayExecutionThread(KernelMode, FALSE, &WaitInterval);
-	}
-
-	// Notify that we are safe to terminate
-	KeSetEvent(
-		&pDeviceContext->PtpLoopRoutineEvent,
-		0,
-		FALSE
-	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSpiInputThreadRoutine: terminated. \n"
-	));
-
-	// Goodbye
-	PsTerminateSystemThread(STATUS_SUCCESS);
 }
