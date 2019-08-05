@@ -22,6 +22,10 @@ If you like my work, please consider buying me a coffee. Thank you for your supp
 
 Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
 
+## A better installation guide
+
+https://www.reddit.com/r/bootcamp/comments/c4alv2/how_to_install_mac_precision_touchpad_better_than/ - thank you Azmat
+
 ## USB-based model Installation
 
 1. Go to the release tab in Github and download the newest version
