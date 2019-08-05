@@ -45,6 +45,11 @@ typedef struct _DEVICE_CONTEXT
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 
 //
+// Pool tags
+//
+#define POOL_TAG_PTP_CONTROL 'PTPC'
+
+//
 // Function to initialize the device's queues and callbacks
 //
 NTSTATUS

@@ -523,7 +523,7 @@ AmtPtpSetWellspringMode(
 	status = WdfMemoryCreate(
 		WDF_NO_OBJECT_ATTRIBUTES,
 		PagedPool,
-		0,
+		POOL_TAG_PTP_CONTROL,
 		DeviceContext->DeviceInfo->um_size,
 		&bufHandle,
 		&buffer
@@ -626,6 +626,7 @@ cleanup:
 		"%!FUNC! Exit"
 	);
 
+	WdfObjectDelete(bufHandle);
 	bufHandle = NULL;
 	return status;
 }
