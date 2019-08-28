@@ -42,4 +42,9 @@ EVT_WDF_OBJECT_CONTEXT_CLEANUP AmtPtpDeviceSpiKmEvtDriverContextCleanup;
 //
 #define PTP_LIST_POOL_TAG 'LTPA'
 
+//
+// State Switch Max Retries
+//
+#define STATE_SWITCH_MAX_RETRIES 5
+
 EXTERN_C_END

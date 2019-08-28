@@ -296,6 +296,7 @@ AmtPtpEvtDeviceD0Entry(
 {
 	NTSTATUS Status = STATUS_SUCCESS;
 	PDEVICE_CONTEXT pDeviceContext;
+	USHORT Retries = 0;
 
 	PAGED_CODE();
 
@@ -310,6 +311,7 @@ AmtPtpEvtDeviceD0Entry(
 	pDeviceContext = DeviceGetContext(Device);
 
 	// Enable SPI trackpad
+enable_trackpad:
 	Status = AmtPtpSpiSetState(
 		Device,
 		TRUE
@@ -317,7 +319,22 @@ AmtPtpEvtDeviceD0Entry(
 
 	if (!NT_SUCCESS(Status))
 	{
-		goto exit;
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!",
+			Status
+		);
+
+		if (Retries >= STATE_SWITCH_MAX_RETRIES)
+		{
+			goto exit;
+		}
+		else
+		{
+			Retries++;
+			goto enable_trackpad;
+		}
 	}
 
 	// Set flag
@@ -355,6 +372,7 @@ AmtPtpEvtDeviceD0Exit(
 	NTSTATUS Status = STATUS_SUCCESS;
 	PDEVICE_CONTEXT pDeviceContext;
 	WDFREQUEST OutstandingRequest;
+	USHORT Retries = 0;
 
 	PAGED_CODE();
 
@@ -383,11 +401,33 @@ AmtPtpEvtDeviceD0Exit(
 	}
 
 	// Disable HID trackpad
+disable_trackpad:
 	Status = AmtPtpSpiSetState(
 		Device,
 		FALSE
 	);
 
+	if (!NT_SUCCESS(Status))
+	{
+		TraceEvents(
+			TRACE_LEVEL_ERROR,
+			TRACE_DRIVER,
+			"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!",
+			Status
+		);
+
+		if (Retries >= STATE_SWITCH_MAX_RETRIES)
+		{
+			goto exit;
+		}
+		else
+		{
+			Retries++;
+			goto disable_trackpad;
+		}
+	}
+
+exit:
 	// Reset mapping
 	for (UINT8 i = 0; i < MAPPING_MAX; i++)
 	{

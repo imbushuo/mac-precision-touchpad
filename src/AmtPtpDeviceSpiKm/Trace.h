@@ -17,14 +17,13 @@ Environment:
 //
 // Define the tracing flags.
 //
-// Tracing GUID - 9b319d80-fe25-41e4-80ef-7d8528f7f1b1
+// Tracing GUID - 9b319d80-fe25-41e4-80ef-7d8528f7f1b5
 //
 
 #define WPP_CONTROL_GUIDS                                              \
     WPP_DEFINE_CONTROL_GUID(                                           \
-        AmtPtpDeviceSpiKmTraceGuid, (9b319d80,fe25,41e4,80ef,7d8528f7f1b1), \
+        AmtPtpDeviceSpiKmTraceGuid, (9b319d80,fe25,41e4,80ef,7d8528f7f1b5), \
                                                                             \
-        WPP_DEFINE_BIT(MYDRIVER_ALL_INFO)                              \
         WPP_DEFINE_BIT(TRACE_DRIVER)                                   \
         WPP_DEFINE_BIT(TRACE_DEVICE)                                   \
         WPP_DEFINE_BIT(TRACE_QUEUE)                                    \
@@ -57,7 +56,7 @@ Environment:
 // Trace function.
 //
 // begin_wpp config
-// FUNC Trace{FLAGS=MYDRIVER_ALL_INFO}(LEVEL, MSG, ...);
+// FUNC Trace{FLAGS=TRACE_DRIVER}(LEVEL, MSG, ...);
 // FUNC TraceEvents(LEVEL, FLAGS, MSG, ...);
 // end_wpp
 //
