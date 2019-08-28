@@ -1,0 +1,26 @@
+name: PTP Trackpad Build (Github Actions)
+
+strategy:
+  matrix:
+    targetArchitecture: [x86, x64, ARM64]
+
+on:
+  push:
+    branches:
+    - master
+  
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Setup MSBuild
+      uses: warrenbuckley/Setup-MSBuild@v1
+    
+    - name: Run MSBuild for solution
+      run: msbuild AmtPtpDriver.sln -m /p:Configuration=Release /p:BuildEnvironment=Github /p:Platform=${{ matrix.targetArchitecture }}
