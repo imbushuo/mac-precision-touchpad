@@ -2,11 +2,11 @@
 
 [![Build Status](https://ligstd.visualstudio.com/_apis/public/build/definitions/7694e0d0-94e3-4fd2-b39a-ecd261e1ba2e/22/badge)](https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/_build?definitionId=22)
 
-**Warning: The project is under development, with some features incomplete yet.** See projects page for known issues and WIP(work-in-progress) items before opening a new issue.
+This project implements Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10. Both USB and SPI trackpads are supported.
 
-This project aims to implement Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10.
+## Future Plans and feature tracking
 
-Both USB and SPI trackpads are supported.
+Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/_workitems/) to track feature and device support plans. Bug reports should go to Github issues.
 
 ## See it in action (YouTube video)
 
@@ -69,7 +69,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Apple Magic Trackpad 2 (Not stable)
 - [x] MacBook Pro with Retina Display (2013, 2014, 2015, 13-inch & 15-inch)
 - [x] New MacBook (12-inch)
-- [x] MacBook Pro 2015, 2016, 2017 (**I need the device ID for 2016 model**)
+- [x] MacBook Pro 2015, 2016, 2017
 - [ ] _(Work in progress)_ T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019
 
 ## Roadmap
@@ -84,9 +84,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Refine input experience (gesture experience)
 - [x] More Models (I need donation)
 - [x] SPI
-- [ ] Signal Processing Algorithm (Papers, papers!)
 - [x] KM Driver cross-cert
-- [ ] KM Driver EV & WHQL
 
 ## Acknowledgements
 
