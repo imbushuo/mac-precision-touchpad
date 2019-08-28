@@ -1,9 +1,5 @@
 name: PTP Trackpad Build (Github Actions)
 
-strategy:
-  matrix:
-    targetArchitecture: [x86, x64, ARM64]
-
 on:
   push:
     branches:
@@ -16,6 +12,9 @@ on:
 jobs:
   build:
     runs-on: windows-2019
+    strategy:
+      matrix:
+        targetArchitecture: [x86, x64, ARM64]
     steps:
     - uses: actions/checkout@v1
     
