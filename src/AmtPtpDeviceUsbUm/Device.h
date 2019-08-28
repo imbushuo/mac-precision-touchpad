@@ -24,14 +24,7 @@ typedef struct _DEVICE_CONTEXT
 	BOOL                        IsSurfaceReportOn;
 	BOOL                        IsButtonReportOn;
 
-	double                      HorizonalFuzz;
-	double                      VerticalFuzz;
-	double                      PressureFuzz;
-	double                      WidthFuzz;
-	double						OrientationFuzz;
-
 	PTP_CONTACT_RAW             ContactRepository[5];
-	SM_RUNTIME_INFORMATION		TouchStateMachineInfo;
 
 	LARGE_INTEGER				PerfCounter;
 
@@ -63,6 +56,8 @@ AmtPtpCreateDevice(
 // handle
 //
 EVT_WDF_DEVICE_PREPARE_HARDWARE AmtPtpEvtDevicePrepareHardware;
+EVT_WDF_DEVICE_D0_ENTRY AmtPtpEvtDeviceD0Entry;
+EVT_WDF_DEVICE_D0_EXIT AmtPtpEvtDeviceD0Exit;
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
@@ -94,20 +89,6 @@ _IRQL_requires_(PASSIVE_LEVEL)
 PCHAR
 DbgDevicePowerString(
 	_In_ WDF_POWER_DEVICE_STATE Type
-);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS
-AmtPtpEvtDeviceD0Entry(
-	_In_ WDFDEVICE Device,
-	_In_ WDF_POWER_DEVICE_STATE PreviousState
-);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS
-AmtPtpEvtDeviceD0Exit(
-	_In_ WDFDEVICE Device,
-	_In_ WDF_POWER_DEVICE_STATE TargetState
 );
 
 _IRQL_requires_(PASSIVE_LEVEL)

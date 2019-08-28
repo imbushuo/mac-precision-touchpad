@@ -14,7 +14,6 @@
 
 #include "AppleDefinition.h"
 #include "Hid.h"
-#include "InputStateMachine.h"
 #include "Device.h"
 #include "Queue.h"
 
