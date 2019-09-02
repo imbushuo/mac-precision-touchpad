@@ -125,12 +125,6 @@ AmtPtpGetHidDescriptor(
 		"%!FUNC! Entry"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetHidDescriptor Entry \n"
-	));
-
 	pDeviceContext = DeviceGetContext(Device);
 	Status = WdfRequestRetrieveOutputMemory(
 		Request,
@@ -145,12 +139,6 @@ AmtPtpGetHidDescriptor(
 			"%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!",
 			Status
 		);
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"WdfRequestRetrieveOutputBuffer failed with 0x%x \n",
-			Status
-		));
 
 		goto exit;
 	}
@@ -167,12 +155,6 @@ AmtPtpGetHidDescriptor(
 				TRACE_DRIVER,
 				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 1"
 			);
-
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 1 \n"
-				));
 
 			CopiedSize = AmtPtpSpiFamily1DefaultHidDescriptor.bLength;
 			Status = WdfMemoryCopyFromBuffer(
@@ -204,12 +186,6 @@ AmtPtpGetHidDescriptor(
 				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 2"
 			);
 
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 2 \n"
-				));
-
 			CopiedSize = AmtPtpSpiFamily2DefaultHidDescriptor.bLength;
 			Status = WdfMemoryCopyFromBuffer(
 				RequestMemory,
@@ -240,12 +216,6 @@ AmtPtpGetHidDescriptor(
 				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 3A"
 			);
 
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 3A \n"
-			));
-
 			CopiedSize = AmtPtpSpiFamily3aDefaultHidDescriptor.bLength;
 			Status = WdfMemoryCopyFromBuffer(
 				RequestMemory,
@@ -275,12 +245,6 @@ AmtPtpGetHidDescriptor(
 				"%!FUNC! Request HID Report Descriptor for Apple SPI Trackpad, Family 3B"
 			);
 
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"AmtPtpGetHidDescriptor Request HID Report Descriptor for Apple SPI Trackpad, Family 3B \n"
-				));
-
 			CopiedSize = AmtPtpSpiFamily3bDefaultHidDescriptor.bLength;
 			Status = WdfMemoryCopyFromBuffer(
 				RequestMemory,
@@ -309,12 +273,6 @@ AmtPtpGetHidDescriptor(
 				"%!FUNC! Request HID Report Descriptor not found"
 			);
 
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"AmtPtpGetHidDescriptor Request HID Report Descriptor not found \n"
-			));
-
 			DescriptorFound = FALSE;
 			break;
 		}
@@ -339,12 +297,6 @@ exit:
 		"%!FUNC! Exit"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetHidDescriptor Exit \n"
-	));
-
 	return Status;
 }
 
@@ -364,12 +316,6 @@ AmtPtpGetDeviceAttribs(
 		TRACE_DRIVER,
 		"%!FUNC! Entry"
 	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetDeviceAttribs Entry \n"
-	));
 
 	Status = WdfRequestRetrieveOutputBuffer(
 		Request,
@@ -407,12 +353,6 @@ exit:
 		"%!FUNC! Exit"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetDeviceAttribs Exit \n"
-	));
-
 	return Status;
 }
 
@@ -436,12 +376,6 @@ AmtPtpGetReportDescriptor(
 		TRACE_DRIVER,
 		"%!FUNC! Entry"
 	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetReportDescriptor Entry \n"
-	));
 
 	pDeviceContext = DeviceGetContext(Device);
 	Status = WdfRequestRetrieveOutputMemory(
@@ -585,13 +519,6 @@ exit:
 		"%!FUNC! Exit"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetReportDescriptor Exit, Status = 0x%x \n",
-		Status
-	));
-
 	return Status;
 }
 
@@ -615,12 +542,6 @@ AmtPtpGetStrings(
 		TRACE_DRIVER,
 		"%!FUNC! called"
 	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetStrings called \n"
-	));
 
 	pDeviceContext = DeviceGetContext(Device);
 
@@ -646,13 +567,6 @@ AmtPtpGetStrings(
 		*Pending = FALSE;
 	}
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpGetStrings exit, Status = 0x%x \n",
-		Status
-	));
-
 	return Status;
 }
 
@@ -677,12 +591,6 @@ AmtPtpReportFeatures(
 		"%!FUNC! Entry"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpReportFeatures Entry \n"
-	));
-
 	Status = STATUS_SUCCESS;
 	pDeviceContext = DeviceGetContext(Device);
 
@@ -691,12 +599,6 @@ AmtPtpReportFeatures(
 
 	if (RequestParameters.Parameters.DeviceIoControl.OutputBufferLength < sizeof(HID_XFER_PACKET))
 	{
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"AmtPtpReportFeatures: HID_XFER_PACKET buffer too small \n"
-		));
-
 		Status = STATUS_BUFFER_TOO_SMALL;
 		goto exit;
 	}
@@ -704,12 +606,6 @@ AmtPtpReportFeatures(
 	pHidPacket = (PHID_XFER_PACKET) WdfRequestWdmGetIrp(Request)->UserBuffer;
 	if (pHidPacket == NULL)
 	{
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"AmtPtpReportFeatures: HID_XFER_PACKET has no input packet \n"
-			));
-
 		Status = STATUS_INVALID_DEVICE_REQUEST;
 		goto exit;
 	}
@@ -804,12 +700,6 @@ AmtPtpReportFeatures(
 				"%!FUNC! Unsupported type %d is requested",
 				pHidPacket->reportId
 			);
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"Report Unsupported type %d is requested \n",
-				pHidPacket->reportId
-			));
 
 			Status = STATUS_NOT_SUPPORTED;
 			goto exit;
@@ -822,13 +712,6 @@ exit:
 		TRACE_DRIVER,
 		"%!FUNC! Exit"
 	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpReportFeatures Exit, Status = 0x%x \n",
-		Status
-	));
 
 	return Status;
 }
@@ -853,12 +736,6 @@ AmtPtpSetFeatures(
 		"%!FUNC! Entry"
 	);
 
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSetFeatures Entry \n"
-	));
-
 	Status = STATUS_SUCCESS;
 	pDeviceContext = DeviceGetContext(Device);
 
@@ -867,12 +744,6 @@ AmtPtpSetFeatures(
 
 	if (RequestParameters.Parameters.DeviceIoControl.InputBufferLength < sizeof(HID_XFER_PACKET))
 	{
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"AmtPtpReportFeatures: HID_XFER_PACKET buffer too small \n"
-			));
-
 		Status = STATUS_BUFFER_TOO_SMALL;
 		goto exit;
 	}
@@ -880,12 +751,6 @@ AmtPtpSetFeatures(
 	pHidPacket = (PHID_XFER_PACKET) WdfRequestWdmGetIrp(Request)->UserBuffer;
 	if (pHidPacket == NULL)
 	{
-		KdPrintEx((
-			DPFLTR_IHVDRIVER_ID,
-			DPFLTR_INFO_LEVEL,
-			"AmtPtpReportFeatures: HID_XFER_PACKET has no input packet \n"
-			));
-
 		Status = STATUS_INVALID_DEVICE_REQUEST;
 		goto exit;
 	}
@@ -900,12 +765,6 @@ AmtPtpSetFeatures(
 				"%!FUNC! Report REPORTID_REPORTMODE is requested"
 			);
 
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"Report REPORTID_REPORTMODE is requested \n"
-			));
-
 			PPTP_DEVICE_INPUT_MODE_REPORT DeviceInputMode = (PPTP_DEVICE_INPUT_MODE_REPORT) pHidPacket->reportBuffer;
 			switch (DeviceInputMode->Mode)
 			{
@@ -916,12 +775,6 @@ AmtPtpSetFeatures(
 						TRACE_DRIVER,
 						"%!FUNC! Report REPORTID_REPORTMODE requested Mouse Input"
 					);
-
-					KdPrintEx((
-						DPFLTR_IHVDRIVER_ID,
-						DPFLTR_INFO_LEVEL,
-						"Report REPORTID_REPORTMODE requested Mouse Input \n"
-					));
 
 					pDeviceContext->PtpInputOn = FALSE;
 					break;
@@ -935,12 +788,6 @@ AmtPtpSetFeatures(
 						"%!FUNC! Report REPORTID_REPORTMODE requested Windows PTP Input"
 					);
 
-					KdPrintEx((
-						DPFLTR_IHVDRIVER_ID,
-						DPFLTR_INFO_LEVEL,
-						"Report REPORTID_REPORTMODE requested Windows PTP Input \n"
-					));
-
 					pDeviceContext->PtpInputOn = TRUE;
 					break;
 				}
@@ -951,11 +798,6 @@ AmtPtpSetFeatures(
 				TRACE_DRIVER,
 				"%!FUNC! Report REPORTID_REPORTMODE is fulfilled"
 			);
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"Report REPORTID_REPORTMODE is fulfilled \n"
-			));
 			break;
 		}
 		case REPORTID_FUNCSWITCH:
@@ -965,11 +807,6 @@ AmtPtpSetFeatures(
 				TRACE_DRIVER,
 				"%!FUNC! Report REPORTID_FUNCSWITCH is requested"
 			);
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"Report REPORTID_FUNCSWITCH is requested \n"
-			));
 
 			PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT InputSelection = (PPTP_DEVICE_SELECTIVE_REPORT_MODE_REPORT) pHidPacket->reportBuffer;
 			pDeviceContext->PtpReportButton = InputSelection->ButtonReport;
@@ -982,24 +819,12 @@ AmtPtpSetFeatures(
 				InputSelection->ButtonReport,
 				InputSelection->SurfaceReport
 			);
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"Report REPORTID_FUNCSWITCH requested Button = %d, Surface = %d \n",
-				InputSelection->ButtonReport,
-				InputSelection->SurfaceReport
-			));
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
 				TRACE_DRIVER,
 				"%!FUNC! Report REPORTID_FUNCSWITCH is fulfilled"
 			);
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"Report REPORTID_FUNCSWITCH is fulfilled \n"
-			));
 
 			break;
 		}
@@ -1011,12 +836,6 @@ AmtPtpSetFeatures(
 				"%!FUNC! Unsupported type %d is requested",
 				pHidPacket->reportId
 			);
-			KdPrintEx((
-				DPFLTR_IHVDRIVER_ID,
-				DPFLTR_INFO_LEVEL,
-				"Report Unsupported type %d is requested \n",
-				pHidPacket->reportId
-			));
 
 			Status = STATUS_NOT_SUPPORTED;
 			goto exit;
@@ -1029,13 +848,6 @@ exit:
 		TRACE_DRIVER,
 		"%!FUNC! Exit"
 	);
-
-	KdPrintEx((
-		DPFLTR_IHVDRIVER_ID,
-		DPFLTR_INFO_LEVEL,
-		"AmtPtpSetFeatures Exit, Status = 0x%x \n",
-		Status
-	));
 
 	return Status;
 }

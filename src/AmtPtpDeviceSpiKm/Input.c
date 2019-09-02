@@ -34,6 +34,45 @@ AmtPtpSpiInputRoutineWorker(
 		return;
 	}
 
+	// Late-init for the sleep workaround
+	if (pDeviceContext->DeviceStatus == D3) {
+		TraceEvents(
+			TRACE_LEVEL_WARNING,
+			TRACE_DRIVER,
+			"%!FUNC! Unexpected call while device is in D3 status"
+		);
+
+		WdfRequestComplete(PtpRequest, STATUS_DEVICE_NOT_READY);
+		return;
+	}
+	else if (pDeviceContext->DeviceStatus == D0ActiveAndUnconfigured) {
+		TraceEvents(
+			TRACE_LEVEL_INFORMATION,
+			TRACE_DRIVER,
+			"%!FUNC! Re-initialize device for sleep workaround"
+		);
+
+		Status = AmtPtpSpiSetState(
+			Device,
+			TRUE
+		);
+
+		if (!NT_SUCCESS(Status))
+		{
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!",
+				Status
+			);
+
+			WdfRequestComplete(PtpRequest, Status);
+			return;
+		}
+
+		pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
+	}
+
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&Attributes, WORKER_REQUEST_CONTEXT);
 	Attributes.ParentObject = Device;
 

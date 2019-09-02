@@ -43,6 +43,12 @@ typedef enum _REPORT_TYPE {
 	InvalidReportType = 0x7fffffff,
 } REPORT_TYPE;
 
+typedef enum _PTP_AAPL_DEVICE_POWER_STATUS {
+	D3 = 0,
+	D0ActiveAndConfigured = 1,
+	D0ActiveAndUnconfigured = 2
+} PTP_AAPL_DEVICE_POWER_STATUS;
+
 //
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
@@ -52,7 +58,7 @@ typedef struct _DEVICE_CONTEXT
 	// IO content
 	WDFDEVICE	SpiDevice;
 	WDFIOTARGET SpiTrackpadIoTarget;
-	BOOLEAN		DeviceReady;
+	PTP_AAPL_DEVICE_POWER_STATUS DeviceStatus;
 	HANDLE		InputPollThreadHandle;
 	WDFQUEUE	HidQueue;
 
@@ -107,13 +113,11 @@ EVT_WDF_DEVICE_PREPARE_HARDWARE AmtPtpEvtDevicePrepareHardware;
 EVT_WDF_DEVICE_D0_ENTRY AmtPtpEvtDeviceD0Entry;
 EVT_WDF_DEVICE_D0_EXIT AmtPtpEvtDeviceD0Exit;
 
-_IRQL_requires_(PASSIVE_LEVEL)
 PCHAR
 DbgDevicePowerString(
 	_In_ WDF_POWER_DEVICE_STATE Type
 );
 
-_IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AmtPtpSpiSetState(
 	_In_ WDFDEVICE Device,
