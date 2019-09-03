@@ -302,8 +302,6 @@ AmtPtpEvtDeviceD0Entry(
 	NTSTATUS Status = STATUS_SUCCESS;
 	PDEVICE_CONTEXT pDeviceContext;
 
-	PAGED_CODE();
-
 	// Log status
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
@@ -325,7 +323,7 @@ AmtPtpEvtDeviceD0Entry(
 		TraceEvents(
 			TRACE_LEVEL_ERROR,
 			TRACE_DRIVER,
-			"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!",
+			"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!. Ignored anyway.",
 			Status
 		);
 
@@ -370,8 +368,6 @@ AmtPtpEvtDeviceD0Exit(
 	PDEVICE_CONTEXT pDeviceContext;
 	WDFREQUEST OutstandingRequest;
 
-	PAGED_CODE();
-
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
 		TRACE_DRIVER,
@@ -394,25 +390,9 @@ AmtPtpEvtDeviceD0Exit(
 		}
 	}
 
-	// Disable HID trackpad
-	Status = AmtPtpSpiSetState(
-		Device,
-		FALSE
-	);
+	// When the queue is empty, this is expected
+	Status = STATUS_SUCCESS;
 
-	if (!NT_SUCCESS(Status))
-	{
-		TraceEvents(
-			TRACE_LEVEL_ERROR,
-			TRACE_DRIVER,
-			"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!",
-			Status
-		);
-
-		goto exit;
-	}
-
-exit:
 	// Reset mapping
 	for (UINT8 i = 0; i < MAPPING_MAX; i++)
 	{

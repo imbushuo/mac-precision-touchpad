@@ -145,18 +145,6 @@ AmtPtpDeviceSpiKmEvtIoInternalDeviceControl(
 	NTSTATUS Status = STATUS_SUCCESS;
 	WDFDEVICE Device = WdfIoQueueGetDevice(Queue);
 	BOOLEAN RequestPending = FALSE;
-	PDEVICE_CONTEXT pDeviceContext = DeviceGetContext(Device);
-
-	if (pDeviceContext->DeviceStatus == D3) {
-		TraceEvents(
-			TRACE_LEVEL_WARNING,
-			TRACE_QUEUE,
-			"%!FUNC! Unexpected call while device is in D3 status"
-		);
-
-		WdfRequestComplete(Request, STATUS_DEVICE_NOT_READY);
-		return;
-	}
 
 	// Dispatch IOCTL to handler
 	switch (IoControlCode)
