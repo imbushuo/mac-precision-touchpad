@@ -1,7 +1,7 @@
 Dual-licensed project notice
 =====================
 
-Copyright © `2018` `Bingxing Wang`
+Copyright 2018-2019, Bingxing Wang and other project contributors.
 
-- The USB PTP project, `AmtPtpDeviceUsbUm` is licensed under [GPLv2](LICENSE-GPL.md).
+- The USB PTP project, `AmtPtpDeviceUsbUm` and `AmtPtpDeviceUsbKm` is licensed under [GPLv2](LICENSE-GPL.md).
 - The SPI PTP project, `AmtPtpDeviceSpiKm` is licensed unser [MIT](LICENSE-MIT.md).
