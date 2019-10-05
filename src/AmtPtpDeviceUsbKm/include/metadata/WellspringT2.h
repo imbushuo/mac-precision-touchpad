@@ -11,18 +11,19 @@
 		REPORT_COUNT, 0x02, /* Report Count: 2 */ \
 		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		REPORT_COUNT, 0x01, /* Report Count: 1 */ \
-		REPORT_SIZE, 0x03, /* Report Size: 3 */ \
-		LOGICAL_MAXIMUM, 0x03, /* Logical Maximum: 3 */ \
-		USAGE, 0x51, /* Usage: Contract Identifier */ \
-		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
-		REPORT_COUNT, 0x03, /* Report Count: 3 */ \
+		REPORT_COUNT, 0x06, /* Report Count: 6 */ \
 		INPUT, 0x03, /* Input: (Const, Var, Abs) */ \
 		/* End of a byte */ \
 		/* Begin of 4 bytes */ \
+		REPORT_COUNT, 0x01, /* Report Count: 1 */ \
+		REPORT_SIZE, 0x20, /* Report Size: 0x10 (2 bytes) */ \
+		LOGICAL_MAXIMUM_3, 0xff, 0xff, 0xff, 0xff, /* Logical Maximum: 0xffffffff */ \
+		USAGE, 0x51, /* Usage: Contract Identifier */ \
+		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
+		/* End of 4 bytes */ \
+		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
-		/* This hard-coded size is designed for MacBookAir 7,2 */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
 		LOGICAL_MAXIMUM_2, 0xc0, 0x32, /* Logical Maximum: 12992 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
@@ -51,15 +52,17 @@
 		REPORT_COUNT, 0x02, /* Report Count: 2 */ \
 		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		REPORT_COUNT, 0x01, /* Report Count: 1 */ \
-		REPORT_SIZE, 0x03, /* Report Size: 3 */ \
-		LOGICAL_MAXIMUM, 0x03, /* Logical Maximum: 3 */ \
-		USAGE, 0x51, /* Usage: Contract Identifier */ \
-		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		REPORT_SIZE, 0x01, /* Report Size: 1 */ \
-		REPORT_COUNT, 0x03, /* Report Count: 3 */ \
+		REPORT_COUNT, 0x06, /* Report Count: 6 */ \
 		INPUT, 0x03, /* Input: (Const, Var, Abs) */ \
 		/* End of a byte */ \
+		/* Begin of 4 bytes */ \
+		REPORT_COUNT, 0x01, /* Report Count: 1 */ \
+		REPORT_SIZE, 0x20, /* Report Size: 0x10 (2 bytes) */ \
+		LOGICAL_MAXIMUM_3, 0xff, 0xff, 0xff, 0xff, /* Logical Maximum: 0xffffffff */ \
+		USAGE, 0x51, /* Usage: Contract Identifier */ \
+		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
+		/* End of 4 bytes */ \
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \

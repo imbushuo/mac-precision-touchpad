@@ -512,7 +512,6 @@ AmtPtpServiceTouchInputInterruptType5(
 			x = (x - DeviceContext->DeviceInfo->x.min) > 0 ? (x - DeviceContext->DeviceInfo->x.min) : 0;
 			y = (y - DeviceContext->DeviceInfo->y.min) > 0 ? (y - DeviceContext->DeviceInfo->y.min) : 0;
 
-			// Set for state machine's reference
 			PtpReport.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
 			PtpReport.Contacts[i].X = (USHORT) x;
 			PtpReport.Contacts[i].Y = (USHORT) y;

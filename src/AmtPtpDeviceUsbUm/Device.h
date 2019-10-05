@@ -24,8 +24,6 @@ typedef struct _DEVICE_CONTEXT
 	BOOL                        IsSurfaceReportOn;
 	BOOL                        IsButtonReportOn;
 
-	PTP_CONTACT_RAW             ContactRepository[5];
-
 	LARGE_INTEGER				PerfCounter;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
