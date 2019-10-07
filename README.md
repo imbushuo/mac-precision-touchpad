@@ -26,6 +26,8 @@ Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
 
 https://www.reddit.com/r/bootcamp/comments/c4alv2/how_to_install_mac_precision_touchpad_better_than/ - thank you Azmat
 
+**Note: it is unnecessary to enable test signing, or install the certificate manually. Doing so may cause problems in installation. See [this issue](https://github.com/imbushuo/mac-precision-touchpad/issues/228#issuecomment-538689587) for detailed explanation.**
+
 ## USB-based model Installation
 
 1. Go to the release tab in Github and download the newest version
@@ -70,7 +72,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] MacBook Pro with Retina Display (2013, 2014, 2015, 13-inch & 15-inch)
 - [x] New MacBook (12-inch)
 - [x] MacBook Pro 2015, 2016, 2017
-- [ ] _(Work in progress)_ T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019
+- [ ] _(Work in progress)_ T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019: a few is supported as of now
 
 ## Roadmap
 
