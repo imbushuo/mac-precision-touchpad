@@ -37,7 +37,14 @@ AmtPtpGetDeviceConfig(
 		}
 	}
 
-	return NULL;
+	// Generic fallback
+	TraceEvents(
+		TRACE_LEVEL_WARNING,
+		TRACE_DRIVER,
+		"%!FUNC! Selected a generic fallback configuration"
+	);
+
+	return &Bcm5974ConfigTable[0];
 }
 
 NTSTATUS

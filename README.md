@@ -71,8 +71,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Apple Magic Trackpad 2 (Not stable)
 - [x] MacBook Pro with Retina Display (2013, 2014, 2015, 13-inch & 15-inch)
 - [x] New MacBook (12-inch)
-- [x] MacBook Pro 2015, 2016, 2017
-- [ ] _(Work in progress)_ T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019: a few is supported as of now
+- [x] MacBook Pro 2015, 2016, 2017 (a few SPI devices are in work-in-progress state)
+- [x] T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019: Use default fallback, experience might not be optimal. Open a issue if you encountered dead touch regions.
 
 ## Roadmap
 

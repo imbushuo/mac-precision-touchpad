@@ -84,10 +84,27 @@ AmtPtpGetHidDescriptor(
 		{
 			TraceEvents(
 				TRACE_LEVEL_WARNING, TRACE_DRIVER,
-				"%!FUNC! Device HID registry is not found"
+				"%!FUNC! Device HID registry is not found, use a generic fallback"
 			);
 
-			status = STATUS_INVALID_DEVICE_STATE;
+			szCopy = AmtPtpT2DefaultHidDescriptor.bLength;
+			status = WdfMemoryCopyFromBuffer(
+				requestMemory,
+				0,
+				(PVOID)&AmtPtpT2DefaultHidDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(
+					TRACE_LEVEL_ERROR, TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				goto exit;
+			}
+
+			WdfRequestSetInformation(Request, szCopy);
 			break;
 		}
 	};
@@ -222,9 +239,38 @@ AmtPtpGetReportDescriptor(
 		{
 			TraceEvents(
 				TRACE_LEVEL_WARNING, TRACE_DRIVER,
-				"%!FUNC! Device HID registry is not found"
+				"%!FUNC! Device HID registry is not found, use a generic fallback"
 			);
-			status = STATUS_INVALID_DEVICE_STATE;
+			
+			szCopy = AmtPtpT2DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			if (szCopy == 0) {
+
+				status = STATUS_INVALID_DEVICE_STATE;
+				TraceEvents(
+					TRACE_LEVEL_ERROR, TRACE_DRIVER,
+					"%!FUNC! Device HID report length is zero"
+				);
+				goto exit;
+			}
+
+			status = WdfMemoryCopyFromBuffer(
+				requestMemory,
+				0,
+				(PVOID)&AmtPtpT2ReportDescriptor,
+				szCopy
+			);
+
+			if (!NT_SUCCESS(status)) {
+
+				TraceEvents(
+					TRACE_LEVEL_ERROR, TRACE_DRIVER,
+					"%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!",
+					status
+				);
+				goto exit;
+			}
+
+			WdfRequestSetInformation(Request, szCopy);
 			break;
 		}
 	}
