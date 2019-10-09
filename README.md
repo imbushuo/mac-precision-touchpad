@@ -2,7 +2,13 @@
 
 [![Build Status](https://ligstd.visualstudio.com/_apis/public/build/definitions/7694e0d0-94e3-4fd2-b39a-ecd261e1ba2e/22/badge)](https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/_build?definitionId=22)
 
-This project implements Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10. Both USB and SPI trackpads are supported.
+This project implements Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10. Both USB (traditional and T2) and SPI trackpads are supported.
+
+If you like my work, please consider buying me a coffee. Thank you for your support!
+
+<a href="https://www.buymeacoffee.com/imbushuo" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
+Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
 
 ## Future Plans and feature tracking
 
@@ -11,16 +17,6 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 ## See it in action (YouTube video)
 
 [![Watch the video](https://img.youtube.com/vi/-GWlfw7omdo/hqdefault.jpg)](https://youtu.be/-GWlfw7omdo)
-
-## T2 devices
-
-I got my T2 MacBook Pro :) Work is in progress. Eventually all USB devices will use the km driver (not only T2).
-
-If you like my work, please consider buying me a coffee. Thank you for your support!
-
-<a href="https://www.buymeacoffee.com/imbushuo" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
-
-Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
 
 ## A better installation guide
 
