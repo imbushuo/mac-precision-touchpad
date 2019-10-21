@@ -95,22 +95,8 @@ AmtPtpConfigContReaderForInterruptEndPoint(
 //
 // Functions to serve interrupt
 //
-_IRQL_requires_max_(DISPATCH_LEVEL)
-VOID
-AmtPtpEvtUsbInterruptPipeReadComplete(
-	_In_ WDFUSBPIPE  Pipe,
-	_In_ WDFMEMORY   Buffer,
-	_In_ size_t      NumBytesTransferred,
-	_In_ WDFCONTEXT  Context
-);
-
-_IRQL_requires_max_(DISPATCH_LEVEL)
-BOOLEAN
-AmtPtpEvtUsbInterruptReadersFailed(
-	_In_ WDFUSBPIPE Pipe,
-	_In_ NTSTATUS Status,
-	_In_ USBD_STATUS UsbdStatus
-);
+EVT_WDF_USB_READER_COMPLETION_ROUTINE AmtPtpEvtUsbInterruptPipeReadComplete;
+EVT_WDF_USB_READERS_FAILED AmtPtpEvtUsbInterruptReadersFailed;
 
 //
 // Debug utilities

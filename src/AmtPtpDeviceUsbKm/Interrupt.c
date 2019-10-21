@@ -86,7 +86,6 @@ exit:
 	return STATUS_SUCCESS;
 }
 
-_IRQL_requires_max_(DISPATCH_LEVEL)
 VOID
 AmtPtpEvtUsbInterruptPipeReadComplete(
 	_In_ WDFUSBPIPE  Pipe,
@@ -250,7 +249,6 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 	WdfRequestComplete(Request, Status);
 }
 
-_IRQL_requires_max_(DISPATCH_LEVEL)
 BOOLEAN
 AmtPtpEvtUsbInterruptReadersFailed(
 	_In_ WDFUSBPIPE Pipe,
