@@ -50,18 +50,21 @@ typedef struct _SPI_SET_FEATURE {
 
 static const SPI_TRACKPAD_INFO SpiTrackpadConfigTable[] = 
 {
-	/* MacBook9 */
-	{ 0x05ac, 0x0275, -5087, 5579, -128, 6089 },
-	/* MacBook10 */
-	{ 0x05ac, 0x0279, -5087, 5579, -128, 6089 },
 	/* MacBookPro11,1 / MacBookPro12,1 */
 	{ 0x05ac, 0x0272, -4750, 5280, -150, 6730 },
 	{ 0x05ac, 0x0273, -4750, 5280, -150, 6730 },
+	/* MacBook9 */
+	{ 0x05ac, 0x0275, -5087, 5579, -128, 6089 },
 	/* MacBookPro14,1 / MacBookPro14,2 */
 	{ 0x05ac, 0x0276, -6243, 6749, -170, 7685 },
 	{ 0x05ac, 0x0277, -6243, 6749, -170, 7685 },
 	/* MacBookPro14,3 */
 	{ 0x05ac, 0x0278, -7456, 7976, -163, 9283 },
+	/* MacBook10 */
+	{ 0x05ac, 0x0279, -5087, 5579, -128, 6089 },
+	/* MacBookAir7,2 fallback */
+	{ 0x05ac, 0x0290, -5087, 5579, -128, 6089 },
+	{ 0x05ac, 0x0291, -5087, 5579, -128, 6089 },
 	/* Terminator */
 	{ 0 }
 };

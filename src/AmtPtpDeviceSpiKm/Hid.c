@@ -149,6 +149,9 @@ AmtPtpGetHidDescriptor(
 		// MacBook 9, 10
 		case 0x0275:
 		case 0x0279:
+		// MacBookAir7,2 also use this fallback
+		case 0x0290:
+		case 0x0291:
 		{
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
@@ -400,6 +403,9 @@ AmtPtpGetReportDescriptor(
 		// MacBook 9, 10
 		case 0x0275:
 		case 0x0279:
+		// MacBookAir7,2 also use this fallback
+		case 0x0290:
+		case 0x0291:
 		{
 			if (pDeviceContext->ReportType == PrecisionTouchpad)
 			{
