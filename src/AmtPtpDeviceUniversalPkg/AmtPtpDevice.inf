@@ -1,0 +1,194 @@
+;
+; AmtPtpDevice.inf
+;
+
+[Version]
+Signature = "$WINDOWS NT$"
+Class = HIDClass
+ClassGuid = {745a17a0-74d3-11d0-b6fe-00a0c90f57da}
+Provider = %ManufacturerName%
+CatalogFile = AmtPtpDevice.cat
+DriverVer =
+
+[DestinationDirs]
+DefaultDestDir = 12
+PtpUmDrivers_Dir = 12,UMDF
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+AmtPtpDeviceUsbKm.sys = 1,,
+AmtPtpDeviceUsbUm.dll = 1,,
+AmtPtpDeviceSpiKm.sys = 1,,
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0273&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0274&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0277&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_027A&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_027B&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_027C&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_027D&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0290&MI_02
+%AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0291&MI_02
+
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0245&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0246&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0247&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0252&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0253&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0254&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0259&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_025a&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_025b&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0262&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0263&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0264&MI_01
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0273&MI_02
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0274&MI_02
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0290&MI_02
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0291&MI_02
+%AmtPtpDeviceUsbUm.DeviceDesc%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0265&MI_01
+
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0272&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0273&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0275&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0276&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0277&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0278&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0279&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0290&MI_02
+%AmtPtpDeviceSpiKm.DeviceDesc%=AmtPtpDeviceSpiKm_Device, SPI\VID_05ac&PID_0291&MI_02
+
+; USB KM
+
+[AmtPtpDeviceUsbKm_Device.NT]
+CopyFiles=PtpKmDrivers_Dir
+
+[PtpKmDrivers_Dir]
+AmtPtpDeviceUsbKm.sys
+
+[AmtPtpDeviceUsbKm_Device.NT.Services]
+AddService = AmtPtpDeviceUsbKm,, AmtPtpDeviceUsbKm_Service_Inst
+AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst
+
+[AmtPtpDeviceUsbKm_Device.NT.HW]
+AddReg=AmtPtpDeviceUsbKm_AddReg
+
+[AmtPtpDeviceUsbKm_AddReg]
+HKR,,FriendlyName,,%AmtPtpDeviceUsbKm.DeviceDesc%
+HKR,,"LowerFilters",0x00010008,"AmtPtpDeviceUsbKm"
+
+; -------------- Microsoft HID KMDF driver install sections
+[mshidkmdf_Service_Inst]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\mshidkmdf.sys
+
+; -------------- AmtPtpDeviceUsbKm driver install sections
+[AmtPtpDeviceUsbKm_Service_Inst]
+DisplayName    = %AmtPtpDeviceUsbKm.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\AmtPtpDeviceUsbKm.sys
+
+[AmtPtpDeviceUsbKm_Device.NT.Wdf]
+KmdfService = AmtPtpDeviceUsbKm, AmtPtpDeviceUsbKm_wdfsect
+
+[AmtPtpDeviceUsbKm_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+; USB UM
+[AmtPtpDeviceUsbUm_Install.NT]
+CopyFiles=PtpUmDrivers_Dir
+
+[AmtPtpDeviceUsbUm_Install.NT.hw]
+AddReg=AmtPtpDeviceUsbUm_AddReg
+
+[AmtPtpDeviceUsbUm_Install.NT.Services]
+AddService=mshidumdf, 0x000001fa, MSHIDUMDF_ServiceInstall ; flag 0x2 sets this as the service for the device
+AddService=WUDFRd,0x000001f8,WUDFRD_ServiceInstall         ; this service is installed because its a filter.
+
+[AmtPtpDeviceUsbUm_Install.NT.Wdf]
+UmdfDispatcher=NativeUSB
+UmdfService=AmtPtpDeviceUsbUm,AmtPtpDeviceUsbUm_Install
+UmdfServiceOrder=AmtPtpDeviceUsbUm
+UmdfKernelModeClientPolicy=AllowKernelModeClients
+UmdfFileObjectPolicy=AllowNullAndUnknownFileObjects
+UmdfMethodNeitherAction=Copy
+UmdfFsContextUsePolicy=CanUseFsContext2
+
+[AmtPtpDeviceUsbUm_Install]
+UmdfLibraryVersion=2.15
+ServiceBinary=%12%\UMDF\AmtPtpDeviceUsbUm.dll
+
+[AmtPtpDeviceUsbUm_AddReg]
+HKR,,FriendlyName,,%AmtPtpDeviceUsbUm.DeviceDesc%
+HKR,,"LowerFilters",0x00010008,"WUDFRd" ; FLG_ADDREG_TYPE_MULTI_SZ | FLG_ADDREG_APPEND
+
+[mshidumdf_ServiceInstall]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\mshidumdf.sys
+
+[WUDFRD_ServiceInstall]
+DisplayName = %WudfRdDisplayName%
+ServiceType = 1
+StartType = 3
+ErrorControl = 1
+ServiceBinary = %12%\WUDFRd.sys
+
+[PtpUmDrivers_Dir]
+AmtPtpDeviceUsbUm.dll
+
+; SPI KM
+[AmtPtpDeviceSpiKm_Device.NT]
+CopyFiles=SpiKmDrivers_Dir
+
+[SpiKmDrivers_Dir]
+AmtPtpDeviceSpiKm.sys
+
+[AmtPtpDeviceSpiKm_Device.NT.Services]
+AddService = AmtPtpDeviceSpiKm,, AmtPtpDeviceSpiKm_Service_Inst
+AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst ;flag 0x2 sets this as the service for the device
+
+[AmtPtpDeviceSpiKm_Device.NT.HW]
+AddReg = AmtPtpDeviceSpiKm_Device.NT.AddReg
+
+[AmtPtpDeviceSpiKm_Device.NT.AddReg]
+HKR,,"LowerFilters",0x00010008,"AmtPtpDeviceSpiKm"
+
+; -------------- AmtPtpDeviceSpiKm driver install sections
+[AmtPtpDeviceSpiKm_Service_Inst]
+DisplayName    = %AmtPtpDeviceSpiKm.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\AmtPtpDeviceSpiKm.sys
+LoadOrderGroup = Extended Base
+
+[AmtPtpDeviceSpiKm_Device.NT.Wdf]
+KmdfService =  AmtPtpDeviceSpiKm, AmtPtpDeviceSpiKm_wdfsect
+
+[AmtPtpDeviceSpiKm_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+REG_MULTI_SZ = 0x00010000
+SPSVCINST_ASSOCSERVICE = 0x00000002
+ManufacturerName = "Bingxing Wang"
+ClassName = "Universal Serial Bus devices"
+DiskName = "AmtPtpDeviceUsbKm Installation Disk"
+AmtPtpDeviceUsbKm.DeviceDesc = "Apple USB Precision Touchpad Device (Kernel-mode)"
+AmtPtpDeviceUsbUm.DeviceDesc = "Apple USB Precision Touchpad Device (User-mode)"
+AmtPtpDeviceSpiKm.DeviceDesc = "Apple SPI Precision Touchpad Device"
+AmtPtpDeviceSpiKm.SVCDESC = "Apple SPI Precision Touchpad Driver Service"
+AmtPtpDeviceUsbKm.SVCDESC = "Apple USB Precision Touchpad Service"
+WudfRdDisplayName = "Windows Driver Foundation - User-mode Driver Framework Reflector"
