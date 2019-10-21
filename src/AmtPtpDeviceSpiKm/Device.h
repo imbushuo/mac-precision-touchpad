@@ -73,8 +73,6 @@ typedef struct _DEVICE_CONTEXT
 	BOOLEAN PtpInputOn;
 	BOOLEAN PtpReportTouch;
 	BOOLEAN PtpReportButton;
-	// Should be PTP_MAX_CONTACT * 2
-	PTP_AAPL_MAPPING PtpMapping[MAPPING_MAX];
 
 	// Timer
 	LARGE_INTEGER LastReportTime;

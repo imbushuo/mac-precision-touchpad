@@ -24,7 +24,7 @@ AmtPtpSpiInputRoutineWorker(
 			"%!FUNC! Unexpected call while device is in D3 status"
 		);
 
-		WdfRequestComplete(PtpRequest, STATUS_DEVICE_NOT_READY);
+		WdfRequestComplete(PtpRequest, STATUS_UNSUCCESSFUL);
 		return;
 	}
 
@@ -43,33 +43,6 @@ AmtPtpSpiInputRoutineWorker(
 
 		WdfRequestComplete(PtpRequest, Status);
 		return;
-	}
-
-	// Late-init for the sleep workaround
-	if (pDeviceContext->DeviceStatus == D0ActiveAndUnconfigured) {
-		TraceEvents(
-			TRACE_LEVEL_INFORMATION,
-			TRACE_DRIVER,
-			"%!FUNC! Re-initialize device for sleep workaround"
-		);
-
-		Status = AmtPtpSpiSetState(
-			Device,
-			TRUE
-		);
-
-		if (!NT_SUCCESS(Status))
-		{
-			TraceEvents(
-				TRACE_LEVEL_ERROR,
-				TRACE_DRIVER,
-				"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!. Ignored anyway.",
-				Status
-			);
-		}
-		else {
-			pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
-		}
 	}
 
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&Attributes, WORKER_REQUEST_CONTEXT);
@@ -136,8 +109,14 @@ AmtPtpSpiInputRoutineWorker(
 			Status
 		);
 
-		WdfObjectDelete(SpiHidReadOutputMemory);
-		WdfObjectDelete(SpiHidReadRequest);
+		if (SpiHidReadOutputMemory != NULL) {
+			WdfObjectDelete(SpiHidReadOutputMemory);
+		}
+
+		if (SpiHidReadRequest != NULL) {
+			WdfObjectDelete(SpiHidReadRequest);
+		}
+		
 		return;
 	}
 
@@ -161,8 +140,13 @@ AmtPtpSpiInputRoutineWorker(
 			"%!FUNC! AmtPtpSpiInputRoutineWorker request failed to sent"
 		);
 
-		WdfObjectDelete(SpiHidReadOutputMemory);
-		WdfObjectDelete(SpiHidReadRequest);
+		if (SpiHidReadOutputMemory != NULL) {
+			WdfObjectDelete(SpiHidReadOutputMemory);
+		}
+
+		if (SpiHidReadRequest != NULL) {
+			WdfObjectDelete(SpiHidReadRequest);
+		}
 	}
 }
 
@@ -187,7 +171,6 @@ AmtPtpRequestCompletionRoutine(
 
 	LARGE_INTEGER CurrentCounter;
 	LONGLONG CounterDelta;
-	BOOLEAN SessionEnded = TRUE;
 
 	UNREFERENCED_PARAMETER(Target);
 
@@ -212,14 +195,38 @@ AmtPtpRequestCompletionRoutine(
 	SpiRequestLength = (LONG) WdfRequestGetInformation(SpiRequest);
 	pSpiTrackpadPacket = (PSPI_TRACKPAD_PACKET) WdfMemoryGetBuffer(Params->Parameters.Ioctl.Output.Buffer, NULL);
 
-	// Safe measurement for buffer overrun
+	// Safe measurement for buffer overrun and device state reset
 	if (SpiRequestLength < 46) {
 		TraceEvents(
 			TRACE_LEVEL_ERROR,
 			TRACE_DRIVER,
-			"%!FUNC! Input too small: %d < 46",
+			"%!FUNC! Input too small: %d < 46. Attempt to re-enable the device.",
 			SpiRequestLength
 		);
+
+		if (pDeviceContext->DeviceStatus == D0ActiveAndUnconfigured) {
+			Status = AmtPtpSpiSetState(
+				pDeviceContext->SpiDevice,
+				TRUE
+			);
+
+			if (!NT_SUCCESS(Status))
+			{
+				TraceEvents(
+					TRACE_LEVEL_ERROR,
+					TRACE_DRIVER,
+					"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!.",
+					Status
+				);
+			}
+			else {
+				pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
+				AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice, PtpRequest);
+				// Bypass PTP request completion
+				goto cleanup;
+			}
+		}
+
 		Status = STATUS_DEVICE_DATA_ERROR;
 		goto exit;
 	}
@@ -254,8 +261,6 @@ AmtPtpRequestCompletionRoutine(
 		PtpReport.Contacts[Count].Confidence = (pSpiTrackpadPacket->Fingers[Count].TouchMajor < 2500 &&
 			pSpiTrackpadPacket->Fingers[Count].TouchMinor < 2500) ? 1 : 0;
 
-		if (!SessionEnded && PtpReport.Contacts[Count].TipSwitch) SessionEnded = FALSE;
-
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
 			TRACE_HID_INPUT,
@@ -266,16 +271,6 @@ AmtPtpRequestCompletionRoutine(
 			pSpiTrackpadPacket->Fingers[Count].X,
 			pSpiTrackpadPacket->Fingers[Count].Y
 		);
-	}
-
-	if (SessionEnded)
-	{
-		for (UINT8 i = 0; i < MAPPING_MAX; i++)
-		{
-			pDeviceContext->PtpMapping[i].ContactID = -1;
-			pDeviceContext->PtpMapping[i].OriginalX = -1;
-			pDeviceContext->PtpMapping[i].OriginalY = -1;
-		}
 	}
 
 	if (CounterDelta >= 0xFF)
@@ -339,5 +334,7 @@ cleanup:
 	// Clean up
 	pSpiTrackpadPacket = NULL;
 	WdfObjectDelete(SpiRequest);
-	WdfObjectDelete(RequestContext->RequestMemory);
+	if (RequestContext->RequestMemory != NULL) {
+		WdfObjectDelete(RequestContext->RequestMemory);
+	}
 }

@@ -312,7 +312,10 @@ AmtPtpEvtDeviceD0Entry(
 
 	pDeviceContext = DeviceGetContext(Device);
 
-	// Enable SPI trackpad; this might fail but can be retried later
+	// Attempt to enable SPI trackpad
+	// this might fail but can be retried later
+	// The state retains unless the power rail of trackpad
+	// has been cut
 	Status = AmtPtpSpiSetState(
 		Device,
 		TRUE
@@ -334,14 +337,6 @@ AmtPtpEvtDeviceD0Entry(
 	else
 	{
 		pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
-	}
-
-	// Reset mapping
-	for (UINT8 i = 0; i < MAPPING_MAX; i++)
-	{
-		pDeviceContext->PtpMapping[i].ContactID = -1;
-		pDeviceContext->PtpMapping[i].OriginalX = -1;
-		pDeviceContext->PtpMapping[i].OriginalY = -1;
 	}
 
 	// Set time
@@ -392,14 +387,6 @@ AmtPtpEvtDeviceD0Exit(
 
 	// When the queue is empty, this is expected
 	Status = STATUS_SUCCESS;
-
-	// Reset mapping
-	for (UINT8 i = 0; i < MAPPING_MAX; i++)
-	{
-		pDeviceContext->PtpMapping[i].ContactID = -1;
-		pDeviceContext->PtpMapping[i].OriginalX = -1;
-		pDeviceContext->PtpMapping[i].OriginalY = -1;
-	}
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
