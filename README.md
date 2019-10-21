@@ -18,40 +18,20 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 [![Watch the video](https://img.youtube.com/vi/-GWlfw7omdo/hqdefault.jpg)](https://youtu.be/-GWlfw7omdo)
 
-## A better installation guide
+## Converged Installation Guide
 
-https://www.reddit.com/r/bootcamp/comments/c4alv2/how_to_install_mac_precision_touchpad_better_than/ - thank you Azmat
-
-**Note: it is unnecessary to enable test signing, or install the certificate manually. Doing so may cause problems in installation. See [this issue](https://github.com/imbushuo/mac-precision-touchpad/issues/228#issuecomment-538689587) for detailed explanation.**
-
-## USB-based model Installation
-
+0. **Disable Secure Boot if your MacBook comes with Apple T2 Security chip**: Boot with Command + R, select Startup Security Tools and disable Secure Boot (No Boot Security)
 1. Go to the release tab in Github and download the newest version
-2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
-3. Go to `AmtPtpDevice` directory
+2. Open the zip and navigate to `x64\ReleaseSigned`
+3. Go to `AmtPtpDeviceUniversalPkg` directory
 4. Right click `AmtPtpDevice.inf` and install it
 5. Confirm driver publisher
 
-## SPI-based model Installation
-
-1. Go to the release tab in Github and download the newest version
-2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
-3. Go to `AmtPtpDeviceSpiKm` directory
-4. Right click `AmtPtpDeviceSpiKm.inf` and install it
-5. Confirm driver publisher
-
-## Apple T2-based model Installation
-
-0. **Disable Secure Boot as temporary mitigation**: Boot with Command + R, select Startup Security Tools and disable Secure Boot (No Boot Security)
-1. Go to the release tab in Github and download the newest version
-2. Open the zip and navigate to `Drivers\x64\ReleaseSigned`
-3. Go to `AmtPtpDeviceUsbKm` directory
-4. Right click `AmtPtpDeviceUsbKm.inf` and install it
-5. Confirm driver publisher
+**Note: it is unnecessary to enable test signing, or install the certificate manually. Doing so may cause problems in installation. See [this issue](https://github.com/imbushuo/mac-precision-touchpad/issues/228#issuecomment-538689587) for detailed explanation.**
 
 ## For developers
 
-- SPI version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
+- SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
 - USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
 
 **Note: I plan to target a higher version of KMDF and drop UMDF later this year.**
