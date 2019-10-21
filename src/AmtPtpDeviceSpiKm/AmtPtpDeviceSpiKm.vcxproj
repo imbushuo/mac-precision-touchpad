@@ -59,9 +59,6 @@
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Trace.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Inf Include="AmtPtpDeviceSpiKm.inf" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FC08B706-5661-47FA-A840-053B06125750}</ProjectGuid>
     <TemplateGuid>{497e31cb-056b-4f31-abb8-447fd55ee5a5}</TemplateGuid>

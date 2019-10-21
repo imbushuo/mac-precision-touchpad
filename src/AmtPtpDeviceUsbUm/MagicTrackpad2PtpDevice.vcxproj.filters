@@ -89,9 +89,4 @@
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Inf Include="AmtPtpDeviceUsbUm.inf">
-      <Filter>Driver Files</Filter>
-    </Inf>
-  </ItemGroup>
 </Project>

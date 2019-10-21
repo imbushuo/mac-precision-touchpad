@@ -22,11 +22,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="AmtPtpDeviceSpiKm.inf">
-      <Filter>Driver Files</Filter>
-    </Inf>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Device.h">
       <Filter>Header Files</Filter>
     </ClInclude>

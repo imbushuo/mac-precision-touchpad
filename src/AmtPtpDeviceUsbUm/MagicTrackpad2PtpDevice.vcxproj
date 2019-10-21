@@ -60,9 +60,6 @@
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Inf Include="AmtPtpDeviceUsbUm.inf" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{87EFA31B-25EB-4944-A30A-300171BFFF57}</ProjectGuid>
     <TemplateGuid>{9181db3b-298d-4e39-a572-55bca4e4ac89}</TemplateGuid>

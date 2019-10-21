@@ -54,9 +54,6 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Trace.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Inf Include="AmtPtpDeviceUsbKm.inf" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AB3E45E7-C524-47C1-9677-728BA2A19344}</ProjectGuid>
     <TemplateGuid>{8c0e3d8b-df43-455b-815a-4a0e72973bc6}</TemplateGuid>
