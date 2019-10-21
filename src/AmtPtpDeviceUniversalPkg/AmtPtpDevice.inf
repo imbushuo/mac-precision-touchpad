@@ -21,6 +21,7 @@ PtpUmDrivers_Dir = 12,UMDF
 AmtPtpDeviceUsbKm.sys = 1,,
 AmtPtpDeviceUsbUm.dll = 1,,
 AmtPtpDeviceSpiKm.sys = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
 
 [Manufacturer]
 %ManufacturerName%=Standard,NT$ARCH$
@@ -98,6 +99,16 @@ StartType      = 3               ; SERVICE_DEMAND_START
 ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
 ServiceBinary  = %12%\AmtPtpDeviceUsbKm.sys
 
+[AmtPtpDeviceUsbKm_Device.NT.CoInstallers]
+AddReg=AmtPtpDeviceUsbKm_Device_CoInstaller_AddReg
+CopyFiles=AmtPtpDeviceUsbKm_Device_CoInstaller_CopyFiles
+
+[AmtPtpDeviceUsbKm_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[AmtPtpDeviceUsbKm_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
 [AmtPtpDeviceUsbKm_Device.NT.Wdf]
 KmdfService = AmtPtpDeviceUsbKm, AmtPtpDeviceUsbKm_wdfsect
 
@@ -115,6 +126,9 @@ AddReg=AmtPtpDeviceUsbUm_AddReg
 AddService=mshidumdf, 0x000001fa, MSHIDUMDF_ServiceInstall ; flag 0x2 sets this as the service for the device
 AddService=WUDFRd,0x000001f8,WUDFRD_ServiceInstall         ; this service is installed because its a filter.
 
+[AmtPtpDeviceUsbUm_Install.NT.CoInstallers]
+AddReg=UsbUmCoInstallers_AddReg
+
 [AmtPtpDeviceUsbUm_Install.NT.Wdf]
 UmdfDispatcher=NativeUSB
 UmdfService=AmtPtpDeviceUsbUm,AmtPtpDeviceUsbUm_Install
@@ -125,7 +139,7 @@ UmdfMethodNeitherAction=Copy
 UmdfFsContextUsePolicy=CanUseFsContext2
 
 [AmtPtpDeviceUsbUm_Install]
-UmdfLibraryVersion=2.15
+UmdfLibraryVersion=2.15.0
 ServiceBinary=%12%\UMDF\AmtPtpDeviceUsbUm.dll
 
 [AmtPtpDeviceUsbUm_AddReg]
@@ -147,6 +161,9 @@ ServiceBinary = %12%\WUDFRd.sys
 
 [PtpUmDrivers_Dir]
 AmtPtpDeviceUsbUm.dll
+
+[UsbUmCoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"WUDFCoinstaller.dll"
 
 ; SPI KM
 [AmtPtpDeviceSpiKm_Device.NT]
@@ -174,8 +191,18 @@ ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
 ServiceBinary  = %12%\AmtPtpDeviceSpiKm.sys
 LoadOrderGroup = Extended Base
 
+[AmtPtpDeviceSpiKm_Device.NT.CoInstallers]
+AddReg=AmtPtpDeviceSpiKm_Device_CoInstaller_AddReg
+CopyFiles=AmtPtpDeviceSpiKm_Device_CoInstaller_CopyFiles
+
+[AmtPtpDeviceSpiKm_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[AmtPtpDeviceSpiKm_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
 [AmtPtpDeviceSpiKm_Device.NT.Wdf]
-KmdfService =  AmtPtpDeviceSpiKm, AmtPtpDeviceSpiKm_wdfsect
+KmdfService = AmtPtpDeviceSpiKm, AmtPtpDeviceSpiKm_wdfsect
 
 [AmtPtpDeviceSpiKm_wdfsect]
 KmdfLibraryVersion = $KMDFVERSION$
