@@ -133,7 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>5.4.0</Version>
+      <Version>5.4.2</Version>
     </PackageReference>
     <PackageReference Include="System.ValueTuple">
       <Version>4.4.0</Version>
