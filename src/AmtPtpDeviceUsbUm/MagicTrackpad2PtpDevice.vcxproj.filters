@@ -61,6 +61,9 @@
     <ClInclude Include="ModernTrace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DeviceFamily\Wellspring6.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">

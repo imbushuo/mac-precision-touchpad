@@ -8,6 +8,7 @@
 
 // Device family metadata
 #include "DeviceFamily\Wellspring5.h"
+#include "DeviceFamily\Wellspring6.h"
 #include "DeviceFamily\Wellspring7A.h"
 #include "DeviceFamily\Wellspring8.h"
 #include "DeviceFamily\WellspringMt2.h"
