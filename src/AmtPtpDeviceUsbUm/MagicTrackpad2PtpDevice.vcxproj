@@ -59,6 +59,7 @@
     <ClInclude Include="include\ModernTrace.h" />
     <ClInclude Include="include\Queue.h" />
     <ClInclude Include="include\resource.h" />
+    <ClInclude Include="include\StaticHidRegistry.h" />
     <ClInclude Include="include\Trace.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

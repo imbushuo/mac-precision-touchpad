@@ -64,6 +64,9 @@
     <ClInclude Include="include\Trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\StaticHidRegistry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
