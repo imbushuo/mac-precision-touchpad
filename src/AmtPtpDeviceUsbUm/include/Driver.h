@@ -9,13 +9,13 @@
 
 // ModernTrace is for runtime debugging
 // Trace is WPP-based, development debugging
-#include "ModernTrace.h"
-#include "Trace.h"
+#include <ModernTrace.h>
+#include <Trace.h>
 
-#include "AppleDefinition.h"
-#include "Hid.h"
-#include "Device.h"
-#include "Queue.h"
+#include <AppleDefinition.h>
+#include <Hid.h>
+#include <Device.h>
+#include <Queue.h>
 
 EXTERN_C_START
 

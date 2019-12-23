@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\HidCommon.h"
+#include <HidCommon.h>
 
 #define AAPL_MAGIC_TRACKPAD2_PTP_FINGER_COLLECTION_1 \
 	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \

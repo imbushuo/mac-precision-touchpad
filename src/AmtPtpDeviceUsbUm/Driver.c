@@ -1,6 +1,6 @@
 // Driver.c: This file contains the driver entry points and callbacks.
 
-#include "driver.h"
+#include <driver.h>
 #include "driver.tmh"
 
 // Declares Windows 10 TraceLogger provider here.

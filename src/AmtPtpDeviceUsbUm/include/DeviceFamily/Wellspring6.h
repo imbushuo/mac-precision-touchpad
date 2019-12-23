@@ -1,8 +1,8 @@
 #pragma once
 
-#include "..\HidCommon.h"
+#include <HidCommon.h>
 
-#define AAPL_WELLSPRING_8_PTP_FINGER_COLLECTION_1 \
+#define AAPL_WELLSPRING_6_PTP_FINGER_COLLECTION_1 \
 	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
 		/* Begin a byte */ \
 		LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 1 */ \
@@ -31,10 +31,10 @@
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x15, 0x04, /* Physical Maximum: 1045 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x2b, 0x04, /* Physical Maximum: 1067 (See Apple Spec) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0xee, 0x02, /* Physical Maximum: 750 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0xfa, 0x02, /* Physical Maximum: 762 (See Apple Spec) */ \
 		LOGICAL_MAXIMUM_2, 0x5e, 0x1a, /* Logical Maximum: 6750 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
@@ -44,7 +44,7 @@
 		/* End of 4 bytes */ \
 	END_COLLECTION /* End Collection */ \
 
-#define AAPL_WELLSPRING_8_PTP_FINGER_COLLECTION_2 \
+#define AAPL_WELLSPRING_6_PTP_FINGER_COLLECTION_2 \
 	BEGIN_COLLECTION, 0x02, /* Begin Collection: Logical */ \
 		/* Begin a byte */ \
 		LOGICAL_MAXIMUM, 0x01, /* Logical Maximum: 1 */ \
@@ -72,35 +72,35 @@
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
 		USAGE, 0x30, /* Usage: X */ \
-		PHYSICAL_MAXIMUM_2, 0x15, 0x04, /* Physical Maximum: 1045 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0x2b, 0x04, /* Physical Maximum: 1067 (See Apple Spec) */ \
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
-		PHYSICAL_MAXIMUM_2, 0xee, 0x02, /* Physical Maximum: 750 (See Apple Spec) */ \
+		PHYSICAL_MAXIMUM_2, 0xfa, 0x02, /* Physical Maximum: 762 (See Apple Spec) */ \
 		LOGICAL_MAXIMUM_2, 0x5e, 0x1a, /* Logical Maximum: 6750 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		/* End of 4 bytes */ \
 	END_COLLECTION /* End Collection */ \
 
-#define AAPL_WELLSPRING_8_PTP_TLC \
+#define AAPL_WELLSPRING_6_PTP_TLC \
 	USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 	USAGE, 0x05, /* Usage: Touch Pad */ \
 	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
 		REPORT_ID, REPORTID_MULTITOUCH, /* Report ID: Multi-touch */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_WELLSPRING_8_PTP_FINGER_COLLECTION_1, /* 1 */ \
+		AAPL_WELLSPRING_6_PTP_FINGER_COLLECTION_1, /* 1 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_WELLSPRING_8_PTP_FINGER_COLLECTION_1, /* 2 */ \
+		AAPL_WELLSPRING_6_PTP_FINGER_COLLECTION_1, /* 2 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_WELLSPRING_8_PTP_FINGER_COLLECTION_2, /* 3 */ \
+		AAPL_WELLSPRING_6_PTP_FINGER_COLLECTION_2, /* 3 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_WELLSPRING_8_PTP_FINGER_COLLECTION_1, /* 4 */ \
+		AAPL_WELLSPRING_6_PTP_FINGER_COLLECTION_1, /* 4 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		USAGE, 0x22, /* Usage: Finger */ \
-		AAPL_WELLSPRING_8_PTP_FINGER_COLLECTION_2, /* 5 */ \
+		AAPL_WELLSPRING_6_PTP_FINGER_COLLECTION_2, /* 5 */ \
 		USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 		UNIT_EXPONENT, 0x0c, /* Unit exponent: -4 */ \
 		UNIT_2, 0x01, 0x10, /* Time: Second */ \

@@ -1,6 +1,6 @@
 // Hid.c: HID-related routine
 
-#include "Driver.h"
+#include <driver.h>
 #include "Hid.tmh"
 
 #ifndef _AAPL_HID_DESCRIPTOR_H_
