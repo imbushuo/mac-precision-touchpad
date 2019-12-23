@@ -22,30 +22,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Device.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Driver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Trace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Queue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AppleDefinition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Hid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HidCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DeviceFamily\Wellspring7A.h">
       <Filter>Device Specific Metadata Files</Filter>
     </ClInclude>
@@ -58,11 +34,38 @@
     <ClInclude Include="DeviceFamily\Wellspring5.h">
       <Filter>Device Specific Metadata Files</Filter>
     </ClInclude>
-    <ClInclude Include="ModernTrace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DeviceFamily\Wellspring6.h">
       <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AppleDefinition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Driver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Hid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HidCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ModernTrace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Trace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StaticHidRegistry.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

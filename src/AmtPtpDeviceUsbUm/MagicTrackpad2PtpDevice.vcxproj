@@ -46,20 +46,21 @@
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AppleDefinition.h" />
-    <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceFamily\Wellspring5.h" />
     <ClInclude Include="DeviceFamily\Wellspring6.h" />
     <ClInclude Include="DeviceFamily\Wellspring7A.h" />
     <ClInclude Include="DeviceFamily\Wellspring8.h" />
     <ClInclude Include="DeviceFamily\WellspringMt2.h" />
-    <ClInclude Include="Driver.h" />
-    <ClInclude Include="Hid.h" />
-    <ClInclude Include="HidCommon.h" />
-    <ClInclude Include="ModernTrace.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="Trace.h" />
-    <ClInclude Include="Queue.h" />
+    <ClInclude Include="include\AppleDefinition.h" />
+    <ClInclude Include="include\Device.h" />
+    <ClInclude Include="include\Driver.h" />
+    <ClInclude Include="include\Hid.h" />
+    <ClInclude Include="include\HidCommon.h" />
+    <ClInclude Include="include\ModernTrace.h" />
+    <ClInclude Include="include\Queue.h" />
+    <ClInclude Include="include\resource.h" />
+    <ClInclude Include="include\StaticHidRegistry.h" />
+    <ClInclude Include="include\Trace.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{87EFA31B-25EB-4944-A30A-300171BFFF57}</ProjectGuid>
@@ -164,18 +165,18 @@
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
@@ -184,19 +185,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
@@ -205,19 +206,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
-    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <SignMode>ProductionSign</SignMode>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
@@ -227,7 +228,7 @@
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
@@ -238,14 +239,14 @@
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -255,21 +256,21 @@
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -279,21 +280,21 @@
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|ARM64'">
     <ClCompile>
       <WppEnabled>true</WppEnabled>
       <WppRecorderEnabled>true</WppRecorderEnabled>
-      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
+      <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
     <DriverSign />
     <DriverSign />

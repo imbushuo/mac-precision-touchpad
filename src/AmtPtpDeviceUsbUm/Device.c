@@ -1,6 +1,6 @@
 // Device.c: Device handling events for driver.
 
-#include "driver.h"
+#include <driver.h>
 #include "device.tmh"
 
 _IRQL_requires_(PASSIVE_LEVEL)

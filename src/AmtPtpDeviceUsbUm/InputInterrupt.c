@@ -1,6 +1,6 @@
 // InputInterrupt.c: Handles device input event
 
-#include "Driver.h"
+#include <driver.h>
 #include "InputInterrupt.tmh"
 
 _IRQL_requires_(PASSIVE_LEVEL)
