@@ -74,6 +74,12 @@
     <RootNamespace>AmtPtpDeviceUniversalPkg</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
+  <!-- Note: AzDevOps Pipeline might override this -->
+  <PropertyGroup Condition="'$(ProductionCertPath)'==''">
+    <ProductionCertPath>CN=Bingxing Wang, O=Bingxing Wang, L=Bloomington, S=Indiana, C=US | 86EEA317D906826CA6F764739A5B44770AF9A12E</ProductionCertPath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
+    <SignMode>ProductionSign</SignMode>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
