@@ -20,12 +20,10 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 ## Converged Installation Guide
 
-0. **Disable Secure Boot if your MacBook comes with Apple T2 Security chip**: Boot with Command + R, select Startup Security Tools and disable Secure Boot (No Boot Security)
 1. Go to the release tab in Github and download the newest version
 2. Open the zip and navigate to `x64\ReleaseSigned`
 3. Go to `AmtPtpDeviceUniversalPkg` directory
 4. Right click `AmtPtpDevice.inf` and install it
-5. Confirm driver publisher
 
 **Note: it is unnecessary to enable test signing, or install the certificate manually. Doing so may cause problems in installation. See [this issue](https://github.com/imbushuo/mac-precision-touchpad/issues/228#issuecomment-538689587) for detailed explanation.**
 
@@ -69,6 +67,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 People familiar with me know that I don't use Apple MacBook (so development work of this driver occurs on a Surface Pro 4). People probably think it doesn't make sense that I started this project. The motivation behind this project origin from complaints from my girlfriend. Hearing about frequent complains about Dell XPS 13's touchpad (though it passed Precision Touchpad certification), I decided to start this project, so by the time she switches to MacBook Pro, she will have excellent touchpad experience out-of-box, even on Windows. This driver is made for you, but also for everyone.
 
 I would like to thank projects like [magictrackpad2-dkms](https://github.com/robbi5/magictrackpad2-dkms) and [macbook12-spi-driver](https://github.com/cb22/macbook12-spi-driver) that inspire me. I would also like to thank my friends for providing me immense help on devices and testing.
+
+Thanks for rixCloud, Inc. for providing support of Microsoft-signed drivers.
  
 ## License
 
