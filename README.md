@@ -20,10 +20,8 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 ## Converged Installation Guide
 
-1. Go to the release tab in Github and download the newest version
-2. Open the zip and navigate to `x64\ReleaseSigned`
-3. Go to `AmtPtpDeviceUniversalPkg` directory
-4. Right click `AmtPtpDevice.inf` and install it
+1. Go to the release tab in Github and download the newest version for your architecture
+2. Right click `AmtPtpDevice.inf` and install it
 
 **Note: it is unnecessary to enable test signing, or install the certificate manually. Doing so may cause problems in installation. See [this issue](https://github.com/imbushuo/mac-precision-touchpad/issues/228#issuecomment-538689587) for detailed explanation.**
 
