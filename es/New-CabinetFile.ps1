@@ -48,7 +48,7 @@ function New-CabinetFile {
         [ValidateNotNullOrEmpty()]
         [string[]] $ContentDirectory,
 
-	    [Parameter(HelpMessage="Default package directory path.", Position=2, ValueFromPipelineByPropertyName=$true)]
+	[Parameter(HelpMessage="Default package directory path.", Position=2, ValueFromPipelineByPropertyName=$true)]
         [AllowNull()]
         [string[]] $DestinationDir,
 
@@ -80,17 +80,17 @@ function New-CabinetFile {
         $ddf += ".Set CabinetNameTemplate=$Name`r`n";
         $ddf += ".Set DiskDirectory1=$DestinationPath`r`n";
         $ddf += ".Set MaxDiskSize=0`r`n";
-	    $ddf += ".Set MaxDiskFileCount=0`r`n";
-	    $ddf += ".Set FolderFileCountThreshold=0`r`n";
-	    $ddf += ".Set FolderSizeThreshold=0`r`n";
-	    $ddf += ".Set MaxCabinetSize=0`r`n";
-	    $ddf += ".Set CompressionType=MSZIP`r`n";
+	$ddf += ".Set MaxDiskFileCount=0`r`n";
+	$ddf += ".Set FolderFileCountThreshold=0`r`n";
+	$ddf += ".Set FolderSizeThreshold=0`r`n";
+	$ddf += ".Set MaxCabinetSize=0`r`n";
+	$ddf += ".Set CompressionType=MSZIP`r`n";
         $ddf += ".Set Cabinet=on`r`n";
         $ddf += ".Set Compress=on`r`n";
         ## Redirect the auto-generated Setup.rpt and Setup.inf files to the temp directory
         $ddf += ".Set RptFileName=$(Join-Path $ENV:TEMP "setup.rpt")`r`n";
         $ddf += ".Set InfFileName=$(Join-Path $ENV:TEMP "setup.inf")`r`n";
-	    $ddf += ".Set DestinationDir=$DestinationDir`r`n";
+	$ddf += ".Set DestinationDir=$DestinationDir`r`n";
 
         ## If -Verbose, echo the directive file
         if ($PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent) {
@@ -115,8 +115,8 @@ function New-CabinetFile {
         $ddfFile = Join-Path $DestinationPath "$Name.ddf";
         $ddf | Out-File $ddfFile -Encoding ascii | Out-Null;
 
-        Write-Verbose "Launching 'MakeCab /f ""$ddfFile""'.";
-        $makeCab = Invoke-Expression "MakeCab /F ""$ddfFile""";
+        Write-Verbose "Launching 'C:\Windows\system32\makecab.exe /f ""$ddfFile""'.";
+        $makeCab = Invoke-Expression "C:\Windows\system32\makecab.exe /F ""$ddfFile""";
 
         ## If Verbose, echo the MakeCab response/output
         if ($PSCmdlet.MyInvocation.BoundParameters["Verbose"].IsPresent) {
