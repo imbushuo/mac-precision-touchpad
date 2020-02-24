@@ -70,10 +70,13 @@
   </PropertyGroup>
   <!-- They told me this: https://help.github.com/en/articles/software-in-virtual-environments-for-github-actions#windows-server-2019 -->
   <!-- We are still using 17134/rs4 WDK on dev and AzDevOps environment. -->
+  <PropertyGroup>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(BuildEnvironment)'=='Github'">
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(BuildEnvironment)'!='Github'">
+  <PropertyGroup Condition="'$(BuildEnvironment)'=='AzurePipelineOnPremAgent'">
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
