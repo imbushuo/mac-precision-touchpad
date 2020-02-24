@@ -1,0 +1,123 @@
+;
+; AmtPtpDeviceUsbUm.inf
+;
+
+[Version]
+Signature="$Windows NT$"
+Class=HIDClass
+ClassGuid={745a17a0-74d3-11d0-b6fe-00a0c90f57da}
+Provider=%ManufacturerName%
+CatalogFile=AmtPtpDeviceUsbUm.cat
+DriverVer=
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+
+; Wellspring 5 Family (MacBook8)
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0245&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0246&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0247&MI_01
+
+; Wellspring 5A Family
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0252&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0253&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0254&MI_01
+
+; Wellspring 7A Family (MacBookPro 10,2 & 11,1)
+; Validated on MacBook Pro
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0259&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_025a&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_025b&MI_01
+
+; Wellspring 7 Family (MacBookPro10,1)
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0262&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0263&MI_01
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0264&MI_01
+
+; Wellspring 9 Family (MacBookPro12,1)
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0273&MI_02
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0274&MI_02
+
+; Wellspring 8 Family (MacBookAir 6,2 & 7,2)
+; Validated on MacBook Air
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0290&MI_02
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0291&MI_02
+
+; WellSpring Data Type 5 (Magic Trackpad 2)
+%DeviceName%=AmtPtpDeviceUsbUm_Install, USB\Vid_05ac&Pid_0265&MI_01
+
+[SourceDisksFiles]
+AmtPtpDeviceUsbUm.dll=1
+
+[SourceDisksNames]
+1 = %DiskName%
+
+; =================== UMDF Device ==================================
+
+[AmtPtpDeviceUsbUm_Install.NT]
+CopyFiles=UMDriverCopy
+
+[AmtPtpDeviceUsbUm_Install.NT.hw]
+AddReg=AmtPtpDeviceUsbUm_AddReg
+
+[AmtPtpDeviceUsbUm_Install.NT.Services]
+AddService=mshidumdf, 0x000001fa, MSHIDUMDF_ServiceInstall ; flag 0x2 sets this as the service for the device
+AddService=WUDFRd,0x000001f8,WUDFRD_ServiceInstall         ; this service is installed because its a filter.
+
+[AmtPtpDeviceUsbUm_Install.NT.CoInstallers]
+AddReg=CoInstallers_AddReg
+
+[AmtPtpDeviceUsbUm_Install.NT.Wdf]
+UmdfDispatcher=NativeUSB
+UmdfService=AmtPtpDeviceUsbUm,AmtPtpDeviceUsbUm_Install
+UmdfServiceOrder=AmtPtpDeviceUsbUm
+UmdfKernelModeClientPolicy=AllowKernelModeClients
+UmdfFileObjectPolicy=AllowNullAndUnknownFileObjects
+UmdfMethodNeitherAction=Copy
+UmdfFsContextUsePolicy=CanUseFsContext2
+
+[AmtPtpDeviceUsbUm_Install]
+UmdfLibraryVersion=$UMDFVERSION$ 
+ServiceBinary=%12%\UMDF\AmtPtpDeviceUsbUm.dll
+
+[AmtPtpDeviceUsbUm_AddReg]
+; By default, USBDevice class uses iProduct descriptor to name the device in
+; Device Manager on Windows 8 and higher.
+; Uncomment for this device to use %DeviceName% on Windows 8 and higher:
+HKR,,FriendlyName,,%DeviceName%
+HKR,,"LowerFilters",0x00010008,"WUDFRd" ; FLG_ADDREG_TYPE_MULTI_SZ | FLG_ADDREG_APPEND
+
+[mshidumdf_ServiceInstall]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\mshidumdf.sys
+
+[WUDFRD_ServiceInstall]
+DisplayName = %WudfRdDisplayName%
+ServiceType = 1
+StartType = 3
+ErrorControl = 1
+ServiceBinary = %12%\WUDFRd.sys
+
+[CoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"WUDFCoinstaller.dll"
+
+[DestinationDirs]
+UMDriverCopy=12,UMDF ; copy to drivers\umdf
+
+[UMDriverCopy]
+AmtPtpDeviceUsbUm.dll
+
+; =================== Generic ==================================
+
+[Strings]
+ManufacturerName="Bingxing Wang"
+ClassName="Universal Serial Bus devices"
+DiskName = "AmtPtpDeviceUsbUm Installation Disk"
+WudfRdDisplayName="Windows Driver Foundation - User-mode Driver Framework Reflector"
+DeviceName="Apple USB Precision Touchpad Device (User-mode)"
+ConfDeviceName="Apple USB Precision Touchpad Settings"
+REG_MULTI_SZ = 0x00010000

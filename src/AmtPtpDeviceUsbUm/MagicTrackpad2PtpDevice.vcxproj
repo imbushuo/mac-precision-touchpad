@@ -311,6 +311,9 @@
   <ItemGroup>
     <None Include="AmtPtpDevice.wprp" />
   </ItemGroup>
+  <ItemGroup>
+    <Inf Include="AmtPtpDeviceUsbUm.inf" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
