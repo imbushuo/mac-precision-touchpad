@@ -27,10 +27,8 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 ## For developers
 
-- SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
-- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 1803 is required for development and testing.
-
-**Note: I plan to target a higher version of KMDF and drop UMDF later this year.**
+- SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1903 is required for development and testing.
+- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 1903 is required for development and testing.
 
 ## Device support
 
