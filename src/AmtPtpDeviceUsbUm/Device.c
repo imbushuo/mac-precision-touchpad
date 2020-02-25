@@ -129,6 +129,9 @@ AmtPtpEvtDevicePrepareHardware(
 	PDEVICE_CONTEXT							pDeviceContext;
 	ULONG									waitWakeEnable;
 	WDF_USB_DEVICE_INFORMATION				deviceInfo;
+	WDFKEY									ParamRegKey;
+	DECLARE_CONST_UNICODE_STRING(TouchJumpDetectionThresholdKey, L"TouchJumpDetectionThreshold");
+	ULONG									Length, ValueType = 0;
 
 	waitWakeEnable = FALSE;
 
@@ -144,6 +147,36 @@ AmtPtpEvtDevicePrepareHardware(
 
 	status = STATUS_SUCCESS;
 	pDeviceContext = DeviceGetContext(Device);
+
+	// Check threshold key
+	status = WdfDriverOpenParametersRegistryKey(
+		WdfDeviceGetDriver(Device),
+		KEY_READ,
+		WDF_NO_OBJECT_ATTRIBUTES,
+		&ParamRegKey
+	);
+
+	if (NT_SUCCESS(status))
+	{
+		status = WdfRegistryQueryValue(
+			ParamRegKey,
+			&TouchJumpDetectionThresholdKey,
+			sizeof(double),
+			&pDeviceContext->TouchJumpThreshold,
+			&Length,
+			&ValueType
+		);
+
+		if (!NT_SUCCESS(status)) {
+			pDeviceContext->TouchJumpThreshold = TOUCHJUMP_DEFAULT_THRESHOLD;
+		}
+	}
+	else {
+		pDeviceContext->TouchJumpThreshold = TOUCHJUMP_DEFAULT_THRESHOLD;
+	}
+
+	status = STATUS_SUCCESS;
+	WdfRegistryClose(ParamRegKey);
 
 	if (pDeviceContext->UsbDevice == NULL) {
 		status = WdfUsbTargetDeviceCreate(Device,
@@ -543,6 +576,9 @@ AmtPtpEvtDeviceD0Entry(
 		&pDeviceContext->PerfCounter
 	);
 
+	// Reset touchjump detection frame
+	RtlZeroMemory(pDeviceContext->LastSample, sizeof(PTP_CONTACT) * MAX_FINGERS);
+
 	//
 	// Since continuous reader is configured for this interrupt-pipe, we must explicitly start
 	// the I/O target to get the framework to post read requests.
@@ -617,6 +653,9 @@ AmtPtpEvtDeviceD0Exit(
 		TRACE_DRIVER,
 		"%!FUNC! -->AmtPtpDeviceEvtDeviceD0Exit - Cancel Wellspring Mode"
 	);
+
+	// Reset touchjump detection frame
+	RtlZeroMemory(pDeviceContext->LastSample, sizeof(PTP_CONTACT) * MAX_FINGERS);
 
 	status = AmtPtpSetWellspringMode(
 		pDeviceContext,

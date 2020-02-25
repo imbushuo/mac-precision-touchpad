@@ -16,15 +16,14 @@ typedef struct _DEVICE_CONTEXT
 
 	ULONG                       UsbDeviceTraits;
 
-	UCHAR						PressureQualLevel;
-	UCHAR						SgContactSizeQualLevel;
-	UCHAR						MuContactSizeQualLevel;
-
 	BOOL                        IsWellspringModeOn;
 	BOOL                        IsSurfaceReportOn;
 	BOOL                        IsButtonReportOn;
 
 	LARGE_INTEGER				PerfCounter;
+
+	PTP_CONTACT					LastSample[MAX_FINGERS];
+	double						TouchJumpThreshold;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -39,6 +38,12 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 // Pool tags
 //
 #define POOL_TAG_PTP_CONTROL 'PTPC'
+
+//
+// Default value for touch jump detection and more
+//
+#define TOUCHJUMP_DEFAULT_THRESHOLD 50.00
+
 
 //
 // Function to initialize the device's queues and callbacks

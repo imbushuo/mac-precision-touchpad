@@ -833,9 +833,6 @@ AmtPtpReportFeatures(
 			PPTP_USERMODEAPP_CONF_REPORT confReport = (PPTP_USERMODEAPP_CONF_REPORT)packet.reportBuffer;
 			
 			confReport->ReportID = REPORTID_UMAPP_CONF;
-			confReport->MultipleContactSizeQualificationLevel = deviceContext->MuContactSizeQualLevel;
-			confReport->SingleContactSizeQualificationLevel = deviceContext->SgContactSizeQualLevel;
-			confReport->PressureQualificationLevel = deviceContext->PressureQualLevel;
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
@@ -1055,11 +1052,6 @@ AmtPtpSetFeatures(
 				"%!FUNC! Report REPORTID_UMAPP_CONF is requested"
 			);
 			PPTP_USERMODEAPP_CONF_REPORT umConfInput = (PPTP_USERMODEAPP_CONF_REPORT) packet.reportBuffer;
-
-			// Set value
-			deviceContext->SgContactSizeQualLevel = umConfInput->SingleContactSizeQualificationLevel;
-			deviceContext->MuContactSizeQualLevel = umConfInput->MultipleContactSizeQualificationLevel;
-			deviceContext->PressureQualLevel = umConfInput->PressureQualificationLevel;
 
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,

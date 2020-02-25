@@ -1,6 +1,7 @@
 // InputInterrupt.c: Handles device input event
 
 #include <driver.h>
+#include <math.h>
 #include "InputInterrupt.tmh"
 
 _IRQL_requires_(PASSIVE_LEVEL)
@@ -308,6 +309,7 @@ AmtPtpServiceTouchInputInterrupt(
 		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
 		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 		PtpReport.ContactCount = (UCHAR) raw_n;
+		UCHAR actualReported = 0;
 
 #ifdef INPUT_CONTENT_TRACE
 		TraceEvents(
@@ -322,6 +324,9 @@ AmtPtpServiceTouchInputInterrupt(
 		for (i = 0; i < raw_n; i++) {
 
 			UCHAR *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
+			UCHAR tipSwitch = 0;
+			UCHAR confidence = 0;
+
 			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
 
 			// Translate X and Y
@@ -330,13 +335,38 @@ AmtPtpServiceTouchInputInterrupt(
 			y = (DeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y)) > 0 ? 
 				((USHORT)(DeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y))) : 0;
 
+			// Tipswitch and confidence
+			tipSwitch = (AmtRawToInteger(f->touch_major) << 1) >= 200 || (AmtRawToInteger(f->touch_minor) << 1) >= 200;
+			confidence = (AmtRawToInteger(f->touch_major) << 1) <= 250 && (AmtRawToInteger(f->touch_minor) << 1) <= 250;
+
+			// Touchjump detection
+			if (DeviceContext->LastSample[i].TipSwitch && tipSwitch) {
+				INT DeltaX = DeviceContext->LastSample[i].X - x;
+				INT DeltaY = DeviceContext->LastSample[i].Y - y;
+
+				if (DeltaX < 70 && DeltaY < 70) {
+					if (sqrt(pow(DeltaX, 2.00) + pow(DeltaY, 2.00)) > DeviceContext->TouchJumpThreshold) {
+						TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INPUT, "A touch jump has been detected and discarded");
+						continue;
+					}
+				}
+			}
+
 			// Defuzz functions remain the same
 			// TODO: Implement defuzz later
 			PtpReport.Contacts[i].ContactID = (UCHAR) i;
 			PtpReport.Contacts[i].X = x;
 			PtpReport.Contacts[i].Y = y;
-			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f->touch_major) << 1) >= 200 || (AmtRawToInteger(f->touch_minor) << 1) >= 200;
-			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f->touch_major) << 1) <= 250 && (AmtRawToInteger(f->touch_minor) << 1) <= 250;
+			PtpReport.Contacts[i].TipSwitch = tipSwitch;
+			PtpReport.Contacts[i].Confidence = confidence;
+
+			DeviceContext->LastSample[i].Confidence = (UCHAR)i;
+			DeviceContext->LastSample[i].X = x;
+			DeviceContext->LastSample[i].Y = y;
+			DeviceContext->LastSample[i].TipSwitch = tipSwitch;
+			DeviceContext->LastSample[i].Confidence = confidence;
+
+			actualReported++;
 
 #ifdef INPUT_CONTENT_TRACE
 			TraceEvents(
@@ -355,6 +385,8 @@ AmtPtpServiceTouchInputInterrupt(
 			);
 #endif
 		}
+
+		PtpReport.ContactCount = actualReported;
 	}
 
 	// Type 2 touchpad contains integrated trackpad buttons
@@ -485,7 +517,8 @@ AmtPtpServiceTouchInputInterruptType5(
 	if (DeviceContext->IsSurfaceReportOn) {
 		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
 		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
-		PtpReport.ContactCount = (UCHAR)raw_n;
+		PtpReport.ContactCount = (UCHAR) raw_n;
+		UCHAR actualReported = 0;
 
 #ifdef INPUT_CONTENT_TRACE
 		TraceEvents(
@@ -500,6 +533,9 @@ AmtPtpServiceTouchInputInterruptType5(
 		for (i = 0; i < raw_n; i++) {
 
 			UCHAR *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
+			UCHAR tipSwitch = 0;
+			UCHAR confidence = 0;
+
 			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
 			f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
 
@@ -512,16 +548,36 @@ AmtPtpServiceTouchInputInterruptType5(
 			x = (x - DeviceContext->DeviceInfo->x.min) > 0 ? (x - DeviceContext->DeviceInfo->x.min) : 0;
 			y = (y - DeviceContext->DeviceInfo->y.min) > 0 ? (y - DeviceContext->DeviceInfo->y.min) : 0;
 
-			PtpReport.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
-			PtpReport.Contacts[i].X = (USHORT) x;
-			PtpReport.Contacts[i].Y = (USHORT) y;
-			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f_type5->TouchMajor) << 1) > 0;
-
 			// The Microsoft spec says reject any input larger than 25mm. This is not ideal
 			// for Magic Trackpad 2 - so we raised the threshold a bit higher.
 			// Or maybe I used the wrong unit? IDK
-			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f_type5->TouchMinor) << 1) < 345 && 
-				(AmtRawToInteger(f_type5->TouchMinor) << 1) < 345;
+			tipSwitch = (AmtRawToInteger(f_type5->TouchMajor) << 1) > 200 || (AmtRawToInteger(f_type5->TouchMinor) << 1) > 100;
+			confidence = (AmtRawToInteger(f_type5->TouchMinor) << 1) < 345 && (AmtRawToInteger(f_type5->TouchMinor) << 1) < 345;
+
+			// Touchjump detection
+			if (DeviceContext->LastSample[i].TipSwitch && tipSwitch) {
+				INT DeltaX = ((INT) DeviceContext->LastSample[i].X) - x;
+				INT DeltaY = ((INT) DeviceContext->LastSample[i].Y) - y;
+
+				if (abs(DeltaX) < 70 && abs(DeltaY) < 70) {
+					if (sqrt(pow(DeltaX, 2.00) + pow(DeltaY, 2.00)) > DeviceContext->TouchJumpThreshold) {
+						TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INPUT, "A touch jump has been detected and discarded");
+						continue;
+					}
+				}
+			}
+
+			PtpReport.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
+			PtpReport.Contacts[i].X = (USHORT) x;
+			PtpReport.Contacts[i].Y = (USHORT) y;
+			PtpReport.Contacts[i].TipSwitch = tipSwitch;
+			PtpReport.Contacts[i].Confidence = confidence;
+			DeviceContext->LastSample[i].Confidence = f_type5->ContactIdentifier.Id;
+			DeviceContext->LastSample[i].X = (USHORT) x;
+			DeviceContext->LastSample[i].Y = (USHORT) y;
+			DeviceContext->LastSample[i].TipSwitch = tipSwitch;
+			DeviceContext->LastSample[i].Confidence = confidence;
+			actualReported++;
 
 #ifdef INPUT_CONTENT_TRACE
 			TraceEvents(
@@ -539,6 +595,8 @@ AmtPtpServiceTouchInputInterruptType5(
 			);
 #endif
 		}
+
+		PtpReport.ContactCount = actualReported;
 	}
 
 	// Button
