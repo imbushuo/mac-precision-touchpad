@@ -146,7 +146,6 @@ struct BCM5974_CONFIG {
 #define PRESSURE_MU_QUALIFICATION_THRESHOLD_TOTAL 15
 #define SIZE_MU_QUALIFICATION_THRESHOLD_TOTAL 25
 
-/* device constants */
 static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 	/* New device? */
 	{
@@ -156,8 +155,9 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		0x83, DATAFORMAT(TYPE4),
 		{ SN_PRESSURE, 0, 300 },
 		{ SN_WIDTH, 0, 2048 },
-		{ SN_COORD, -7435, 7956 },
-		{ SN_COORD, -170, 9283 },
+		// Oversampled - this is fine for a trackpad
+		{ SN_COORD, -7600, 8200 },
+		{ SN_COORD, -200, 9500 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
 	},
 	/* 13 inch */
@@ -191,8 +191,9 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		0x83, DATAFORMAT(TYPE4),
 		{ SN_PRESSURE, 0, 300 },
 		{ SN_WIDTH, 0, 2048 },
-		{ SN_COORD, -7435, 7956 },
-		{ SN_COORD, -170, 9283 },
+		// Oversampled - this is fine for a trackpad
+		{ SN_COORD, -7600, 8200 },
+		{ SN_COORD, -200, 9500 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
 	},
 	{
@@ -202,8 +203,9 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		0x83, DATAFORMAT(TYPE4),
 		{ SN_PRESSURE, 0, 300 },
 		{ SN_WIDTH, 0, 2048 },
-		{ SN_COORD, -7435, 7956 },
-		{ SN_COORD, -170, 9283 },
+		// Oversampled - this is fine for a trackpad
+		{ SN_COORD, -7600, 8200 },
+		{ SN_COORD, -200, 9500 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
 	},
 	{

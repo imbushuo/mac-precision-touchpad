@@ -34,7 +34,7 @@
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM_2, 0x52, 0x03, /* Physical Maximum: 850 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0x25, 0x25, /* Logical Maximum: 9500 (See definition) */ \
+		LOGICAL_MAXIMUM_2, 0x10, 0x27, /* Logical Maximum: 10000 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM, 0x00, /* Physical Maximum: 0 */ \
@@ -75,7 +75,7 @@
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM_2, 0x52, 0x03, /* Physical Maximum: 750 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0x25, 0x25, /* Logical Maximum: 9500 (See definition) */ \
+		LOGICAL_MAXIMUM_2, 0x10, 0x27, /* Logical Maximum: 10000 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		/* End of 4 bytes */ \
