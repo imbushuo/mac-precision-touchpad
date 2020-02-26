@@ -25,7 +25,7 @@
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0x80, 0x3e, /* Logical Maximum: 16000 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0x20, 0x4e, /* Logical Maximum: 20000 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
@@ -34,7 +34,7 @@
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM_2, 0x52, 0x03, /* Physical Maximum: 850 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0x10, 0x27, /* Logical Maximum: 10000 (See definition) */ \
+		LOGICAL_MAXIMUM_2, 0xe0, 0x2e, /* Logical Maximum: 12000 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM, 0x00, /* Physical Maximum: 0 */ \
@@ -66,7 +66,7 @@
 		/* Begin of 4 bytes */ \
 		/* Size is hard-coded at this moment */ \
 		USAGE_PAGE, 0x01, /* Usage Page: Generic Desktop */ \
-		LOGICAL_MAXIMUM_2, 0x80, 0x3e, /* Logical Maximum: 16000 (See defintion) */ \
+		LOGICAL_MAXIMUM_2, 0x20, 0x4e, /* Logical Maximum: 20000 (See defintion) */ \
 		REPORT_SIZE, 0x10, /* Report Size: 0x10 (2 bytes) */ \
 		UNIT_EXPONENT, 0x0e, /* Unit exponent: -2 */ \
 		UNIT, 0x11, /* Unit: SI Length (cm) */ \
@@ -75,7 +75,7 @@
 		REPORT_COUNT, 0x01, /* Report count: 1 */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		PHYSICAL_MAXIMUM_2, 0x52, 0x03, /* Physical Maximum: 750 (See Apple Spec) */ \
-		LOGICAL_MAXIMUM_2, 0x10, 0x27, /* Logical Maximum: 10000 (See definition) */ \
+		LOGICAL_MAXIMUM_2, 0xe0, 0x2e, /* Logical Maximum: 12000 (See definition) */ \
 		USAGE, 0x31, /* Usage: Y */ \
 		INPUT, 0x02, /* Input: (Data, Var, Abs) */ \
 		/* End of 4 bytes */ \
