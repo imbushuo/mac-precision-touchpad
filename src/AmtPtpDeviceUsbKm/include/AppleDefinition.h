@@ -7,6 +7,7 @@
 #define USB_DEVICE_ID_APPLE_T2_7B 0x027b
 #define USB_DEVICE_ID_APPLE_T2_7C 0x027c
 #define USB_DEVICE_ID_APPLE_T2_7D 0x027d
+#define USB_DEVICE_ID_DEFAULT_FALLBACK 0xffff
 
 /* button data structure */
 struct TRACKPAD_BUTTON_DATA {
@@ -145,8 +146,21 @@ struct BCM5974_CONFIG {
 #define PRESSURE_MU_QUALIFICATION_THRESHOLD_TOTAL 15
 #define SIZE_MU_QUALIFICATION_THRESHOLD_TOTAL 25
 
-/* device constants */
 static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
+	/* New device? */
+	{
+		USB_DEVICE_ID_DEFAULT_FALLBACK,
+		HAS_INTEGRATED_BUTTON,
+		0, sizeof(struct TRACKPAD_BUTTON_DATA),
+		0x83, DATAFORMAT(TYPE4),
+		{ SN_PRESSURE, 0, 300 },
+		{ SN_WIDTH, 0, 2048 },
+		// Oversampled - this is fine for a trackpad
+		{ SN_COORD, -7600, 8200 },
+		{ SN_COORD, -200, 9500 },
+		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
+	},
+	/* 13 inch */
 	{
 		USB_DEVICE_ID_APPLE_T2_7A,
 		HAS_INTEGRATED_BUTTON,
@@ -169,6 +183,7 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		{ SN_COORD, -170, 7685 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
 	},
+	/* 15 inch */
 	{
 		USB_DEVICE_ID_APPLE_T2_7C,
 		HAS_INTEGRATED_BUTTON,
@@ -176,8 +191,9 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		0x83, DATAFORMAT(TYPE4),
 		{ SN_PRESSURE, 0, 300 },
 		{ SN_WIDTH, 0, 2048 },
-		{ SN_COORD, -6243, 6749 },
-		{ SN_COORD, -170, 7685 },
+		// Oversampled - this is fine for a trackpad
+		{ SN_COORD, -7600, 8200 },
+		{ SN_COORD, -200, 9500 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
 	},
 	{
@@ -187,8 +203,9 @@ static const struct BCM5974_CONFIG Bcm5974ConfigTable[] = {
 		0x83, DATAFORMAT(TYPE4),
 		{ SN_PRESSURE, 0, 300 },
 		{ SN_WIDTH, 0, 2048 },
-		{ SN_COORD, -6243, 6749 },
-		{ SN_COORD, -170, 7685 },
+		// Oversampled - this is fine for a trackpad
+		{ SN_COORD, -7600, 8200 },
+		{ SN_COORD, -200, 9500 },
 		{ SN_ORIENT, -MAX_FINGER_ORIENTATION, MAX_FINGER_ORIENTATION }
 	},
 	{
