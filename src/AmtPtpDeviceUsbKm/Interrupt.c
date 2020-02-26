@@ -204,21 +204,12 @@ AmtPtpEvtUsbInterruptPipeReadComplete(
 			y = (pDeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y)) > 0 ? 
 				((USHORT)(pDeviceContext->DeviceInfo->y.max - AmtRawToInteger(f->abs_y))) : 0;
 
-			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
-				TRACE_INPUT,
-				"%!FUNC!: Point %llu, Raw X = %d, Raw Y = %d",
-				i,
-				AmtRawToInteger(f->abs_x),
-				AmtRawToInteger(f->abs_y)
-			);
-
 			// Defuzz functions remain the same
 			// TODO: Implement defuzz later
 			PtpReport.Contacts[i].ContactID = (UCHAR) i;
 			PtpReport.Contacts[i].X = x;
 			PtpReport.Contacts[i].Y = y;
-			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f->touch_major) << 1) >= 200;
+			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f->touch_major) << 1) >= 200 || (AmtRawToInteger(f->touch_minor) << 1) >= 150;
 			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f->touch_minor) << 1) > 0;
 		}
 	}
