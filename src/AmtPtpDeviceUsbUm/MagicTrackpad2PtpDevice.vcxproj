@@ -46,13 +46,14 @@
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DeviceFamily\Wellspring5.h" />
-    <ClInclude Include="DeviceFamily\Wellspring6.h" />
-    <ClInclude Include="DeviceFamily\Wellspring7A.h" />
-    <ClInclude Include="DeviceFamily\Wellspring8.h" />
-    <ClInclude Include="DeviceFamily\WellspringMt2.h" />
     <ClInclude Include="include\AppleDefinition.h" />
     <ClInclude Include="include\Device.h" />
+    <ClInclude Include="include\DeviceFamily\Wellspring3.h" />
+    <ClInclude Include="include\DeviceFamily\Wellspring5.h" />
+    <ClInclude Include="include\DeviceFamily\Wellspring6.h" />
+    <ClInclude Include="include\DeviceFamily\Wellspring7A.h" />
+    <ClInclude Include="include\DeviceFamily\Wellspring8.h" />
+    <ClInclude Include="include\DeviceFamily\WellspringMt2.h" />
     <ClInclude Include="include\Driver.h" />
     <ClInclude Include="include\Hid.h" />
     <ClInclude Include="include\HidCommon.h" />

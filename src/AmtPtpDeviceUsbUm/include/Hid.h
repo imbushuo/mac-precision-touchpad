@@ -7,6 +7,7 @@
 #include <HidCommon.h>
 
 // Device family metadata
+#include "DeviceFamily/Wellspring3.h"
 #include "DeviceFamily/Wellspring5.h"
 #include "DeviceFamily/Wellspring6.h"
 #include "DeviceFamily/Wellspring7A.h"

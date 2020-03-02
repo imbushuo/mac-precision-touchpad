@@ -22,21 +22,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DeviceFamily\Wellspring7A.h">
-      <Filter>Device Specific Metadata Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DeviceFamily\WellspringMt2.h">
-      <Filter>Device Specific Metadata Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DeviceFamily\Wellspring8.h">
-      <Filter>Device Specific Metadata Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DeviceFamily\Wellspring5.h">
-      <Filter>Device Specific Metadata Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DeviceFamily\Wellspring6.h">
-      <Filter>Device Specific Metadata Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\AppleDefinition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -66,6 +51,24 @@
     </ClInclude>
     <ClInclude Include="include\StaticHidRegistry.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceFamily\Wellspring3.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceFamily\Wellspring5.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceFamily\Wellspring6.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceFamily\Wellspring7A.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceFamily\Wellspring8.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceFamily\WellspringMt2.h">
+      <Filter>Device Specific Metadata Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

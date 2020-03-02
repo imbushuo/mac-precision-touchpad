@@ -40,6 +40,20 @@ AmtPtpGetHidDescriptor(
 	}
 
 	switch (pContext->DeviceDescriptor.idProduct) {
+		case USB_DEVICE_ID_APPLE_WELLSPRING3_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING3_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING3_JIS:
+		{
+			TraceEvents(
+				TRACE_LEVEL_INFORMATION,
+				TRACE_DRIVER,
+				"%!FUNC! Request HID Report Descriptor for MacBook Family, Wellspring 3 Series"
+			);
+
+			szHidDescriptor = AmtPtp3DefaultHidDescriptor.bLength;
+			pSelectedHidDescriptor = &AmtPtp3DefaultHidDescriptor;
+			break;
+		}
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:
@@ -262,6 +276,14 @@ AmtPtpGetReportDescriptor(
 	}
 
 	switch (pContext->DeviceDescriptor.idProduct) {
+		case USB_DEVICE_ID_APPLE_WELLSPRING3_ANSI:
+		case USB_DEVICE_ID_APPLE_WELLSPRING3_ISO:
+		case USB_DEVICE_ID_APPLE_WELLSPRING3_JIS:
+		{
+			szHidDescriptor = AmtPtp3DefaultHidDescriptor.DescriptorList[0].wReportLength;
+			pSelectedHidDescriptor = AmtPtp3ReportDescriptor;
+			break;
+		}
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ANSI:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_ISO:
 		case USB_DEVICE_ID_APPLE_WELLSPRING5_JIS:

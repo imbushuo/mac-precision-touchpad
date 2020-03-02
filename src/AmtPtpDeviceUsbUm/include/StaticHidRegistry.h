@@ -3,6 +3,12 @@
 #ifndef _AAPL_HID_DESCRIPTOR_H_
 #define _AAPL_HID_DESCRIPTOR_H_
 
+HID_REPORT_DESCRIPTOR AmtPtp3ReportDescriptor[] = {
+	AAPL_WELLSPRING_3_PTP_TLC,
+	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
+	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
 HID_REPORT_DESCRIPTOR AmtPtp5ReportDescriptor[] = {
 	AAPL_WELLSPRING_5_PTP_TLC,
 	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
@@ -31,6 +37,18 @@ HID_REPORT_DESCRIPTOR AmtPtpMt2ReportDescriptor[] = {
 	AAPL_MAGIC_TRACKPAD2_PTP_TLC,
 	AAPL_PTP_WINDOWS_CONFIGURATION_TLC,
 	AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC
+};
+
+HID_DESCRIPTOR AmtPtp3DefaultHidDescriptor = {
+	0x09,   // bLength
+	0x21,   // bDescriptorType
+	0x0100, // bcdHID
+	0x00,   // bCountryCode
+	0x01,   // bNumDescriptors
+	{
+		0x22,                               // bDescriptorType
+		sizeof(AmtPtp3ReportDescriptor)    // bDescriptorLength
+	},
 };
 
 HID_DESCRIPTOR AmtPtp5DefaultHidDescriptor = {
