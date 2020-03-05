@@ -38,11 +38,12 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Some non-Retina MacBook Pro (2011 and 2012)
 - [x] MacBook Pro with Retina Display (MacBookPro 10,1, MacBookPro10,2 & MacBookPro11,1)
 - [x] All recent MacBook Air (Please report if your model is not supported)
-- [x] Apple Magic Trackpad 2 (Not stable)
 - [x] MacBook Pro with Retina Display (2013, 2014, 2015, 13-inch & 15-inch)
 - [x] New MacBook (12-inch)
 - [x] MacBook Pro 2015, 2016, 2017 (a few SPI devices are in work-in-progress state)
 - [x] T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019: Use default fallback, experience might not be optimal. Open a issue if you encountered dead touch regions.
+- [ ] Magic Trackpad 2 (USB)
+- [ ] Magic Trackpad 2 ( Bluetooth connection)
 
 ## Roadmap
 
@@ -57,14 +58,15 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] More Models (I need donation)
 - [x] SPI
 - [x] KM Driver cross-cert
+- [ ] Bluetooth
+- [ ] Defuzz
+- [ ] Input sensitivity configuration
 
 ## Acknowledgements
 
 People familiar with me know that I don't use Apple MacBook (so development work of this driver occurs on a Surface Pro 4). People probably think it doesn't make sense that I started this project. The motivation behind this project origin from complaints from my girlfriend. Hearing about frequent complains about Dell XPS 13's touchpad (though it passed Precision Touchpad certification), I decided to start this project, so by the time she switches to MacBook Pro, she will have excellent touchpad experience out-of-box, even on Windows. This driver is made for you, but also for everyone.
 
 I would like to thank projects like [magictrackpad2-dkms](https://github.com/robbi5/magictrackpad2-dkms) and [macbook12-spi-driver](https://github.com/cb22/macbook12-spi-driver) that inspire me. I would also like to thank my friends for providing me immense help on devices and testing.
-
-Thanks for rixCloud, Inc. for providing support of Microsoft-signed drivers.
  
 ## License
 
