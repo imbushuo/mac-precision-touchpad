@@ -25,6 +25,13 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 **Note: it is unnecessary to enable test signing, or install the certificate manually. Doing so may cause problems in installation. See [this issue](https://github.com/imbushuo/mac-precision-touchpad/issues/228#issuecomment-538689587) for detailed explanation.**
 
+## Also Uninstallation
+
+1. Go to device manager
+2. Find the "Apple Precision Touch Device"
+3. Right click "remove the device" and also check "uninstall driver"
+4. Rescan devices
+
 ## For developers
 
 - SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1903 is required for development and testing.
