@@ -32,6 +32,14 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 3. Right click "remove the device" and also check "uninstall driver"
 4. Rescan devices
 
+## Installation with Chocolatey
+
+The drivers are available as a [Chocolatey package](https://chocolatey.org/packages/mac-precision-touchpad/). To install using [Chocolatey](https://chocolatey.org) run:
+
+```
+choco install mac-precision-touchpad
+```
+
 ## For developers
 
 - SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1903 is required for development and testing.
