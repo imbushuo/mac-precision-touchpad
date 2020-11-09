@@ -20,12 +20,13 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 ## Converged Installation Guide
 
+0. Make sure you uninstalled `Trackpad++` completely if you have previously does so
 1. Go to the release tab in Github and download the newest version for your architecture
 2. Right click `AmtPtpDevice.inf` and install it
 
 **Note: it is unnecessary to enable test signing, or install the certificate manually. Doing so may cause problems in installation. See [this issue](https://github.com/imbushuo/mac-precision-touchpad/issues/228#issuecomment-538689587) for detailed explanation.**
 
-## Also Uninstallation
+## Also Uninstallation (extremely important for reinstallation `Trackpad++` and such)
 
 1. Go to device manager
 2. Find the "Apple Precision Touch Device"
