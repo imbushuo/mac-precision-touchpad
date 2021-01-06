@@ -20,6 +20,10 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 ## Converged Installation Guide
 
+**IMPORTANT:** Given changes in Microsoft driver code signing policy, and the compliance need of EV certificate, CI auto builds beyond 2021/01/06 04:00AM EST will not be automatically signed with normal code signing certificate.
+
+These builds are still supposed via TestSigning, but not recommended for normal users. Proper WHQL and EV dual-signed packages will be released manually, which can be downloaded from the release page.
+
 0. Make sure you uninstalled `Trackpad++` completely if you have previously does so
 1. Go to the release tab in Github and download the newest version for your architecture
 2. Right click `AmtPtpDevice.inf` and install it
