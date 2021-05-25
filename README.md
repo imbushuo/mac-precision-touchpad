@@ -4,12 +4,6 @@
 
 This project implements Windows Precision Touchpad Protocol for Apple MacBook family/Magic Trackpad 2 on Windows 10. Both USB (traditional and T2) and SPI trackpads are supported.
 
-If you like my work, please consider buying me a coffee. Also I am going to graduate, so any referral for full time opportunities are also appreciated. Thank you for your support!
-
-<a href="https://www.buymeacoffee.com/imbushuo" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
-
-Or [PayPal](https://www.paypal.com/paypalme/imbushuo)
-
 ## Future Plans and feature tracking
 
 Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/_workitems/) to track feature and device support plans. Bug reports should go to Github issues.
