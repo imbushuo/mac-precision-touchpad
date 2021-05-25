@@ -1,0 +1,117 @@
+;
+; AmtPtpHidFilter.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class = HIDClass
+ClassGuid = {745a17a0-74d3-11d0-b6fe-00a0c90f57da}
+Provider=%ManufacturerName%
+CatalogFile=AmtPtpHidFilter.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+; PnpLockDown=1 Not enabled in development
+
+[DestinationDirs]
+DefaultDestDir = 12
+AmtPtpHidFilter_Device_CoInstaller_CopyFiles = 11
+
+[ControlFlags]
+; We don't want our device to be installable via the non-PnP hardware dialogs
+ExcludeFromSelect = *
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+AmtPtpHidFilter.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_USBDevice, USB\VID_05AC&PID_0265&REV_0855&MI_01
+%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_BluetoothDevice, BTHENUM\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265
+
+[FilterDriver_Payload]
+AmtPtpHidFilter.sys
+
+; USB and Bluetooth have different HID input stack, hence the installation paths are separated.
+[AmtPtpHidFilter_USBDevice.NT]
+Include=Input.inf
+Needs=HID_Inst.NT
+CopyFiles=FilterDriver_Payload
+
+[AmtPtpHidFilter_BluetoothDevice.NT]
+Include=hidbth.inf
+Needs=HIDBTH_Inst.NT
+CopyFiles=FilterDriver_Payload
+
+[AmtPtpHidFilter_USBDevice.NT.HW]
+Include=Input.inf
+Needs=HID_Inst.NT.HW
+AddReg=AmtPtpHidFilter_Inst_HWAddReg.NT
+
+[AmtPtpHidFilter_BluetoothDevice.NT.HW]
+Include=hidbth.inf
+Needs=HIDBTH_Inst.NT.HW
+AddReg=AmtPtpHidFilter_Inst_HWAddReg.NT
+
+[AmtPtpHidFilter_Inst_HWAddReg.NT]
+HKR,,"UpperFilters",0x00010000,"AmtPtpHidFilter"
+
+[AmtPtpHidFilter_USBDevice.NT.Services]
+Include=Input.inf
+Needs=HID_Inst.NT.Services
+AddService = AmtPtpHidFilter,,AmtPtpHidFilter_Service_Inst
+
+;-------------- Service installation
+[AmtPtpHidFilter_BluetoothDevice.NT.Services]
+Include=hidbth.inf
+Needs=HIDBTH_Inst.NT.Services
+AddService = AmtPtpHidFilter,,AmtPtpHidFilter_Service_Inst
+
+; -------------- AmtPtpHidFilter driver install sections
+[AmtPtpHidFilter_Service_Inst]
+DisplayName    = %AmtPtpHidFilter.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\AmtPtpHidFilter.sys
+
+;
+;--- AmtPtpHidFilter_Device Coinstaller installation ------
+;
+[AmtPtpHidFilter_USBDevice.NT.CoInstallers]
+AddReg=AmtPtpHidFilter_Device_CoInstaller_AddReg
+CopyFiles=AmtPtpHidFilter_Device_CoInstaller_CopyFiles
+
+[AmtPtpHidFilter_USBDevice.NT.Wdf]
+KmdfService = AmtPtpHidFilter, AmtPtpHidFilter_wdfsect
+
+[AmtPtpHidFilter_BluetoothDevice.NT.CoInstallers]
+AddReg=AmtPtpHidFilter_Device_CoInstaller_AddReg
+CopyFiles=AmtPtpHidFilter_Device_CoInstaller_CopyFiles
+
+[AmtPtpHidFilter_BluetoothDevice.NT.Wdf]
+KmdfService = AmtPtpHidFilter, AmtPtpHidFilter_wdfsect
+
+[AmtPtpHidFilter_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[AmtPtpHidFilter_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[AmtPtpHidFilter_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName = "Bingxing Wang"
+DiskName = "AmtPtpHidFilter Installation Disk"
+AmtPtpHidFilter.DeviceDesc = "Apple Touch Pad HID Filter Device"
+AmtPtpHidFilter.SVCDESC = "Apple Touch Pad HID Filter Service"
