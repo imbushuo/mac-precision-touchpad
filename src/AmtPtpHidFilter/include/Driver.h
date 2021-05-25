@@ -10,6 +10,8 @@
 
 #include "Trace.h"
 
+EXTERN_C_START
+
 // Common entry points
 DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD PtpFilterEvtDeviceAdd;
@@ -17,3 +19,6 @@ EVT_WDF_OBJECT_CONTEXT_CLEANUP PtpFilterEvtDriverContextCleanup;
 
 // Device specific routines
 #include "Device.h"
+#include "Queue.h"
+
+EXTERN_C_END

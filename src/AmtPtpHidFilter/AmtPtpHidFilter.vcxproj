@@ -269,6 +269,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Device.h" />
+    <ClInclude Include="include\Queue.h" />
     <ClInclude Include="include\Trace.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
