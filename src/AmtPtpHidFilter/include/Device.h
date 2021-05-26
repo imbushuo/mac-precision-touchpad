@@ -11,11 +11,12 @@ DEFINE_GUID(GUID_DEVICEINTERFACE_AmtPtpHidFilter,
 // Device Context
 typedef struct _DEVICE_CONTEXT
 {
-    WDFDEVICE Device;
+    WDFDEVICE   Device;
     WDFIOTARGET DeviceIoTarget;
+    WDFQUEUE    SystemIoQueue;
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, PtpFilterGetContext);
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, PtpFilterGetContext)
 
 // Initialization routine
 NTSTATUS
