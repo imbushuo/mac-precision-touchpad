@@ -14,6 +14,7 @@ PtpFilterIoQueueInitialize(
 {
     WDFQUEUE queue;
     WDF_IO_QUEUE_CONFIG queueConfig;
+    WDF_OBJECT_ATTRIBUTES queueAttributes;
     PDEVICE_CONTEXT deviceContext;
     PQUEUE_CONTEXT queueContext;
     NTSTATUS status;
@@ -24,9 +25,10 @@ PtpFilterIoQueueInitialize(
     deviceContext = PtpFilterGetContext(Device);
 
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&queueAttributes, QUEUE_CONTEXT);
     queueConfig.EvtIoInternalDeviceControl = FilterEvtIoIntDeviceControl;
     queueConfig.EvtIoStop = FilterEvtIoStop;
-    status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
+    status = WdfIoQueueCreate(Device, &queueConfig, &queueAttributes, &queue);
     if (!NT_SUCCESS(status))
     {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
