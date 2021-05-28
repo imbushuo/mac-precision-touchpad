@@ -152,6 +152,7 @@ UmdfKernelModeClientPolicy=AllowKernelModeClients
 UmdfFileObjectPolicy=AllowNullAndUnknownFileObjects
 UmdfMethodNeitherAction=Copy
 UmdfFsContextUsePolicy=CanUseFsContext2
+UmdfHostPriority=PriorityHigh
 
 [AmtPtpDeviceUsbUm_Install]
 UmdfLibraryVersion=2.15.0
