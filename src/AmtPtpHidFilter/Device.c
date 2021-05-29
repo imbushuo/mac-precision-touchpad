@@ -135,7 +135,6 @@ PtpFilterHijackWindowsHIDStack(
     PDRIVER_OBJECT  hidTransportWdmDriverObject = NULL;
     PIO_CLIENT_EXTENSION hidTransportIoClientExtension = NULL;
     PHIDCLASS_DRIVER_EXTENSION hidTransportClassExtension = NULL;
-    UNICODE_STRING HidUsbServiceNameString;
 
     PAGED_CODE();
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
