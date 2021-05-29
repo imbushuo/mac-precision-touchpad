@@ -32,6 +32,11 @@ PtpFilterCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
 );
 
+NTSTATUS
+PtpFilterHijackWindowsHIDStack(
+    _In_ WDFDEVICE Device
+);
+
 // Power Management Handlers
 EVT_WDF_DEVICE_PREPARE_HARDWARE PtpFilterPrepareHardware;
 EVT_WDF_DEVICE_D0_ENTRY PtpFilterDeviceD0Entry;

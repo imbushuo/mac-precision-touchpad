@@ -49,5 +49,8 @@
     <ClInclude Include="include\Queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Hac.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

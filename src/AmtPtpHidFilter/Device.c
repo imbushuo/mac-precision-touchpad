@@ -125,7 +125,7 @@ PtpFilterDeviceD0Exit(
 }
 
 NTSTATUS
-PtpFilterSelfManagedIoInit(
+PtpFilterHijackWindowsHIDStack(
     _In_ WDFDEVICE Device
 )
 {
@@ -133,9 +133,10 @@ PtpFilterSelfManagedIoInit(
     PDEVICE_CONTEXT deviceContext;
     PDEVICE_OBJECT  hidTransportWdmDeviceObject = NULL;
     PDRIVER_OBJECT  hidTransportWdmDriverObject = NULL;
-    PIO_CLIENT_EXTENSION ioClientExtension = NULL;
+    PIO_CLIENT_EXTENSION hidTransportIoClientExtension = NULL;
+    PHIDCLASS_DRIVER_EXTENSION hidTransportClassExtension = NULL;
     UNICODE_STRING HidUsbServiceNameString;
-    
+
     PAGED_CODE();
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
     deviceContext = PtpFilterGetContext(Device);
@@ -176,25 +177,82 @@ PtpFilterSelfManagedIoInit(
     }
 
     // Just two more check...
-    ioClientExtension = ((PDRIVER_EXTENSION_EXT) hidTransportWdmDriverObject->DriverExtension)->IoClientExtension;
-    if (ioClientExtension == NULL) {
+    hidTransportIoClientExtension = ((PDRIVER_EXTENSION_EXT)hidTransportWdmDriverObject->DriverExtension)->IoClientExtension;
+    if (hidTransportIoClientExtension == NULL) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IO Extension is NULL, can't continue");
         status = STATUS_UNSUCCESSFUL;
         goto cleanup;
     }
 
-    if (strncmp(HID_CLASS_EXTENSION_LITERAL_ID, ioClientExtension->ClientIdentificationAddress, sizeof(HID_CLASS_EXTENSION_LITERAL_ID)) != 0) {
+    if (strncmp(HID_CLASS_EXTENSION_LITERAL_ID, hidTransportIoClientExtension->ClientIdentificationAddress, sizeof(HID_CLASS_EXTENSION_LITERAL_ID)) != 0) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IO Extension mistmatch, can't continue");
         status = STATUS_UNSUCCESSFUL;
         goto cleanup;
     }
 
+    hidTransportClassExtension = (PHIDCLASS_DRIVER_EXTENSION)(hidTransportIoClientExtension + 1);
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Sanity check seems okay, safe to patch IO handler routines");
+
+    // HIDClass overrides:
+    // IRP_MJ_SYSTEM_CONTROL, IRP_MJ_WRITE, IRP_MJ_READ, IRP_MJ_POWER, IRP_MJ_PNP, IRP_MJ_INTERNAL_DEVICE_CONTROL, IRP_MJ_DEVICE_CONTROL
+    // IRP_MJ_CREATE, IRP_MJ_CLOSE
+    // For us, overriding IRP_MJ_DEVICE_CONTROL and IRP_MJ_INTERNAL_DEVICE_CONTROL might be sufficient.
+    // Details: https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/_wiki/wikis/Apple-PTP-Trackpad.wiki/47/Hijack-HIDCLASS
+    hidTransportWdmDriverObject->MajorFunction[IRP_MJ_INTERNAL_DEVICE_CONTROL] = hidTransportClassExtension->MajorFunction[IRP_MJ_INTERNAL_DEVICE_CONTROL];
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! IRP_MJ_INTERNAL_DEVICE_CONTROL patched");
 
 cleanup:
     if (hidTransportWdmDeviceObject != NULL) {
         ObDereferenceObject(hidTransportWdmDeviceObject);
     }
+exit:
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
+    return status;
+}
+
+NTSTATUS
+PtpFilterSelfManagedIoInit(
+    _In_ WDFDEVICE Device
+)
+{
+    NTSTATUS status;
+    PDEVICE_CONTEXT deviceContext;
+    WDF_MEMORY_DESCRIPTOR hidAttributeMemoryDescriptor;
+    HID_DEVICE_ATTRIBUTES deviceAttributes;
+
+    PAGED_CODE();
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+
+    deviceContext = PtpFilterGetContext(Device);
+    status = PtpFilterHijackWindowsHIDStack(Device);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterHijackWindowsHIDStack failed, Status = %!STATUS!", status);
+        goto exit;
+    }
+
+    // Request device attribute descriptor for self-identification.
+    RtlZeroMemory(&deviceAttributes, sizeof(deviceAttributes));
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
+        &hidAttributeMemoryDescriptor,
+        (PVOID)&deviceAttributes,
+        sizeof(deviceAttributes)
+    );
+
+    status = WdfIoTargetSendInternalIoctlSynchronously(
+        deviceContext->HidIoTarget, NULL,
+        IOCTL_HID_GET_DEVICE_ATTRIBUTES,
+        NULL, &hidAttributeMemoryDescriptor, NULL, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfIoTargetSendInternalIoctlSynchronously failed, Status = %!STATUS!", status);
+        goto exit;
+    }
+
+    deviceContext->VendorID = deviceAttributes.VendorID;
+    deviceContext->ProductID = deviceAttributes.ProductID;
+    deviceContext->VersionNumber = deviceAttributes.VersionNumber;
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Device %x:%x, Version 0x%x", deviceContext->VendorID,
+        deviceContext->ProductID, deviceContext->VersionNumber);
+    
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;
