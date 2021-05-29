@@ -169,13 +169,6 @@ PtpFilterHijackWindowsHIDStack(
         goto cleanup;
     }
 
-    RtlInitUnicodeString(&HidUsbServiceNameString, HID_USB_SERVICE_NAME);
-    if (!RtlEqualUnicodeString(&hidTransportWdmDriverObject->DriverExtension->ServiceKeyName, &HidUsbServiceNameString, TRUE)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! DriverExtension key mismatch: %wZ", &hidTransportWdmDriverObject->DriverExtension->ServiceKeyName);
-        status = STATUS_UNSUCCESSFUL;
-        goto cleanup;
-    }
-
     // Just two more check...
     hidTransportIoClientExtension = ((PDRIVER_EXTENSION_EXT)hidTransportWdmDriverObject->DriverExtension)->IoClientExtension;
     if (hidTransportIoClientExtension == NULL) {
