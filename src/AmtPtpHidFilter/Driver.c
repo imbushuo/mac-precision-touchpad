@@ -30,8 +30,7 @@ DriverEntry(
 
     // Register WDF driver
     WDF_DRIVER_CONFIG_INIT(&config, PtpFilterEvtDeviceAdd);
-    status = WdfDriverCreate(DriverObject, RegistryPath,
-        &attributes, &config, WDF_NO_HANDLE);
+    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
@@ -58,7 +57,6 @@ PtpFilterEvtDeviceAdd(
     // We do not own power control.
     // In addition we do not own every I/O request.
     WdfFdoInitSetFilter(DeviceInit);
-    WdfPdoInitAllowForwardingRequestToParent(DeviceInit);
 
     // Create the device.
     status = PtpFilterCreateDevice(DeviceInit);

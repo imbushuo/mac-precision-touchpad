@@ -37,7 +37,7 @@ PtpFilterIoQueueInitialize(
 
     queueContext = PtpFilterQueueGetContext(queue);
     queueContext->Device = deviceContext->Device;
-    queueContext->DeviceIoTarget = deviceContext->DeviceIoTarget;
+    queueContext->DeviceIoTarget = deviceContext->HidIoTarget;
 
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit, Status = %!STATUS!", status);
@@ -54,29 +54,18 @@ FilterEvtIoIntDeviceControl(
 )
 {
     PQUEUE_CONTEXT queueContext;
-    WDF_REQUEST_SEND_OPTIONS options;
-    WDF_REQUEST_PARAMETERS params;
-    NTSTATUS status = STATUS_SUCCESS;
-    BOOLEAN ret;
-
+    PDEVICE_CONTEXT deviceContext;
+    
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
     UNREFERENCED_PARAMETER(IoControlCode);
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! IOCTL 0x%x", IoControlCode);
+
     queueContext = PtpFilterQueueGetContext(Queue);
+    deviceContext = PtpFilterGetContext(queueContext->Device);
 
-    // Just no brainer forward to parent
-    WDF_REQUEST_PARAMETERS_INIT(&params);
-    WdfRequestGetParameters(Request, &params);
-    WdfRequestFormatRequestUsingCurrentType(Request);
-    WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
-
-    ret = WdfRequestSend(Request, queueContext->DeviceIoTarget, &options);
-    if (!ret) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "[FORWARD] WdfRequestSend failed %!STATUS!", status);
-        status = WdfRequestGetStatus(Request);
-        WdfRequestComplete(Request,status);
-    }
+    WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
 }
 
 VOID
