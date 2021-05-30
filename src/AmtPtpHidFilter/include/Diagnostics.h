@@ -7,6 +7,16 @@ VOID PtpFilterDiagnosticsInitializeContinuousRead(
 );
 
 VOID
+PtpFilterDiagnosticsInputIssueRequest(
+	_In_ WDFDEVICE Device
+);
+
+VOID
+PtpFilterRecoveryTimerCallback(
+	WDFTIMER Timer
+);
+
+VOID
 PtpFilterDiagnosticsRequestCompletionRoutine(
 	_In_ WDFREQUEST Request,
 	_In_ WDFIOTARGET Target,

@@ -91,7 +91,7 @@ AmtPtpDeviceSpiKmCreateDevice(
 
 		if (!NT_SUCCESS(Status)) {
 			TraceEvents(
-				TRACE_LEVEL_INFORMATION,
+				TRACE_LEVEL_ERROR,
 				TRACE_DRIVER,
 				"%!FUNC! WdfLookasideListCreate failed with %!STATUS!",
 				Status
@@ -108,6 +108,15 @@ AmtPtpDeviceSpiKmCreateDevice(
 		TimerAttributes.ParentObject = Device;
 		TimerAttributes.ExecutionLevel = WdfExecutionLevelPassive;
 		Status = WdfTimerCreate(&TimerConfig, &TimerAttributes, &pDeviceContext->PowerOnRecoveryTimer);
+		if (!NT_SUCCESS(Status)) {
+			TraceEvents(
+				TRACE_LEVEL_ERROR,
+				TRACE_DRIVER,
+				"%!FUNC! WdfTimerCreate failed with %!STATUS!",
+				Status
+			);
+			goto exit;
+		}
 
 		//
 		// Retrieve IO target.
