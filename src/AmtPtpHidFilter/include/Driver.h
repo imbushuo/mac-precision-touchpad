@@ -22,5 +22,10 @@ EVT_WDF_OBJECT_CONTEXT_CLEANUP PtpFilterEvtDriverContextCleanup;
 #include "Device.h"
 #include "Queue.h"
 #include "Hac.h"
+#include "Diagnostics.h"
+
+// Pool Tag
+#define PTP_LIST_POOL_TAG 'LTPA'
+#define REPORT_BUFFER_SIZE   1024
 
 EXTERN_C_END

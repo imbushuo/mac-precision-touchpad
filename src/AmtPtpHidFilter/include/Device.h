@@ -28,6 +28,9 @@ typedef struct _DEVICE_CONTEXT
     USHORT ProductID;
     USHORT VersionNumber;
 
+    // List of buffers
+    WDFLOOKASIDE HidReadBufferLookaside;
+
     // System HID transport PDO IO Target
     WDFIOTARGET HidIoTarget;
     BOOLEAN     IsHidIoDetourCompleted;

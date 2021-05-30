@@ -36,6 +36,9 @@
     <ClCompile Include="Detour.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Diagnostics.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Driver.h">
@@ -53,6 +56,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Hac.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Diagnostics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -59,6 +59,15 @@ PtpFilterCreateDevice(
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "PtpFilterIoQueueInitialize failed: %!STATUS!", status);
     }
 
+    // Initialize read buffer
+    status = WdfLookasideListCreate(WDF_NO_OBJECT_ATTRIBUTES, REPORT_BUFFER_SIZE,
+        NonPagedPoolNx, WDF_NO_OBJECT_ATTRIBUTES, PTP_LIST_POOL_TAG,
+        &deviceContext->HidReadBufferLookaside
+    );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfLookasideListCreate failed: %!STATUS!", status);
+    }
+
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;
@@ -172,6 +181,9 @@ PtpFilterSelfManagedIoInit(
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
     }
+
+    // Start diagnostics content read
+    PtpFilterDiagnosticsInitializeContinuousRead(Device);
     
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
@@ -201,6 +213,9 @@ PtpFilterSelfManagedIoRestart(
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! HID detour should already complete here");
         status = STATUS_INVALID_STATE_TRANSITION;
     }
+
+    // Start diagnostics content read
+    PtpFilterDiagnosticsInitializeContinuousRead(Device);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;
