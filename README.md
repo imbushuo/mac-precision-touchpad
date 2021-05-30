@@ -39,8 +39,8 @@ choco install mac-precision-touchpad
 
 ## For developers
 
-- SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 1903 is required for development and testing.
-- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 1903 is required for development and testing.
+- SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Windows 10 Driver Development Kit Version 2004 is required for development and testing.
+- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 2004 is required for development and testing.
 
 ## Device support
 
@@ -67,7 +67,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] Device Test (Magic Trackpad 2)
 - [x] Refine input experience (tip switch detection and pressure)
 - [x] Refine input experience (gesture experience)
-- [x] More Models (I need donation)
+- [x] More Models
 - [x] SPI
 - [x] KM Driver cross-cert
 - [ ] Bluetooth
