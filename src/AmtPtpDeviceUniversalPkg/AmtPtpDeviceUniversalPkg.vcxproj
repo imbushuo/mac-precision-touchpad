@@ -69,7 +69,8 @@
   </PropertyGroup>
   <!-- Note: AzDevOps Pipeline might override this -->
   <PropertyGroup Condition="'$(ProductionCertPath)'==''">
-    <ProductionCertPath></ProductionCertPath>
+    <ProductionCertPath>
+    </ProductionCertPath>
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <SignMode>ProductionSign</SignMode>
   </PropertyGroup>
@@ -198,6 +199,12 @@
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
     </DriverSign>
+    <Inf>
+      <TimeStamp Condition="'$(BuildEnvironment)'=='AzurePipeline'">2021.$(PipelineReleaseID).1.1000</TimeStamp>
+    </Inf>
+    <Inf>
+      <TimeStamp Condition="'$(BuildEnvironment)'!='AzurePipeline'">*</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
