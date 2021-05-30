@@ -34,9 +34,18 @@ typedef struct _DEVICE_CONTEXT
     // System HID transport PDO IO Target
     WDFIOTARGET HidIoTarget;
     BOOLEAN     IsHidIoDetourCompleted;
+    WDFTIMER    HidTransportRecoveryTimer;
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, PtpFilterGetContext)
+
+// Request context
+typedef struct _WORKER_REQUEST_CONTEXT {
+    PDEVICE_CONTEXT DeviceContext;
+    WDFMEMORY RequestMemory;
+} WORKER_REQUEST_CONTEXT, * PWORKER_REQUEST_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(WORKER_REQUEST_CONTEXT, WorkerRequestGetContext)
 
 // Initialization routines
 NTSTATUS

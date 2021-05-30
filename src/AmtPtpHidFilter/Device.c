@@ -14,6 +14,7 @@ PtpFilterCreateDevice(
 {
     WDF_OBJECT_ATTRIBUTES deviceAttributes;
     WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
+    WDF_TIMER_CONFIG timerConfig;
     WDFDEVICE device;
     PDEVICE_CONTEXT deviceContext;
     NTSTATUS status;
@@ -53,12 +54,6 @@ PtpFilterCreateDevice(
         goto exit;
     }
 
-    // Initialize IO queue
-    status = PtpFilterIoQueueInitialize(device);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "PtpFilterIoQueueInitialize failed: %!STATUS!", status);
-    }
-
     // Initialize read buffer
     status = WdfLookasideListCreate(WDF_NO_OBJECT_ATTRIBUTES, REPORT_BUFFER_SIZE,
         NonPagedPoolNx, WDF_NO_OBJECT_ATTRIBUTES, PTP_LIST_POOL_TAG,
@@ -66,6 +61,23 @@ PtpFilterCreateDevice(
     );
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfLookasideListCreate failed: %!STATUS!", status);
+    }
+
+    // Initialize HID recovery timer
+    WDF_TIMER_CONFIG_INIT(&timerConfig, PtpFilterRecoveryTimerCallback);
+    timerConfig.AutomaticSerialization = TRUE;
+    WDF_OBJECT_ATTRIBUTES_INIT(&deviceAttributes);
+    deviceAttributes.ParentObject = device;
+    deviceAttributes.ExecutionLevel = WdfExecutionLevelPassive;
+    status = WdfTimerCreate(&timerConfig, &deviceAttributes, &deviceContext->HidTransportRecoveryTimer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfTimerCreate failed: %!STATUS!", status);
+    }
+
+    // Initialize IO queue
+    status = PtpFilterIoQueueInitialize(device);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "PtpFilterIoQueueInitialize failed: %!STATUS!", status);
     }
 
 exit:
