@@ -34,9 +34,9 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with
 %ManufacturerName%=Standard,NT$ARCH$
 
 [Standard.NT$ARCH$]
-; The fact is, you can't filter HIDUSB or friends, because they use function pointers which might
-; change in the future. Therefore we still implement our own HID miniport transport, but in fact 
-; reusing the underlying HID transport (either Bluetooth or USB).
+; The fact is, you can't filter HIDUSB or friends directly, because they load the export driver called
+; HIDCLASS which overrides their IO Major Function pointers. Therefore we still implement our own HID miniport 
+; transport, but in fact reusing the underlying HID transport (either Bluetooth or USB).
 ; Some high-level patches involved to modify the underlying driver IO handlers.
 %AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col02
 %AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col02

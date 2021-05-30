@@ -40,7 +40,6 @@ PtpFilterCreateDevice(
     // Initialize context and interface
     deviceContext = PtpFilterGetContext(device);
     deviceContext->Device = device;
-    deviceContext->HidIoTarget = WdfDeviceGetIoTarget(device);
     deviceContext->WdmDeviceObject = WdfDeviceWdmGetDeviceObject(device);
     if (deviceContext->WdmDeviceObject == NULL) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfDeviceWdmGetDeviceObject failed");
@@ -125,84 +124,6 @@ PtpFilterDeviceD0Exit(
 }
 
 NTSTATUS
-PtpFilterHijackWindowsHIDStack(
-    _In_ WDFDEVICE Device
-)
-{
-    NTSTATUS status = STATUS_SUCCESS;
-    PDEVICE_CONTEXT deviceContext;
-    PDEVICE_OBJECT  hidTransportWdmDeviceObject = NULL;
-    PDRIVER_OBJECT  hidTransportWdmDriverObject = NULL;
-    PIO_CLIENT_EXTENSION hidTransportIoClientExtension = NULL;
-    PHIDCLASS_DRIVER_EXTENSION hidTransportClassExtension = NULL;
-
-    PAGED_CODE();
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
-    deviceContext = PtpFilterGetContext(Device);
-
-    if (deviceContext->WdmDeviceObject == NULL || deviceContext->WdmDeviceObject->DriverObject == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WDM Device Object or Driver Object is null, can't continue");
-        status = STATUS_UNSUCCESSFUL;
-        goto exit;
-    }
-
-    // Access the driver object to find next low-level device (in our case, we expect it to be HID transport driver)
-    hidTransportWdmDeviceObject = IoGetLowerDeviceObject(deviceContext->WdmDeviceObject);
-    if (hidTransportWdmDeviceObject == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IoGetLowerDeviceObject returns null, can't continue");
-        status = STATUS_UNSUCCESSFUL;
-        goto exit;
-    }
-
-    hidTransportWdmDriverObject = hidTransportWdmDeviceObject->DriverObject;
-    if (hidTransportWdmDriverObject == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! DriverObject of HID transport Device Object is null, can't continue");
-        status = STATUS_UNSUCCESSFUL;
-        goto cleanup;
-    }
-
-    // Verify if the driver extension is what we expected.
-    if (hidTransportWdmDriverObject->DriverExtension == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! DriverExtension of HID transport Driver Object is null, can't continue");
-        status = STATUS_UNSUCCESSFUL;
-        goto cleanup;
-    }
-
-    // Just two more check...
-    hidTransportIoClientExtension = ((PDRIVER_EXTENSION_EXT)hidTransportWdmDriverObject->DriverExtension)->IoClientExtension;
-    if (hidTransportIoClientExtension == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IO Extension is NULL, can't continue");
-        status = STATUS_UNSUCCESSFUL;
-        goto cleanup;
-    }
-
-    if (strncmp(HID_CLASS_EXTENSION_LITERAL_ID, hidTransportIoClientExtension->ClientIdentificationAddress, sizeof(HID_CLASS_EXTENSION_LITERAL_ID)) != 0) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IO Extension mistmatch, can't continue");
-        status = STATUS_UNSUCCESSFUL;
-        goto cleanup;
-    }
-
-    hidTransportClassExtension = (PHIDCLASS_DRIVER_EXTENSION)(hidTransportIoClientExtension + 1);
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Sanity check seems okay, safe to patch IO handler routines");
-
-    // HIDClass overrides:
-    // IRP_MJ_SYSTEM_CONTROL, IRP_MJ_WRITE, IRP_MJ_READ, IRP_MJ_POWER, IRP_MJ_PNP, IRP_MJ_INTERNAL_DEVICE_CONTROL, IRP_MJ_DEVICE_CONTROL
-    // IRP_MJ_CREATE, IRP_MJ_CLOSE
-    // For us, overriding IRP_MJ_DEVICE_CONTROL and IRP_MJ_INTERNAL_DEVICE_CONTROL might be sufficient.
-    // Details: https://ligstd.visualstudio.com/Apple%20PTP%20Trackpad/_wiki/wikis/Apple-PTP-Trackpad.wiki/47/Hijack-HIDCLASS
-    hidTransportWdmDriverObject->MajorFunction[IRP_MJ_INTERNAL_DEVICE_CONTROL] = hidTransportClassExtension->MajorFunction[IRP_MJ_INTERNAL_DEVICE_CONTROL];
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! IRP_MJ_INTERNAL_DEVICE_CONTROL patched");
-
-cleanup:
-    if (hidTransportWdmDeviceObject != NULL) {
-        ObDereferenceObject(hidTransportWdmDeviceObject);
-    }
-exit:
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
-    return status;
-}
-
-NTSTATUS
 PtpFilterSelfManagedIoInit(
     _In_ WDFDEVICE Device
 )
@@ -216,9 +137,9 @@ PtpFilterSelfManagedIoInit(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
 
     deviceContext = PtpFilterGetContext(Device);
-    status = PtpFilterHijackWindowsHIDStack(Device);
+    status = PtpFilterDetourWindowsHIDStack(Device);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterHijackWindowsHIDStack failed, Status = %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterDetourWindowsHIDStack failed, Status = %!STATUS!", status);
         goto exit;
     }
 
@@ -244,7 +165,121 @@ PtpFilterSelfManagedIoInit(
     deviceContext->VersionNumber = deviceAttributes.VersionNumber;
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Device %x:%x, Version 0x%x", deviceContext->VendorID,
         deviceContext->ProductID, deviceContext->VersionNumber);
+
+    // Configure device into multi-touch mode
+    status = PtpFilterConfigureMultiTouch(Device);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
+    }
     
+exit:
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
+    return status;
+}
+
+NTSTATUS
+PtpFilterConfigureMultiTouch(
+    _In_ WDFDEVICE Device
+)
+{
+    NTSTATUS status = STATUS_SUCCESS;
+    PDEVICE_CONTEXT deviceContext;
+
+    UCHAR hidPacketBuffer[HID_XFER_PACKET_SIZE];
+    PHID_XFER_PACKET pHidPacket;
+    WDFMEMORY hidMemory;
+    WDF_OBJECT_ATTRIBUTES attributes;
+    WDF_REQUEST_SEND_OPTIONS configRequestSendOptions;
+    WDFREQUEST configRequest;
+    PIRP pConfigIrp = NULL;
+
+    PAGED_CODE();
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    deviceContext = PtpFilterGetContext(Device);
+    
+    // Check if this device is supported for configuration.
+    // So far in this prototype, we support Magic Trackpad 2 in USB (05AC:0265) or Bluetooth mode (004c:0265)
+    if (deviceContext->VendorID != HID_VID_APPLE_USB && deviceContext->VendorID != HID_VID_APPLE_BT) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Vendor not supported: 0x%x", deviceContext->VendorID);
+        status = STATUS_NOT_SUPPORTED;
+        goto exit;
+    }
+    if (deviceContext->ProductID != HID_PID_MAGIC_TRACKPAD_2) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Product not supported: 0x%x", deviceContext->ProductID);
+        status = STATUS_NOT_SUPPORTED;
+        goto exit;
+    }
+
+    RtlZeroMemory(hidPacketBuffer, sizeof(hidPacketBuffer));
+    pHidPacket = (PHID_XFER_PACKET) &hidPacketBuffer;
+
+    if (deviceContext->VendorID == HID_VID_APPLE_USB) {
+        pHidPacket->reportId = 0x02;
+        pHidPacket->reportBufferLen = 0x04;
+        pHidPacket->reportBuffer = (PUCHAR) pHidPacket + sizeof(HID_XFER_PACKET);
+        pHidPacket->reportBuffer[0] = 0x02;
+        pHidPacket->reportBuffer[1] = 0x01;
+        pHidPacket->reportBuffer[2] = 0x00;
+        pHidPacket->reportBuffer[3] = 0x00;
+    }
+    else if (deviceContext->VendorID == HID_VID_APPLE_BT) {
+        pHidPacket->reportId = 0xF1;
+        pHidPacket->reportBufferLen = 0x03;
+        pHidPacket->reportBuffer = (PUCHAR)pHidPacket + sizeof(HID_XFER_PACKET);
+        pHidPacket->reportBuffer[0] = 0xF1;
+        pHidPacket->reportBuffer[1] = 0x02;
+        pHidPacket->reportBuffer[2] = 0x01;
+    }
+
+    // Init a request entity.
+    // Because we bypassed HIDCLASS driver, there's a few things that we need to manually take care of.
+    status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, deviceContext->HidIoTarget, &configRequest);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfRequestCreate failed, Status = %!STATUS!", status);
+        goto exit;
+    }
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = configRequest;
+    status = WdfMemoryCreatePreallocated(&attributes, (PVOID) pHidPacket, HID_XFER_PACKET_SIZE, &hidMemory);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfMemoryCreatePreallocated failed, Status = %!STATUS!", status);
+        goto cleanup;
+    }
+
+    status = WdfIoTargetFormatRequestForInternalIoctl(deviceContext->HidIoTarget,
+        configRequest, IOCTL_HID_SET_FEATURE,
+        hidMemory, NULL, NULL, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfIoTargetFormatRequestForInternalIoctl failed, Status = %!STATUS!", status);
+        goto cleanup;
+    }
+    
+    // Manually take care of IRP to meet requirements of mini drivers.
+    pConfigIrp = WdfRequestWdmGetIrp(configRequest);
+    if (pConfigIrp == NULL) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfRequestWdmGetIrp failed");
+        status = STATUS_UNSUCCESSFUL;
+        goto cleanup;
+    }
+
+    // God-damn-it we have to configure it by ourselves :)
+    pConfigIrp->UserBuffer = pHidPacket;
+
+    WDF_REQUEST_SEND_OPTIONS_INIT(&configRequestSendOptions, WDF_REQUEST_SEND_OPTION_SYNCHRONOUS);
+    if (WdfRequestSend(configRequest, deviceContext->HidIoTarget, &configRequestSendOptions) == FALSE) {
+        status = WdfRequestGetStatus(configRequest);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfRequestSend failed, Status = %!STATUS!", status);
+        goto cleanup;
+    } else {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Changed trackpad status to multitouch mode");
+        status = STATUS_SUCCESS;
+    }
+
+cleanup:
+    if (configRequest != NULL) {
+        WdfObjectDelete(configRequest);
+    }
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;

@@ -33,11 +33,18 @@ typedef struct _DRIVER_EXTENSION_EXT {
 #define HID_CLASS_EXTENSION_LITERAL_ID "HIDCLASS"
 #define HID_USB_SERVICE_NAME L"HidUsb"
 
-// Hack: import
+// Hack: import from ntifs.h
 extern NTKERNELAPI
 PDEVICE_OBJECT
 IoGetLowerDeviceObject(
     _In_  PDEVICE_OBJECT  DeviceObject
 );
+
+// Detour routines
+NTSTATUS
+PtpFilterDetourWindowsHIDStack(
+    _In_ WDFDEVICE Device
+);
+
 
 EXTERN_C_END
