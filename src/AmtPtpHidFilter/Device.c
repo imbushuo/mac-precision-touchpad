@@ -27,6 +27,7 @@ PtpFilterCreateDevice(
     pnpPowerCallbacks.EvtDeviceD0Entry = PtpFilterDeviceD0Entry;
     pnpPowerCallbacks.EvtDeviceD0Exit = PtpFilterDeviceD0Exit;
     pnpPowerCallbacks.EvtDeviceSelfManagedIoInit = PtpFilterSelfManagedIoInit;
+    pnpPowerCallbacks.EvtDeviceSelfManagedIoRestart = PtpFilterSelfManagedIoRestart;
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
     // Create WDF device object
@@ -98,9 +99,9 @@ PtpFilterDeviceD0Entry(
 {
     NTSTATUS status = STATUS_SUCCESS;
 
+    PAGED_CODE();
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(PreviousState);
-    PAGED_CODE();
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
@@ -178,6 +179,34 @@ exit:
 }
 
 NTSTATUS
+PtpFilterSelfManagedIoRestart(
+    _In_ WDFDEVICE Device
+)
+{
+    NTSTATUS status = STATUS_SUCCESS;
+    PDEVICE_CONTEXT deviceContext;
+
+    PAGED_CODE();
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    deviceContext = PtpFilterGetContext(Device);
+
+    // If this is first D0, it will be done in self-managed IO init.
+    if (deviceContext->IsHidIoDetourCompleted) {
+        status = PtpFilterConfigureMultiTouch(Device);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
+        }
+    }
+    else {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! HID detour should already complete here");
+        status = STATUS_INVALID_STATE_TRANSITION;
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
+    return status;
+}
+
+NTSTATUS
 PtpFilterConfigureMultiTouch(
     _In_ WDFDEVICE Device
 )
@@ -195,7 +224,7 @@ PtpFilterConfigureMultiTouch(
 
     PAGED_CODE();
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
-    deviceContext = PtpFilterGetContext(Device);
+    deviceContext = PtpFilterGetContext(Device); 
     
     // Check if this device is supported for configuration.
     // So far in this prototype, we support Magic Trackpad 2 in USB (05AC:0265) or Bluetooth mode (004c:0265)
