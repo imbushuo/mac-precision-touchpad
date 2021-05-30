@@ -9,10 +9,11 @@ ClassGuid = {745a17a0-74d3-11d0-b6fe-00a0c90f57da}
 Provider = %ManufacturerName%
 CatalogFile = AmtPtpDevice.cat
 DriverVer =
+PnpLockdown = 1
 
 [DestinationDirs]
-DefaultDestDir = 12
-PtpUmDrivers_Dir = 12,UMDF
+DefaultDestDir = 13
+PtpUmDrivers_Dir = 13
 
 [SourceDisksNames]
 1 = %DiskName%,,,""
@@ -21,7 +22,6 @@ PtpUmDrivers_Dir = 12,UMDF
 AmtPtpDeviceUsbKm.sys = 1,,
 AmtPtpDeviceUsbUm.dll = 1,,
 AmtPtpDeviceSpiKm.sys = 1,,
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1
 
 [Manufacturer]
 %ManufacturerName%=Standard,NT$ARCH$
@@ -112,17 +112,7 @@ DisplayName    = %AmtPtpDeviceUsbKm.SVCDESC%
 ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
 StartType      = 3               ; SERVICE_DEMAND_START
 ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %12%\AmtPtpDeviceUsbKm.sys
-
-[AmtPtpDeviceUsbKm_Device.NT.CoInstallers]
-AddReg=AmtPtpDeviceUsbKm_Device_CoInstaller_AddReg
-CopyFiles=AmtPtpDeviceUsbKm_Device_CoInstaller_CopyFiles
-
-[AmtPtpDeviceUsbKm_Device_CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
-
-[AmtPtpDeviceUsbKm_Device_CoInstaller_CopyFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+ServiceBinary  = %13%\AmtPtpDeviceUsbKm.sys
 
 [AmtPtpDeviceUsbKm_Device.NT.Wdf]
 KmdfService = AmtPtpDeviceUsbKm, AmtPtpDeviceUsbKm_wdfsect
@@ -156,7 +146,7 @@ UmdfHostPriority=PriorityHigh
 
 [AmtPtpDeviceUsbUm_Install]
 UmdfLibraryVersion=2.15.0
-ServiceBinary=%12%\UMDF\AmtPtpDeviceUsbUm.dll
+ServiceBinary=%13%\AmtPtpDeviceUsbUm.dll
 
 [AmtPtpDeviceUsbUm_AddReg]
 HKR,,FriendlyName,,%AmtPtpDeviceUsbUm.DeviceDesc%
@@ -204,18 +194,8 @@ DisplayName    = %AmtPtpDeviceSpiKm.SVCDESC%
 ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
 StartType      = 3               ; SERVICE_DEMAND_START
 ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %12%\AmtPtpDeviceSpiKm.sys
+ServiceBinary  = %13%\AmtPtpDeviceSpiKm.sys
 LoadOrderGroup = Extended Base
-
-[AmtPtpDeviceSpiKm_Device.NT.CoInstallers]
-AddReg=AmtPtpDeviceSpiKm_Device_CoInstaller_AddReg
-CopyFiles=AmtPtpDeviceSpiKm_Device_CoInstaller_CopyFiles
-
-[AmtPtpDeviceSpiKm_Device_CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
-
-[AmtPtpDeviceSpiKm_Device_CoInstaller_CopyFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
 [AmtPtpDeviceSpiKm_Device.NT.Wdf]
 KmdfService = AmtPtpDeviceSpiKm, AmtPtpDeviceSpiKm_wdfsect
