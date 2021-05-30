@@ -27,7 +27,9 @@ AmtPtpDeviceSpiKmCreateDevice(
     )
 {
     WDF_OBJECT_ATTRIBUTES DeviceAttributes;
+	WDF_OBJECT_ATTRIBUTES TimerAttributes;
     PDEVICE_CONTEXT pDeviceContext;
+	WDF_TIMER_CONFIG TimerConfig;
     WDFDEVICE Device;
     NTSTATUS Status;
 
@@ -48,6 +50,8 @@ AmtPtpDeviceSpiKmCreateDevice(
 	pnpPowerCallbacks.EvtDevicePrepareHardware = AmtPtpEvtDevicePrepareHardware;
 	pnpPowerCallbacks.EvtDeviceD0Entry = AmtPtpEvtDeviceD0Entry;
 	pnpPowerCallbacks.EvtDeviceD0Exit = AmtPtpEvtDeviceD0Exit;
+	pnpPowerCallbacks.EvtDeviceSelfManagedIoInit = AmtPtpEvtDeviceSelfManagedIoInitOrRestart;
+	pnpPowerCallbacks.EvtDeviceSelfManagedIoRestart = AmtPtpEvtDeviceSelfManagedIoInitOrRestart;
 	WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
 	// Create WDF device object
@@ -94,6 +98,16 @@ AmtPtpDeviceSpiKmCreateDevice(
 			);
 			goto exit;
 		}
+
+		//
+		// Create power-on recovery timer
+		//
+		WDF_TIMER_CONFIG_INIT(&TimerConfig, AmtPtpPowerRecoveryTimerCallback);
+		TimerConfig.AutomaticSerialization = TRUE;
+		WDF_OBJECT_ATTRIBUTES_INIT(&TimerAttributes);
+		TimerAttributes.ParentObject = Device;
+		TimerAttributes.ExecutionLevel = WdfExecutionLevelPassive;
+		Status = WdfTimerCreate(&TimerConfig, &TimerAttributes, &pDeviceContext->PowerOnRecoveryTimer);
 
 		//
 		// Retrieve IO target.
@@ -312,37 +326,11 @@ AmtPtpEvtDeviceD0Entry(
 
 	pDeviceContext = DeviceGetContext(Device);
 
-	// Attempt to enable SPI trackpad
-	// this might fail but can be retried later
-	// The state retains unless the power rail of trackpad
-	// has been cut
-	Status = AmtPtpSpiSetState(
-		Device,
-		TRUE
-	);
-
-	if (!NT_SUCCESS(Status))
-	{
-		TraceEvents(
-			TRACE_LEVEL_ERROR,
-			TRACE_DRIVER,
-			"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!. Ignored anyway.",
-			Status
-		);
-
-		// Ignore anyway, but set unconfigured status
-		pDeviceContext->DeviceStatus = D0ActiveAndUnconfigured;
-		Status = STATUS_SUCCESS;
-	}
-	else
-	{
-		pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
-	}
+	// We will configure the device in Self Managed IO init / restart routine
+	pDeviceContext->DeviceStatus = D0ActiveAndUnconfigured;
 
 	// Set time
-	KeQueryPerformanceCounter(
-		&pDeviceContext->LastReportTime
-	);
+	KeQueryPerformanceCounter(&pDeviceContext->LastReportTime);
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION,
@@ -394,6 +382,38 @@ AmtPtpEvtDeviceD0Exit(
 		"%!FUNC! <--AmtPtpDeviceEvtDeviceD0Exit"
 	);
 
+	return Status;
+}
+
+NTSTATUS
+AmtPtpEvtDeviceSelfManagedIoInitOrRestart(
+	_In_ WDFDEVICE Device
+)
+{
+	NTSTATUS Status = STATUS_SUCCESS;
+	PDEVICE_CONTEXT pDeviceContext;
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	pDeviceContext = DeviceGetContext(Device);
+	
+	Status = AmtPtpSpiSetState(Device, TRUE);
+	if (!NT_SUCCESS(Status))
+	{
+		// In this case, we will retry after 5 seconds. Block any incoming requests.
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! AmtPtpSpiSetState failed with %!STATUS!. Retry after 5 seconds", Status);
+		Status = STATUS_SUCCESS;
+		WdfTimerStart(pDeviceContext->PowerOnRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(5));
+		goto exit;
+	}
+	else
+	{
+		// Set time and status
+		pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
+		KeQueryPerformanceCounter(&pDeviceContext->LastReportTime);
+	}
+
+exit:
+	TraceEvents(TRACE_LEVEL_INFORMATION,TRACE_DRIVER, "%!FUNC! Exit, Status = %!STATUS!", Status);
 	return Status;
 }
 
@@ -507,4 +527,27 @@ exit:
 	);
 
 	return Status;
+}
+
+void AmtPtpPowerRecoveryTimerCallback(
+	WDFTIMER Timer
+)
+{
+	WDFDEVICE Device;
+	PDEVICE_CONTEXT pDeviceContext;
+	NTSTATUS Status = STATUS_SUCCESS;
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+	Device = WdfTimerGetParentObject(Timer);
+	pDeviceContext = DeviceGetContext(Device);
+
+	Status = AmtPtpSpiSetState(Device, TRUE);
+	if (NT_SUCCESS(Status))
+	{
+		// Triage request and set status
+		AmtPtpSpiInputIssueRequest(Device);
+		pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
+	}
+
+	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit, Status = %!STATUS!", Status);
 }

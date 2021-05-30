@@ -7,3 +7,8 @@ AmtPtpSpiInputRoutineWorker(
 	WDFDEVICE Device,
 	WDFREQUEST PtpRequest
 );
+
+VOID
+AmtPtpSpiInputIssueRequest(
+	WDFDEVICE Device
+);

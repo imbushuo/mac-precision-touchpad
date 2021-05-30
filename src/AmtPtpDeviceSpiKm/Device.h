@@ -76,6 +76,7 @@ typedef struct _DEVICE_CONTEXT
 
 	// Timer
 	LARGE_INTEGER LastReportTime;
+	WDFTIMER PowerOnRecoveryTimer;
 
 	// List of buffers
 	WDFLOOKASIDE HidReadBufferLookaside;
@@ -111,6 +112,11 @@ EVT_WDF_DEVICE_PREPARE_HARDWARE AmtPtpEvtDevicePrepareHardware;
 EVT_WDF_DEVICE_D0_ENTRY AmtPtpEvtDeviceD0Entry;
 EVT_WDF_DEVICE_D0_EXIT AmtPtpEvtDeviceD0Exit;
 
+NTSTATUS
+AmtPtpEvtDeviceSelfManagedIoInitOrRestart(
+	_In_ WDFDEVICE Device
+);
+
 PCHAR
 DbgDevicePowerString(
 	_In_ WDF_POWER_DEVICE_STATE Type
@@ -120,6 +126,10 @@ NTSTATUS
 AmtPtpSpiSetState(
 	_In_ WDFDEVICE Device,
 	_In_ BOOLEAN DesiredState
+);
+
+void AmtPtpPowerRecoveryTimerCallback(
+	WDFTIMER Timer
 );
 
 EXTERN_C_END
