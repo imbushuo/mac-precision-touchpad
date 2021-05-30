@@ -46,6 +46,7 @@ EVT_WDF_DEVICE_PREPARE_HARDWARE PtpFilterPrepareHardware;
 EVT_WDF_DEVICE_D0_ENTRY PtpFilterDeviceD0Entry;
 EVT_WDF_DEVICE_D0_EXIT PtpFilterDeviceD0Exit;
 EVT_WDF_DEVICE_SELF_MANAGED_IO_INIT PtpFilterSelfManagedIoInit;
+EVT_WDF_DEVICE_SELF_MANAGED_IO_RESTART PtpFilterSelfManagedIoRestart;
 
 // Device Management routines
 NTSTATUS

@@ -12,8 +12,7 @@ DriverVer= ; TODO: set DriverVer in stampinf property pages
 ; PnpLockDown=1 Not enabled in development
 
 [DestinationDirs]
-DefaultDestDir = 12
-AmtPtpHidFilter_Device_CoInstaller_CopyFiles = 11
+DefaultDestDir = 13
 
 [ControlFlags]
 ; We don't want our device to be installable via the non-PnP hardware dialogs
@@ -24,26 +23,25 @@ ExcludeFromSelect = *
 
 [SourceDisksFiles]
 AmtPtpHidFilter.sys  = 1,,
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
 
 ;*****************************************
 ; Install Section
 ;*****************************************
 
 [Manufacturer]
-%ManufacturerName%=Standard,NT$ARCH$
+%ManufacturerName%=Standard,NT$ARCH$.10.0
 
-[Standard.NT$ARCH$]
+[Standard.NT$ARCH$.10.0]
 ; The fact is, you can't filter HIDUSB or friends directly, because they load the export driver called
 ; HIDCLASS which overrides their IO Major Function pointers. Therefore we still implement our own HID miniport 
 ; transport, but in fact reusing the underlying HID transport (either Bluetooth or USB).
 ; Some high-level patches involved to modify the underlying driver IO handlers.
-%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col02
-%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col02
+%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col01
+%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col01
 ; To avoid confusions to OS, disable any other collections.
-%AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col01
+%AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col02
 %AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col03
-%AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col01
+%AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col02
 
 [FilterDriver_Payload]
 AmtPtpHidFilter.sys
@@ -69,6 +67,9 @@ AddReg=AmtPtpHidFilter_AddReg
 HKR,,FriendlyName,,%AmtPtpHidFilter.DeviceDesc%
 ;HKR,,"LowerFilters",0x00010008,"AmtPtpHidFilter"
 
+[AmtPtpHidFilter_MiniPortDevice.NT.Wdf]
+KmdfService = AmtPtpHidFilter, AmtPtpHidFilter_wdfsect
+
 ; -------------- Microsoft HID KMDF driver install sections
 [mshidkmdf_Service_Inst]
 ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
@@ -82,23 +83,7 @@ DisplayName    = %AmtPtpHidFilter.SVCDESC%
 ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
 StartType      = 3               ; SERVICE_DEMAND_START
 ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %12%\AmtPtpHidFilter.sys
-
-;
-;--- AmtPtpHidFilter_Device Coinstaller installation ------
-;
-[AmtPtpHidFilter_MiniPortDevice.NT.CoInstallers]
-AddReg=AmtPtpHidFilter_Device_CoInstaller_AddReg
-CopyFiles=AmtPtpHidFilter_Device_CoInstaller_CopyFiles
-
-[AmtPtpHidFilter_MiniPortDevice.NT.Wdf]
-KmdfService = AmtPtpHidFilter, AmtPtpHidFilter_wdfsect
-
-[AmtPtpHidFilter_Device_CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
-
-[AmtPtpHidFilter_Device_CoInstaller_CopyFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+ServiceBinary  = %13%\AmtPtpHidFilter.sys
 
 [AmtPtpHidFilter_wdfsect]
 KmdfLibraryVersion = $KMDFVERSION$
