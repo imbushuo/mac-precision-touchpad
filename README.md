@@ -14,9 +14,7 @@ Use the [Azure DevOps Board](https://ligstd.visualstudio.com/Apple%20PTP%20Track
 
 ## Converged Installation Guide
 
-**IMPORTANT:** Given changes in Microsoft driver code signing policy, and the compliance need of EV certificate, CI auto builds beyond 2021/01/06 04:00AM EST will not be automatically signed with normal code signing certificate.
-
-These builds are still supposed via TestSigning, but not recommended for normal users. Proper WHQL and EV dual-signed packages will be released manually, which can be downloaded from the release page.
+**IMPORTANT:** Given changes in Microsoft driver code signing policy, and the compliance need of EV certificate, CI auto builds beyond 2021/01/06 04:00AM EST will not be automatically signed with normal code signing certificate. These builds are still supposed via TestSigning, but not recommended for normal users. Proper WHQL and EV dual-signed packages will be released manually, which can be downloaded from the release page.
 
 0. Make sure you uninstalled `Trackpad++` completely if you have previously does so
 1. Go to the release tab in Github and download the newest version for your architecture
@@ -57,7 +55,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] MacBook Pro 2015, 2016, 2017 (a few SPI devices are in work-in-progress state)
 - [x] T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019/2020: Use default fallback, experience might not be optimal. Open a issue if you encountered dead touch regions.
 - [x] Magic Trackpad 2 (USB)
-- [ ] Magic Trackpad 2 ( Bluetooth connection)
+- [ ] Magic Trackpad 2 (Bluetooth connection)
 
 ## Roadmap
 
@@ -77,6 +75,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [ ] Input sensitivity configuration
 
 ## Acknowledgements
+
+**UPDATE 2021/05**: She got a M1 Mac now.
 
 People familiar with me know that I don't use Apple MacBook (so development work of this driver occurs on a Surface Pro 4). People probably think it doesn't make sense that I started this project. The motivation behind this project origin from complaints from my girlfriend. Hearing about frequent complains about Dell XPS 13's touchpad (though it passed Precision Touchpad certification), I decided to start this project, so by the time she switches to MacBook Pro, she will have excellent touchpad experience out-of-box, even on Windows. This driver is made for you, but also for everyone.
 
