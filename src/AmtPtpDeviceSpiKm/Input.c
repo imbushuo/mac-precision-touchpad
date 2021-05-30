@@ -9,24 +9,7 @@ AmtPtpSpiInputRoutineWorker(
 {
 	NTSTATUS Status;
 	PDEVICE_CONTEXT pDeviceContext;
-	WDF_OBJECT_ATTRIBUTES Attributes;
-	BOOLEAN RequestStatus = FALSE;
-	WDFREQUEST SpiHidReadRequest;
-	WDFMEMORY SpiHidReadOutputMemory;
-	PWORKER_REQUEST_CONTEXT RequestContext;
 	pDeviceContext = DeviceGetContext(Device);
-
-	// This call is expected to happen after D0 entrance
-	if (pDeviceContext->DeviceStatus == D3) {
-		TraceEvents(
-			TRACE_LEVEL_WARNING,
-			TRACE_QUEUE,
-			"%!FUNC! Unexpected call while device is in D3 status"
-		);
-
-		WdfRequestComplete(PtpRequest, STATUS_UNSUCCESSFUL);
-		return;
-	}
 
 	Status = WdfRequestForwardToIoQueue(
 		PtpRequest,
@@ -45,6 +28,27 @@ AmtPtpSpiInputRoutineWorker(
 		return;
 	}
 
+	// Only issue request when fully configured.
+	// Otherwise we will let power recovery process to triage it
+	if (pDeviceContext->DeviceStatus == D0ActiveAndConfigured) {
+		AmtPtpSpiInputIssueRequest(Device);
+	}
+}
+
+VOID
+AmtPtpSpiInputIssueRequest(
+	WDFDEVICE Device
+)
+{
+	NTSTATUS Status;
+	PDEVICE_CONTEXT pDeviceContext;
+	WDF_OBJECT_ATTRIBUTES Attributes;
+	BOOLEAN RequestStatus = FALSE;
+	WDFREQUEST SpiHidReadRequest;
+	WDFMEMORY SpiHidReadOutputMemory;
+	PWORKER_REQUEST_CONTEXT RequestContext;
+	pDeviceContext = DeviceGetContext(Device);
+
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&Attributes, WORKER_REQUEST_CONTEXT);
 	Attributes.ParentObject = Device;
 
@@ -58,7 +62,7 @@ AmtPtpSpiInputRoutineWorker(
 	{
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
-			TRACE_DRIVER,
+			TRACE_DEVICE,
 			"%!FUNC! WdfRequestCreate fails, status = %!STATUS!",
 			Status
 		);
@@ -75,7 +79,7 @@ AmtPtpSpiInputRoutineWorker(
 	{
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
-			TRACE_DRIVER,
+			TRACE_DEVICE,
 			"%!FUNC! WdfMemoryCreateFromLookaside fails, status = %!STATUS!",
 			Status
 		);
@@ -104,7 +108,7 @@ AmtPtpSpiInputRoutineWorker(
 	{
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
-			TRACE_DRIVER,
+			TRACE_DEVICE,
 			"%!FUNC! WdfIoTargetFormatRequestForInternalIoctl fails, status = %!STATUS!",
 			Status
 		);
@@ -116,7 +120,7 @@ AmtPtpSpiInputRoutineWorker(
 		if (SpiHidReadRequest != NULL) {
 			WdfObjectDelete(SpiHidReadRequest);
 		}
-		
+
 		return;
 	}
 
@@ -136,7 +140,7 @@ AmtPtpSpiInputRoutineWorker(
 	{
 		TraceEvents(
 			TRACE_LEVEL_INFORMATION,
-			TRACE_DRIVER,
+			TRACE_DEVICE,
 			"%!FUNC! AmtPtpSpiInputRoutineWorker request failed to sent"
 		);
 
@@ -203,29 +207,6 @@ AmtPtpRequestCompletionRoutine(
 			"%!FUNC! Input too small: %d < 46. Attempt to re-enable the device.",
 			SpiRequestLength
 		);
-
-		if (pDeviceContext->DeviceStatus == D0ActiveAndUnconfigured) {
-			Status = AmtPtpSpiSetState(
-				pDeviceContext->SpiDevice,
-				TRUE
-			);
-
-			if (!NT_SUCCESS(Status))
-			{
-				TraceEvents(
-					TRACE_LEVEL_ERROR,
-					TRACE_DRIVER,
-					"%!FUNC! AmtPtpSpiSetState failed with %!STATUS!.",
-					Status
-				);
-			}
-			else {
-				pDeviceContext->DeviceStatus = D0ActiveAndConfigured;
-				AmtPtpSpiInputRoutineWorker(pDeviceContext->SpiDevice, PtpRequest);
-				// Bypass PTP request completion
-				goto cleanup;
-			}
-		}
 
 		Status = STATUS_DEVICE_DATA_ERROR;
 		goto exit;
