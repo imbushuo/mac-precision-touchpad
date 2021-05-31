@@ -74,6 +74,12 @@ PtpFilterCreateDevice(
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfTimerCreate failed: %!STATUS!", status);
     }
 
+    // Set initial state
+    deviceContext->VendorID = 0;
+    deviceContext->ProductID = 0;
+    deviceContext->VersionNumber = 0;
+    deviceContext->DeviceConfigured = FALSE;
+
     // Initialize IO queue
     status = PtpFilterIoQueueInitialize(device);
     if (!NT_SUCCESS(status)) {
@@ -107,6 +113,7 @@ PtpFilterPrepareHardware(
     deviceContext->VendorID = 0;
     deviceContext->ProductID = 0;
     deviceContext->VersionNumber = 0;
+    deviceContext->DeviceConfigured = FALSE;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;
@@ -135,11 +142,30 @@ PtpFilterDeviceD0Exit(
     _In_ WDF_POWER_DEVICE_STATE TargetState
 )
 {
-    UNREFERENCED_PARAMETER(Device);
+    PDEVICE_CONTEXT deviceContext;
+    NTSTATUS status = STATUS_SUCCESS;
+    WDFREQUEST outstandingRequest;
+
     UNREFERENCED_PARAMETER(TargetState);
 
     PAGED_CODE();
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    deviceContext = PtpFilterGetContext(Device);
+
+    // Reset device state
+    deviceContext->DeviceConfigured = FALSE;
+
+    // Cancelling all outstanding requests
+    while (NT_SUCCESS(status)) {
+        status = WdfIoQueueRetrieveNextRequest(
+            deviceContext->HidReadQueue,
+            &outstandingRequest
+        );
+
+        if (NT_SUCCESS(status)) {
+            WdfRequestComplete(outstandingRequest, STATUS_CANCELLED);
+        }
+    }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", STATUS_SUCCESS);
     return STATUS_SUCCESS;
@@ -197,6 +223,9 @@ PtpFilterSelfManagedIoInit(
     // Stamp last query performance counter
     KeQueryPerformanceCounter(&deviceContext->LastReportTime);
 
+    // Set device state
+    deviceContext->DeviceConfigured = TRUE;
+
     // Start diagnostics content read
     PtpFilterDiagnosticsInitializeContinuousRead(Device);
     
@@ -222,6 +251,7 @@ PtpFilterSelfManagedIoRestart(
         status = PtpFilterConfigureMultiTouch(Device);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
+            // TODO: if this failed, defer the request and retry after a few seconds
         }
     }
     else {
@@ -231,6 +261,9 @@ PtpFilterSelfManagedIoRestart(
 
     // Stamp last query performance counter
     KeQueryPerformanceCounter(&deviceContext->LastReportTime);
+
+    // Set device state
+    deviceContext->DeviceConfigured = TRUE;
 
     // Start diagnostics content read
     PtpFilterDiagnosticsInitializeContinuousRead(Device);

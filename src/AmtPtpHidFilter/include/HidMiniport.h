@@ -78,13 +78,13 @@ PtpFilterGetStrings(
 );
 
 NTSTATUS
-PtpFilterReportFeatures(
+PtpFilterGetHidFeatures(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
 
 NTSTATUS
-PtpFilterSetFeatures(
+PtpFilterSetHidFeatures(
 	_In_ WDFDEVICE Device,
 	_In_ WDFREQUEST Request
 );
