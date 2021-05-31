@@ -24,4 +24,9 @@ PtpFilterDiagnosticsRequestCompletionRoutine(
 	_In_ WDFCONTEXT Context
 );
 
+PCHAR
+PtpFilterDiagnosticsIoControlGetString(
+	_In_ ULONG IoControlCode
+);
+
 EXTERN_C_END

@@ -24,6 +24,7 @@ PtpFilterIoQueueInitialize(
 
     deviceContext = PtpFilterGetContext(Device);
 
+    // First queue for system-wide HID controls
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&queueAttributes, QUEUE_CONTEXT);
     queueConfig.EvtIoInternalDeviceControl = FilterEvtIoIntDeviceControl;
@@ -31,13 +32,21 @@ PtpFilterIoQueueInitialize(
     status = WdfIoQueueCreate(Device, &queueConfig, &queueAttributes, &queue);
     if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "%!FUNC! WdfIoQueueCreate failed %!STATUS!", status);
         goto exit;
     }
 
     queueContext = PtpFilterQueueGetContext(queue);
     queueContext->Device = deviceContext->Device;
     queueContext->DeviceIoTarget = deviceContext->HidIoTarget;
+
+    // Second queue for HID read requests
+    WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchManual);
+    queueConfig.PowerManaged = WdfFalse;
+    status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &deviceContext->HidReadQueue);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "%!FUNC! WdfIoQueueCreate (Input) failed %!STATUS!", status);
+    }
 
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit, Status = %!STATUS!", status);
@@ -55,17 +64,55 @@ FilterEvtIoIntDeviceControl(
 {
     PQUEUE_CONTEXT queueContext;
     PDEVICE_CONTEXT deviceContext;
+    BOOLEAN requestPending = FALSE;
+	NTSTATUS status = STATUS_UNSUCCESSFUL;
     
-    UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
-    UNREFERENCED_PARAMETER(IoControlCode);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! IOCTL 0x%x", IoControlCode);
+    UNREFERENCED_PARAMETER(OutputBufferLength);
 
     queueContext = PtpFilterQueueGetContext(Queue);
     deviceContext = PtpFilterGetContext(queueContext->Device);
 
-    WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
+	switch (IoControlCode)
+	{
+	case IOCTL_HID_GET_DEVICE_DESCRIPTOR:
+		status = PtpFilterGetHidDescriptor(queueContext->Device, Request);
+		break;
+	case IOCTL_HID_GET_DEVICE_ATTRIBUTES:
+		status = PtpFilterGetDeviceAttribs(queueContext->Device, Request);
+		break;
+	case IOCTL_HID_GET_REPORT_DESCRIPTOR:
+		status = PtpFilterGetHidDescriptor(queueContext->Device, Request);
+		break;
+	case IOCTL_HID_GET_STRING:
+		status = PtpFilterGetStrings(queueContext->Device, Request, &requestPending);
+		break;
+	case IOCTL_HID_READ_REPORT:
+        // TODO: Implement this
+		requestPending = TRUE;
+		break;
+	case IOCTL_HID_GET_FEATURE:
+		status = PtpFilterGetHidFeatures(queueContext->Device, Request);
+		break;
+	case IOCTL_HID_SET_FEATURE:
+		status = PtpFilterSetHidFeatures(queueContext->Device, Request);
+		break;
+	case IOCTL_HID_WRITE_REPORT:
+	case IOCTL_UMDF_HID_SET_OUTPUT_REPORT:
+	case IOCTL_UMDF_HID_GET_INPUT_REPORT:
+	case IOCTL_HID_ACTIVATE_DEVICE:
+	case IOCTL_HID_DEACTIVATE_DEVICE:
+	case IOCTL_HID_SEND_IDLE_NOTIFICATION_REQUEST:
+	default:
+		status = STATUS_NOT_SUPPORTED;
+		TraceEvents(TRACE_LEVEL_WARNING, TRACE_QUEUE, "%!FUNC!: %s is not yet implemented", PtpFilterDiagnosticsIoControlGetString(IoControlCode));
+		break;
+	}
+
+    if (requestPending != TRUE)
+    {
+        WdfRequestComplete(Request, status);
+    }
 }
 
 VOID

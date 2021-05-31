@@ -20,7 +20,7 @@ typedef struct _DEVICE_CONTEXT
 {
     PDEVICE_OBJECT  WdmDeviceObject;
     WDFDEVICE       Device;
-    WDFQUEUE        SystemIoQueue;
+    WDFQUEUE        HidReadQueue;
 
     // Device identification
     USHORT VendorID;
@@ -34,6 +34,9 @@ typedef struct _DEVICE_CONTEXT
     WDFIOTARGET HidIoTarget;
     BOOLEAN     IsHidIoDetourCompleted;
     WDFTIMER    HidTransportRecoveryTimer;
+
+    // Device State
+    BOOLEAN DeviceConfigured;
 
     // PTP report specific
     LARGE_INTEGER   LastReportTime;
