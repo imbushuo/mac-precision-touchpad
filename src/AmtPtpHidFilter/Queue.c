@@ -88,7 +88,7 @@ FilterEvtIoIntDeviceControl(
 		status = PtpFilterGetStrings(queueContext->Device, Request, &requestPending);
 		break;
 	case IOCTL_HID_READ_REPORT:
-        // TODO: Implement this
+        PtpFilterInputProcessRequest(queueContext->Device, Request);
 		requestPending = TRUE;
 		break;
 	case IOCTL_HID_GET_FEATURE:

@@ -226,9 +226,6 @@ PtpFilterSelfManagedIoInit(
     // Set device state
     deviceContext->DeviceConfigured = TRUE;
 
-    // Start diagnostics content read
-    PtpFilterDiagnosticsInitializeContinuousRead(Device);
-    
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;
@@ -251,7 +248,10 @@ PtpFilterSelfManagedIoRestart(
         status = PtpFilterConfigureMultiTouch(Device);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
-            // TODO: if this failed, defer the request and retry after a few seconds
+            // If this failed, we will retry after 3 seconds (and pretend nothing happens)
+            status = STATUS_SUCCESS;
+            WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(3));
+            goto exit;
         }
     }
     else {
@@ -265,9 +265,7 @@ PtpFilterSelfManagedIoRestart(
     // Set device state
     deviceContext->DeviceConfigured = TRUE;
 
-    // Start diagnostics content read
-    PtpFilterDiagnosticsInitializeContinuousRead(Device);
-
+exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;
 }
@@ -378,4 +376,25 @@ cleanup:
 exit:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
     return status;
+}
+
+VOID
+PtpFilterRecoveryTimerCallback(
+    WDFTIMER Timer
+)
+{
+    WDFDEVICE device;
+    PDEVICE_CONTEXT deviceContext;
+    NTSTATUS status;
+
+    device = WdfTimerGetParentObject(Timer);
+    deviceContext = PtpFilterGetContext(device);
+
+    // We will try to reinitialize the device
+    status = PtpFilterSelfManagedIoRestart(device);
+    if (NT_SUCCESS(status)) {
+        // If succeeded, proceed to reissue the request.
+        // Otherwise it will retry the process after a few seconds.
+        PtpFilterInputIssueTransportRequest(device);
+    }
 }

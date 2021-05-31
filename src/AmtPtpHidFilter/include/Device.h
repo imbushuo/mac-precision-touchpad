@@ -74,4 +74,9 @@ PtpFilterConfigureMultiTouch(
     _In_ WDFDEVICE Device
 );
 
+VOID
+PtpFilterRecoveryTimerCallback(
+    WDFTIMER Timer
+);
+
 EXTERN_C_END

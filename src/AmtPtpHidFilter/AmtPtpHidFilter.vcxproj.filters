@@ -85,5 +85,8 @@
     <ClInclude Include="include\HidMiniport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
