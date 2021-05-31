@@ -5,8 +5,8 @@
 
 VOID
 PtpFilterInputProcessRequest(
-	WDFDEVICE Device,
-	WDFREQUEST Request
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
 )
 {
 	NTSTATUS status;
