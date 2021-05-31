@@ -12,11 +12,6 @@ PtpFilterDiagnosticsInputIssueRequest(
 );
 
 VOID
-PtpFilterRecoveryTimerCallback(
-	WDFTIMER Timer
-);
-
-VOID
 PtpFilterDiagnosticsRequestCompletionRoutine(
 	_In_ WDFREQUEST Request,
 	_In_ WDFIOTARGET Target,

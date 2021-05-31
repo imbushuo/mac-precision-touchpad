@@ -17,16 +17,6 @@ VOID PtpFilterDiagnosticsInitializeContinuousRead(
 	TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit, Status = %!STATUS!", status);
 }
 
-
-VOID
-PtpFilterRecoveryTimerCallback(
-	WDFTIMER Timer
-)
-{
-	WDFDEVICE device = WdfTimerGetParentObject(Timer);
-	PtpFilterDiagnosticsInputIssueRequest(device);
-}
-
 VOID
 PtpFilterDiagnosticsInputIssueRequest(
 	_In_ WDFDEVICE Device

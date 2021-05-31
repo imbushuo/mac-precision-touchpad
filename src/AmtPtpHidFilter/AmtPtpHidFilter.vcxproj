@@ -277,6 +277,7 @@
     <ClInclude Include="include\Hac.h" />
     <ClInclude Include="include\HidCommon.h" />
     <ClInclude Include="include\HidMiniport.h" />
+    <ClInclude Include="include\Input.h" />
     <ClInclude Include="include\Metadata\MagicTrackpad2.h" />
     <ClInclude Include="include\Metadata\StaticHidRegistry.h" />
     <ClInclude Include="include\Metadata\WindowsHID.h" />
