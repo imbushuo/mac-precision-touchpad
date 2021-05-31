@@ -13,7 +13,6 @@ DEFINE_GUID(GUID_DEVICEINTERFACE_AmtPtpHidFilter,
 
 #define HID_VID_APPLE_USB 0x05ac
 #define HID_VID_APPLE_BT  0x004c
-
 #define HID_PID_MAGIC_TRACKPAD_2 0x0265
 
 // Device Context
@@ -31,10 +30,16 @@ typedef struct _DEVICE_CONTEXT
     // List of buffers
     WDFLOOKASIDE HidReadBufferLookaside;
 
-    // System HID transport PDO IO Target
+    // System HID transport
     WDFIOTARGET HidIoTarget;
     BOOLEAN     IsHidIoDetourCompleted;
     WDFTIMER    HidTransportRecoveryTimer;
+
+    // PTP report specific
+    LARGE_INTEGER   LastReportTime;
+    BOOLEAN         PtpInputOn;
+    BOOLEAN         PtpReportTouch;
+    BOOLEAN         PtpReportButton;
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, PtpFilterGetContext)

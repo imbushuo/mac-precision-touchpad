@@ -17,6 +17,9 @@
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
     </Filter>
+    <Filter Include="Device Specific Metadata Files">
+      <UniqueIdentifier>{cccbe0e8-fadd-4a3c-bd83-cbd350127d11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="AmtPtpHidFilter.inf">
@@ -39,6 +42,12 @@
     <ClCompile Include="Diagnostics.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Input.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hid.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Driver.h">
@@ -59,6 +68,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Diagnostics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Metadata\MagicTrackpad2.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HidCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Metadata\StaticHidRegistry.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Metadata\WindowsHID.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HidMiniport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

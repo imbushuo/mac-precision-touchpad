@@ -264,6 +264,8 @@
     <ClCompile Include="Device.c" />
     <ClCompile Include="Diagnostics.c" />
     <ClCompile Include="Driver.c" />
+    <ClCompile Include="Hid.c" />
+    <ClCompile Include="Input.c" />
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
@@ -273,6 +275,11 @@
     <ClInclude Include="include\Device.h" />
     <ClInclude Include="include\Diagnostics.h" />
     <ClInclude Include="include\Hac.h" />
+    <ClInclude Include="include\HidCommon.h" />
+    <ClInclude Include="include\HidMiniport.h" />
+    <ClInclude Include="include\Metadata\MagicTrackpad2.h" />
+    <ClInclude Include="include\Metadata\StaticHidRegistry.h" />
+    <ClInclude Include="include\Metadata\WindowsHID.h" />
     <ClInclude Include="include\Queue.h" />
     <ClInclude Include="include\Trace.h" />
   </ItemGroup>

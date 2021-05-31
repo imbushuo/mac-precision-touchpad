@@ -194,6 +194,9 @@ PtpFilterSelfManagedIoInit(
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
     }
 
+    // Stamp last query performance counter
+    KeQueryPerformanceCounter(&deviceContext->LastReportTime);
+
     // Start diagnostics content read
     PtpFilterDiagnosticsInitializeContinuousRead(Device);
     
@@ -225,6 +228,9 @@ PtpFilterSelfManagedIoRestart(
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! HID detour should already complete here");
         status = STATUS_INVALID_STATE_TRANSITION;
     }
+
+    // Stamp last query performance counter
+    KeQueryPerformanceCounter(&deviceContext->LastReportTime);
 
     // Start diagnostics content read
     PtpFilterDiagnosticsInitializeContinuousRead(Device);
