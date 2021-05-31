@@ -13,6 +13,19 @@
 #define PTP_CONTACT_CONFIDENCE_BIT   1
 #define PTP_CONTACT_TIPSWITCH_BIT    2
 
+#define AAPL_PTP_USERMODE_CONFIGURATION_APP_TLC \
+	USAGE_PAGE_1, 0x00, 0xff, /* Usage Page: Vendor defined */ \
+	USAGE, 0x01, /* Usage: Vendor Usage 0x01 */ \
+	BEGIN_COLLECTION, 0x01, /* Begin Collection: Application */ \
+		REPORT_ID, REPORTID_UMAPP_CONF, /* Report ID: User-mode Application configuration */ \
+		USAGE, 0x01, /* Usage: Vendor Usage 0x01 */ \
+		LOGICAL_MINIMUM, 0x00, /* Logical Minimum 0 */ \
+		LOGICAL_MAXIMUM_2, 0xff, 0x00, /* Logical Maximum 255 */ \
+		REPORT_SIZE, 0x08, /* Report Size: 8 */ \
+		REPORT_COUNT, 0x03, /* Report Count: 3 */ \
+		FEATURE, 0x02, /* Feature: (Data, Var, Abs) */ \
+	END_COLLECTION
+
 #define AAPL_PTP_WINDOWS_CONFIGURATION_TLC \
 	USAGE_PAGE, 0x0d, /* Usage Page: Digitizer */ \
 	USAGE, 0x0e, /* Usage: Configuration */ \

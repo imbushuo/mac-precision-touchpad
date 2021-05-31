@@ -3,13 +3,13 @@
 
 VOID
 PtpFilterInputProcessRequest(
-	WDFDEVICE Device,
-	WDFREQUEST Request
+	_In_ WDFDEVICE Device,
+	_In_ WDFREQUEST Request
 );
 
 VOID
 PtpFilterInputIssueTransportRequest(
-	WDFDEVICE Device
+	_In_ WDFDEVICE Device
 );
 
 VOID

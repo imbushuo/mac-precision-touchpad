@@ -82,7 +82,7 @@ FilterEvtIoIntDeviceControl(
 		status = PtpFilterGetDeviceAttribs(queueContext->Device, Request);
 		break;
 	case IOCTL_HID_GET_REPORT_DESCRIPTOR:
-		status = PtpFilterGetHidDescriptor(queueContext->Device, Request);
+		status = PtpFilterGetReportDescriptor(queueContext->Device, Request);
 		break;
 	case IOCTL_HID_GET_STRING:
 		status = PtpFilterGetStrings(queueContext->Device, Request, &requestPending);
@@ -111,6 +111,7 @@ FilterEvtIoIntDeviceControl(
 
     if (requestPending != TRUE)
     {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC!: %s, Status = %!STATUS!", PtpFilterDiagnosticsIoControlGetString(IoControlCode), status);
         WdfRequestComplete(Request, status);
     }
 }
