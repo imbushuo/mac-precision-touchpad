@@ -1,0 +1,97 @@
+;
+; AmtPtpHidFilter.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class = HIDClass
+ClassGuid = {745a17a0-74d3-11d0-b6fe-00a0c90f57da}
+Provider=%ManufacturerName%
+CatalogFile=AmtPtpHidFilter.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 13
+
+[ControlFlags]
+; We don't want our device to be installable via the non-PnP hardware dialogs
+ExcludeFromSelect = *
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+AmtPtpHidFilter.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$.10.0
+
+[Standard.NT$ARCH$.10.0]
+; The fact is, you can't filter HIDUSB or friends directly, because they load the export driver called
+; HIDCLASS which overrides their IO Major Function pointers. Therefore we still implement our own HID miniport 
+; transport, but in fact reusing the underlying HID transport (either Bluetooth or USB).
+; Some high-level patches involved to modify the underlying driver IO handlers.
+%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col01
+%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col01
+; To avoid confusions to OS, disable any other collections.
+%AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col02
+%AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col03
+%AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col02
+
+[FilterDriver_Payload]
+AmtPtpHidFilter.sys
+
+[AmtPtpHidFilter_MiniPortDevice.NT]
+CopyFiles=FilterDriver_Payload
+
+[AmtPtpHidFilter_NullDevice]
+; Nothing!
+
+[AmtPtpHidFilter_NullDevice.Services]
+AddService = ,2    ; no value for the service name
+
+;-------------- Service installation
+[AmtPtpHidFilter_MiniPortDevice.NT.Services]
+AddService = AmtPtpHidFilter,, AmtPtpHidFilter_Service_Inst
+AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst
+
+[AmtPtpHidFilter_MiniPortDevice.NT.HW]
+AddReg=AmtPtpHidFilter_AddReg
+
+[AmtPtpHidFilter_AddReg]
+HKR,,FriendlyName,,%AmtPtpHidFilter.DeviceDesc%
+HKR,,"LowerFilters",0x00010008,"AmtPtpHidFilter"
+
+[AmtPtpHidFilter_MiniPortDevice.NT.Wdf]
+KmdfService = AmtPtpHidFilter, AmtPtpHidFilter_wdfsect
+
+; -------------- Microsoft HID KMDF driver install sections
+[mshidkmdf_Service_Inst]
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\mshidkmdf.sys
+
+; -------------- AmtPtpHidFilter driver install sections
+[AmtPtpHidFilter_Service_Inst]
+DisplayName    = %AmtPtpHidFilter.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %13%\AmtPtpHidFilter.sys
+
+[AmtPtpHidFilter_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName = "Bingxing Wang"
+DiskName = "AmtPtpHidFilter Installation Disk"
+AmtPtpHidFilter.DeviceDesc = "Apple Touch Pad HID Filter Device"
+AmtPtpHidFilter.NullDeviceDesc = "Apple Multi-touch Device"
+AmtPtpHidFilter.SVCDESC = "Apple Touch Pad HID Filter Service"
