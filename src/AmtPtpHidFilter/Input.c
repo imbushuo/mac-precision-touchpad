@@ -154,7 +154,7 @@ PtpFilterInputRequestCompletionCallback(
 	if (responseLength <= 0) {
 		PtpFilterInputIssueTransportRequest(requestContext->DeviceContext->Device);
 		goto cleanup;
-	}
+	}	
 
 	// Pre-flight check 2: the response size should be sane
 	if (responseLength < deviceContext->InputHeaderSize || (responseLength - deviceContext->InputHeaderSize) % deviceContext->InputFingerSize != 0) {
