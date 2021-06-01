@@ -307,21 +307,51 @@ PtpFilterConfigureMultiTouch(
     pHidPacket = (PHID_XFER_PACKET) &hidPacketBuffer;
 
     if (deviceContext->VendorID == HID_VID_APPLE_USB) {
+        deviceContext->InputFingerSize = FSIZE_TYPE5;
+        deviceContext->InputHeaderSize = HOFFSET_TYPE_USB_5;
+        deviceContext->InputFingerDelta = FDELTA_TYPE5;
+        deviceContext->InputButtonDelta = BOFFSET_TYPE5;
+
+        deviceContext->X.snratio = 250;
+        deviceContext->X.min = -3678;
+        deviceContext->X.max = 3934;
+        deviceContext->Y.snratio = 250;
+        deviceContext->Y.min = -2479;
+        deviceContext->Y.max = 2586;
+
         pHidPacket->reportId = 0x02;
         pHidPacket->reportBufferLen = 0x04;
-        pHidPacket->reportBuffer = (PUCHAR) pHidPacket + sizeof(HID_XFER_PACKET);
+        pHidPacket->reportBuffer = (PUCHAR)pHidPacket + sizeof(HID_XFER_PACKET);
         pHidPacket->reportBuffer[0] = 0x02;
         pHidPacket->reportBuffer[1] = 0x01;
         pHidPacket->reportBuffer[2] = 0x00;
         pHidPacket->reportBuffer[3] = 0x00;
     }
     else if (deviceContext->VendorID == HID_VID_APPLE_BT) {
+        deviceContext->InputFingerSize = FSIZE_TYPE5;
+        deviceContext->InputHeaderSize = HOFFSET_TYPE_BTH_5;
+        deviceContext->InputFingerDelta = FDELTA_TYPE5;
+        deviceContext->InputButtonDelta = BOFFSET_TYPE5;
+
+        deviceContext->X.snratio = 250;
+        deviceContext->X.min = -3678;
+        deviceContext->X.max = 3934;
+        deviceContext->Y.snratio = 250;
+        deviceContext->Y.min = -2479;
+        deviceContext->Y.max = 2586;
+
         pHidPacket->reportId = 0xF1;
         pHidPacket->reportBufferLen = 0x03;
         pHidPacket->reportBuffer = (PUCHAR)pHidPacket + sizeof(HID_XFER_PACKET);
         pHidPacket->reportBuffer[0] = 0xF1;
         pHidPacket->reportBuffer[1] = 0x02;
         pHidPacket->reportBuffer[2] = 0x01;
+    }
+    else {
+        // Something we don't support yet.
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Unrecognized device detected");
+        status = STATUS_NOT_SUPPORTED;
+        goto exit;
     }
 
     // Init a request entity.
