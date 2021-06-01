@@ -9,7 +9,7 @@ ClassGuid = {745a17a0-74d3-11d0-b6fe-00a0c90f57da}
 Provider=%ManufacturerName%
 CatalogFile=AmtPtpHidFilter.cat
 DriverVer= ; TODO: set DriverVer in stampinf property pages
-; PnpLockDown=1 Not enabled in development
+PnpLockdown=1
 
 [DestinationDirs]
 DefaultDestDir = 13

@@ -15,6 +15,13 @@ DEFINE_GUID(GUID_DEVICEINTERFACE_AmtPtpHidFilter,
 #define HID_VID_APPLE_BT  0x004c
 #define HID_PID_MAGIC_TRACKPAD_2 0x0265
 
+/* device-specific parameters */
+typedef struct _BCM5974_PARAM {
+    int snratio;		/* signal-to-noise ratio */
+    int min;			/* device minimum reading */
+    int max;			/* device maximum reading */
+} BCM5974_PARAM, *PBCM5974_PARAM;
+
 // Device Context
 typedef struct _DEVICE_CONTEXT
 {
@@ -26,6 +33,12 @@ typedef struct _DEVICE_CONTEXT
     USHORT VendorID;
     USHORT ProductID;
     USHORT VersionNumber;
+    size_t InputHeaderSize;
+    size_t InputFingerSize;
+    size_t InputFingerDelta;
+    size_t InputButtonDelta;
+    BCM5974_PARAM X;
+    BCM5974_PARAM Y;
 
     // List of buffers
     WDFLOOKASIDE HidReadBufferLookaside;

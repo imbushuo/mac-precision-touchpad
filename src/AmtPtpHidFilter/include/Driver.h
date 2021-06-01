@@ -25,6 +25,7 @@ EVT_WDF_OBJECT_CONTEXT_CLEANUP PtpFilterEvtDriverContextCleanup;
 #include "Diagnostics.h"
 #include "Metadata/StaticHidRegistry.h"
 #include "HidMiniport.h"
+#include "HidDevice.h"
 #include "Input.h"
 
 // Pool Tag

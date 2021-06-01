@@ -115,9 +115,133 @@ PtpFilterInputRequestCompletionCallback(
 	_In_ WDFCONTEXT Context
 )
 {
-	// TODO: handle PTP reports here
-	UNREFERENCED_PARAMETER(Request);
+	PWORKER_REQUEST_CONTEXT requestContext;
+	PDEVICE_CONTEXT deviceContext;
+	NTSTATUS status;
+
+	WDFREQUEST ptpRequest;
+	PTP_REPORT ptpOutputReport;
+	WDFMEMORY  ptpRequestMemory;
+
+	LONG responseLength;
+	PUCHAR responseBuffer;
+
+	LARGE_INTEGER currentTSC;
+	LONGLONG tSCDelta;
+
+	const TRACKPAD_FINGER* f;
+	const TRACKPAD_FINGER_TYPE5* f_type5;
+	size_t raw_n, headerSize, fingerprintSize = 0;
+	INT x, y = 0;
+
 	UNREFERENCED_PARAMETER(Target);
-	UNREFERENCED_PARAMETER(Params);
-	UNREFERENCED_PARAMETER(Context);
+	
+	requestContext = (PWORKER_REQUEST_CONTEXT)Context;
+	deviceContext = requestContext->DeviceContext;
+	responseLength = (LONG)WdfRequestGetInformation(Request);
+	responseBuffer = WdfMemoryGetBuffer(Params->Parameters.Ioctl.Output.Buffer, NULL);
+	headerSize = deviceContext->InputHeaderSize;
+	fingerprintSize = deviceContext->InputFingerSize;
+
+	// Pre-flight check 0: Right now we only have Magic Trackpad 2 (BT and USB)
+	if (deviceContext->VendorID != HID_VID_APPLE_USB && deviceContext->VendorID != HID_VID_APPLE_BT) {
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_INPUT, "%!FUNC! Unsupported device entered this routine");
+		WdfDeviceSetFailed(deviceContext->Device, WdfDeviceFailedNoRestart);
+		goto cleanup;
+	}
+
+	// Pre-flight check 1: if size is 0, this is not something we need. Ignore the read, and issue next request.
+	if (responseLength <= 0 && deviceContext->DeviceConfigured) {
+		PtpFilterInputIssueTransportRequest(requestContext->DeviceContext->Device);
+		goto cleanup;
+	}
+
+	// Pre-flight check 2: the response size should be sane
+	if (responseLength < deviceContext->InputHeaderSize || (responseLength - deviceContext->InputHeaderSize) % deviceContext->InputFingerSize != 0) {
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INPUT, "%!FUNC! Malformed input received. Length = %llu. Attempt to reset device.", responseLength);
+		WdfDeviceSetFailed(deviceContext->Device, WdfDeviceFailedAttemptRestart);
+		goto cleanup;
+	}
+
+	// Pre-flight check 3: Device should be configured
+	if (!deviceContext->DeviceConfigured) {
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_INPUT, "%!FUNC! Routine is called without enabling multi-touch mode");
+		WdfDeviceSetFailed(deviceContext->Device, WdfDeviceFailedAttemptRestart);
+		goto cleanup;
+	}
+
+	// Read report and fulfill PTP request. If no report is found, just exit.
+	status = WdfIoQueueRetrieveNextRequest(deviceContext->HidReadQueue, &ptpRequest);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! WdfIoQueueRetrieveNextRequest failed with %!STATUS!", status);
+		goto cleanup;
+	}
+
+	// Capture current timestamp and get input delta in 100us unit
+	KeQueryPerformanceCounter(&currentTSC);
+	tSCDelta = (currentTSC.QuadPart - deviceContext->LastReportTime.QuadPart) / 100;
+	ptpOutputReport.ScanTime = (tSCDelta >= 0xFF) ? 0xFF : (USHORT)tSCDelta;
+	deviceContext->LastReportTime.QuadPart = currentTSC.QuadPart;
+
+	// Report required content
+	// Touch
+	raw_n = (responseLength - headerSize) / fingerprintSize;
+	if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
+	ptpOutputReport.ContactCount = (UCHAR) raw_n;
+	for (size_t i = 0; i < raw_n; i++) {
+		PUCHAR f_base = responseBuffer + headerSize + deviceContext->InputFingerDelta;
+		f = (const TRACKPAD_FINGER*)(f_base + i * fingerprintSize);
+		f_type5 = (const TRACKPAD_FINGER_TYPE5*)f;
+		
+		USHORT tmp_x = (*((USHORT*)f_type5)) & 0x1fff;
+		unsigned int tmp_y = (INT)(*((unsigned int*) f_type5));
+
+		x = (SHORT)(tmp_x << 3) >> 3;
+		y = -(INT)(tmp_y << 6) >> 19;
+		x = (x - deviceContext->X.min) > 0 ? (x - deviceContext->X.min) : 0;
+		y = (y - deviceContext->Y.min) > 0 ? (y - deviceContext->Y.min) : 0;
+
+		ptpOutputReport.Contacts[i].ContactID = f_type5->OrientationAndOrigin.ContactIdentifier.Id;
+		ptpOutputReport.Contacts[i].X = (USHORT)x;
+		ptpOutputReport.Contacts[i].Y = (USHORT)y;
+		ptpOutputReport.Contacts[i].TipSwitch = ((signed short) (f_type5->TouchMajor) << 1) > 0;
+		// The Microsoft spec says reject any input larger than 25mm. This is not ideal
+		// for Magic Trackpad 2 - so we raised the threshold a bit higher.
+		// Or maybe I used the wrong unit? IDK
+		ptpOutputReport.Contacts[i].Confidence = ((signed short) (f_type5->TouchMinor) << 1) < 345 && ((signed short) (f_type5->TouchMinor) << 1) < 345;
+	}
+
+	// Button
+	if (responseBuffer[deviceContext->InputButtonDelta]) {
+		ptpOutputReport.IsButtonClicked = TRUE;
+	}
+
+	status = WdfRequestRetrieveOutputMemory(ptpRequest, &ptpRequestMemory);
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_INPUT, "%!FUNC! WdfRequestRetrieveOutputBuffer failed with %!STATUS!", status);
+		WdfDeviceSetFailed(deviceContext->Device, WdfDeviceFailedAttemptRestart);
+		goto cleanup;
+	}
+
+	status = WdfMemoryCopyFromBuffer(ptpRequestMemory, 0, (PVOID) &ptpOutputReport, sizeof(PTP_REPORT));
+	if (!NT_SUCCESS(status))
+	{
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_INPUT, "%!FUNC! WdfMemoryCopyFromBuffer failed with %!STATUS!", status);
+		WdfDeviceSetFailed(deviceContext->Device, WdfDeviceFailedAttemptRestart);
+		goto cleanup;
+	}
+
+	WdfRequestSetInformation(ptpRequest, sizeof(PTP_REPORT));
+	WdfRequestComplete(ptpRequest, status);
+
+cleanup:
+	// Cleanup
+	WdfObjectDelete(Request);
+	if (requestContext->RequestMemory != NULL) {
+		WdfObjectDelete(requestContext->RequestMemory);
+	}
+
+	// We don't issue new request here (unless it's a spurious request - which is handled earlier) to
+	// keep the request pipe go through one-way.
 }
