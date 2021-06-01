@@ -151,7 +151,7 @@ PtpFilterInputRequestCompletionCallback(
 	}
 
 	// Pre-flight check 1: if size is 0, this is not something we need. Ignore the read, and issue next request.
-	if (responseLength <= 0 && deviceContext->DeviceConfigured) {
+	if (responseLength <= 0) {
 		PtpFilterInputIssueTransportRequest(requestContext->DeviceContext->Device);
 		goto cleanup;
 	}
@@ -163,19 +163,16 @@ PtpFilterInputRequestCompletionCallback(
 		goto cleanup;
 	}
 
-	// Pre-flight check 3: Device should be configured
-	if (!deviceContext->DeviceConfigured) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_INPUT, "%!FUNC! Routine is called without enabling multi-touch mode");
-		WdfDeviceSetFailed(deviceContext->Device, WdfDeviceFailedAttemptRestart);
-		goto cleanup;
-	}
-
 	// Read report and fulfill PTP request. If no report is found, just exit.
 	status = WdfIoQueueRetrieveNextRequest(deviceContext->HidReadQueue, &ptpRequest);
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! WdfIoQueueRetrieveNextRequest failed with %!STATUS!", status);
+		TraceEvents(TRACE_LEVEL_ERROR, TRACE_INPUT, "%!FUNC! WdfIoQueueRetrieveNextRequest failed with %!STATUS!", status);
 		goto cleanup;
 	}
+
+	// Report header
+	ptpOutputReport.ReportID = REPORTID_MULTITOUCH;
+	ptpOutputReport.IsButtonClicked = 0;
 
 	// Capture current timestamp and get input delta in 100us unit
 	KeQueryPerformanceCounter(&currentTSC);
@@ -212,7 +209,7 @@ PtpFilterInputRequestCompletionCallback(
 	}
 
 	// Button
-	if (responseBuffer[deviceContext->InputButtonDelta]) {
+	if ((responseBuffer[deviceContext->InputButtonDelta] & 1) != 0) {
 		ptpOutputReport.IsButtonClicked = TRUE;
 	}
 
