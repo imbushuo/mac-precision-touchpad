@@ -158,8 +158,8 @@ PtpFilterInputRequestCompletionCallback(
 
 	// Pre-flight check 2: the response size should be sane
 	if (responseLength < deviceContext->InputHeaderSize || (responseLength - deviceContext->InputHeaderSize) % deviceContext->InputFingerSize != 0) {
-		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INPUT, "%!FUNC! Malformed input received. Length = %llu. Attempt to reset device.", responseLength);
-		WdfDeviceSetFailed(deviceContext->Device, WdfDeviceFailedAttemptRestart);
+		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INPUT, "%!FUNC! Malformed input received. Length = %llu. Attempt to reconfigure the device.", responseLength);
+		WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(3));
 		goto cleanup;
 	}
 
