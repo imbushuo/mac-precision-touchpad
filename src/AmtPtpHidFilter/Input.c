@@ -123,7 +123,7 @@ PtpFilterInputRequestCompletionCallback(
 	PTP_REPORT ptpOutputReport;
 	WDFMEMORY  ptpRequestMemory;
 
-	LONG responseLength;
+	size_t responseLength;
 	PUCHAR responseBuffer;
 
 	LARGE_INTEGER currentTSC;
@@ -138,7 +138,7 @@ PtpFilterInputRequestCompletionCallback(
 	
 	requestContext = (PWORKER_REQUEST_CONTEXT)Context;
 	deviceContext = requestContext->DeviceContext;
-	responseLength = (LONG)WdfRequestGetInformation(Request);
+	responseLength = (size_t)(LONG)WdfRequestGetInformation(Request);
 	responseBuffer = WdfMemoryGetBuffer(Params->Parameters.Ioctl.Output.Buffer, NULL);
 	headerSize = deviceContext->InputHeaderSize;
 	fingerprintSize = deviceContext->InputFingerSize;
