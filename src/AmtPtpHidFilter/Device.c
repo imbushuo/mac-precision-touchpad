@@ -226,7 +226,10 @@ PtpFilterSelfManagedIoInit(
 
     status = PtpFilterConfigureMultiTouch(Device);
     if (!NT_SUCCESS(status)) {
+        // If this failed, we will retry after 2 seconds (and pretend nothing happens)
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
+        status = STATUS_SUCCESS;
+        WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(2));
         goto exit;
     }
 
@@ -258,9 +261,9 @@ PtpFilterSelfManagedIoRestart(
         status = PtpFilterConfigureMultiTouch(Device);
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
-            // If this failed, we will retry after 3 seconds (and pretend nothing happens)
+            // If this failed, we will retry after 2 seconds (and pretend nothing happens)
             status = STATUS_SUCCESS;
-            WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(3));
+            WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(2));
             goto exit;
         }
     }
