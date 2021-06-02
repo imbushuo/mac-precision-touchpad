@@ -214,10 +214,15 @@ PtpFilterSelfManagedIoInit(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Device %x:%x, Version 0x%x", deviceContext->VendorID,
         deviceContext->ProductID, deviceContext->VersionNumber);
 
+    // Any step after this can fail - we are fine with this
     // Configure device into multi-touch mode
     status = PtpFilterConfigureMultiTouch(Device);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
+        // If this failed, we will retry after 3 seconds (and pretend nothing happens)
+        status = STATUS_SUCCESS;
+        WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(3));
+        goto exit;
     }
 
     // Stamp last query performance counter
