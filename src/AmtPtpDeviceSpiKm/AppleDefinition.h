@@ -1,6 +1,7 @@
 #pragma once
 
 #define SPI_TRACKPAD_MAX_FINGERS 10
+#define DEVICE_VID 0x8910
 
 typedef struct _SPI_TRACKPAD_FINGER
 {

@@ -48,6 +48,9 @@
     <ProjectReference Include="..\AmtPtpDeviceUsbUm\MagicTrackpad2PtpDevice.vcxproj">
       <Project>{87efa31b-25eb-4944-a30a-300171bfff57}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\AmtPtpHidFilter\AmtPtpHidFilter.vcxproj">
+      <Project>{ee63c42b-f401-4f55-adbb-14c16bd3b18c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="AmtPtpDevice.inf" />
@@ -184,7 +187,7 @@
     <SignMode>TestSign</SignMode>
   </PropertyGroup>
   <!-- For release signed config on Azure pipeline, CI pipeline don't sign it. We do that locally -->
-  <PropertyGroup  Condition="'$(Configuration)'=='ReleaseSigned'">
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseSigned'">
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
     <SignMode Condition="'$(BuildEnvironment)'!='AzurePipeline'">ProductionSign</SignMode>
@@ -200,6 +203,30 @@
     <Inf>
       <TimeStamp Condition="'$(BuildEnvironment)'!='AzurePipeline'">*</TimeStamp>
     </Inf>
+    <PreBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+    </PreBuildEvent>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+      </Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </Command>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>

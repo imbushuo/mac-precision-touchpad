@@ -39,4 +39,5 @@
 #define BEGIN_COLLECTION 0xa1
 #define END_COLLECTION   0xc0
 
+#define DEVICE_VID 0x8910
 #define DEVICE_VERSION 0x100

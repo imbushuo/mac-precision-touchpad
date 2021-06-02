@@ -340,7 +340,9 @@ AmtPtpGetDeviceAttribs(
 	}
 
 	pDeviceAttributes->Size = sizeof(HID_DEVICE_ATTRIBUTES);
-	pDeviceAttributes->VendorID = pDeviceContext->HidVendorID;
+	// Okay here's one thing: we cannot report the real ID here, otherwise there's will be some great conflict with the USB/BT driver.
+	// Therefore Vendor ID is changed to a hardcoded number
+	pDeviceAttributes->VendorID = DEVICE_VID;
 	pDeviceAttributes->ProductID = pDeviceContext->HidProductID;
 	pDeviceAttributes->VersionNumber = pDeviceContext->HidVersionNumber;
 

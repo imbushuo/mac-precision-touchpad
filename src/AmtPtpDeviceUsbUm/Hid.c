@@ -222,7 +222,9 @@ AmtPtpGetDeviceAttribs(
 
 	pDeviceAttributes->Size          = sizeof(HID_DEVICE_ATTRIBUTES);
 	pDeviceAttributes->ProductID     = pContext->DeviceDescriptor.idProduct;
-	pDeviceAttributes->VendorID      = pContext->DeviceDescriptor.idVendor;
+	// Okay here's one thing: we cannot report the real ID here, otherwise there's will be some great conflict with the USB/BT driver.
+	// Therefore Vendor ID is changed to a hardcoded number
+	pDeviceAttributes->VendorID      = DEVICE_VID;
 	pDeviceAttributes->VersionNumber = DEVICE_VERSION;
 	
 	WdfRequestSetInformation(
