@@ -32,6 +32,9 @@ AmtPtpHidFilter.sys  = 1,,
 %ManufacturerName%=Standard,NT$ARCH$.10.0
 
 [Standard.NT$ARCH$.10.0]
+; Driver migration: if this user installed the old Precision Touch Driver, install the generic HID USB driver for them
+%AmtPtpHidRootDevice.DeviceDesc%=StandardUsbHid_Device, USB\Vid_05ac&Pid_0265&MI_01
+
 ; The fact is, you can't filter HIDUSB or friends directly, because they load the export driver called
 ; HIDCLASS which overrides their IO Major Function pointers. Therefore we still implement our own HID miniport 
 ; transport, but in fact reusing the underlying HID transport (either Bluetooth or USB).
@@ -45,6 +48,18 @@ AmtPtpHidFilter.sys  = 1,,
 
 [FilterDriver_Payload]
 AmtPtpHidFilter.sys
+
+[StandardUsbHid_Device.NT]
+Include = input.inf
+Needs = HID_Inst.NT
+
+[StandardUsbHid_Device.NT.HW]
+Include = input.inf
+Needs = HID_Inst.NT.HW
+
+[StandardUsbHid_Device.NT.Services]
+Include = input.inf
+Needs = HID_Inst.NT.Services
 
 [AmtPtpHidFilter_MiniPortDevice.NT]
 CopyFiles=FilterDriver_Payload
@@ -91,7 +106,8 @@ KmdfLibraryVersion = $KMDFVERSION$
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
 ManufacturerName = "Bingxing Wang"
-DiskName = "AmtPtpHidFilter Installation Disk"
-AmtPtpHidFilter.DeviceDesc = "Apple Touch Pad HID Filter Device"
-AmtPtpHidFilter.NullDeviceDesc = "Apple Multi-touch Device"
-AmtPtpHidFilter.SVCDESC = "Apple Touch Pad HID Filter Service"
+DiskName = "Precision Touchpad for Apple Trackpad Installation Disk"
+AmtPtpHidRootDevice.DeviceDesc = "Apple Multi-touch Trackpad HID Device"
+AmtPtpHidFilter.DeviceDesc = "Apple Multi-touch Trackpad HID Filter"
+AmtPtpHidFilter.NullDeviceDesc = "Apple Multi-touch Auxiliary Services"
+AmtPtpHidFilter.SVCDESC = "Apple Multi-touch Trackpad HID Filter Service"
