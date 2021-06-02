@@ -15,6 +15,7 @@ PtpFilterCreateDevice(
     WDF_OBJECT_ATTRIBUTES deviceAttributes;
     WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
     WDF_TIMER_CONFIG timerConfig;
+    WDF_WORKITEM_CONFIG workitemConfig;
     WDFDEVICE device;
     PDEVICE_CONTEXT deviceContext;
     NTSTATUS status;
@@ -72,6 +73,15 @@ PtpFilterCreateDevice(
     status = WdfTimerCreate(&timerConfig, &deviceAttributes, &deviceContext->HidTransportRecoveryTimer);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfTimerCreate failed: %!STATUS!", status);
+    }
+
+    // Initialize HID recovery workitem
+    WDF_WORKITEM_CONFIG_INIT(&workitemConfig, PtpFilterWorkItemCallback);
+    WDF_OBJECT_ATTRIBUTES_INIT(&deviceAttributes);
+    deviceAttributes.ParentObject = device;
+    status = WdfWorkItemCreate(&workitemConfig, &deviceAttributes, &deviceContext->HidTransportRecoveryWorkItem);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "HidTransportRecoveryWorkItem failed: %!STATUS!", status);
     }
 
     // Set initial state
@@ -214,14 +224,9 @@ PtpFilterSelfManagedIoInit(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Device %x:%x, Version 0x%x", deviceContext->VendorID,
         deviceContext->ProductID, deviceContext->VersionNumber);
 
-    // Any step after this can fail - we are fine with this
-    // Configure device into multi-touch mode
     status = PtpFilterConfigureMultiTouch(Device);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! PtpFilterConfigureMultiTouch failed, Status = %!STATUS!", status);
-        // If this failed, we will retry after 3 seconds (and pretend nothing happens)
-        status = STATUS_SUCCESS;
-        WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(3));
         goto exit;
     }
 

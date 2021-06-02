@@ -8,6 +8,11 @@ PtpFilterInputProcessRequest(
 );
 
 VOID
+PtpFilterWorkItemCallback(
+	_In_ WDFWORKITEM WorkItem
+);
+
+VOID
 PtpFilterInputIssueTransportRequest(
 	_In_ WDFDEVICE Device
 );

@@ -47,6 +47,7 @@ typedef struct _DEVICE_CONTEXT
     WDFIOTARGET HidIoTarget;
     BOOLEAN     IsHidIoDetourCompleted;
     WDFTIMER    HidTransportRecoveryTimer;
+    WDFWORKITEM HidTransportRecoveryWorkItem;
 
     // Device State
     BOOLEAN DeviceConfigured;

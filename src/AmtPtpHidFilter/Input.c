@@ -28,6 +28,15 @@ PtpFilterInputProcessRequest(
 }
 
 VOID
+PtpFilterWorkItemCallback(
+	_In_ WDFWORKITEM WorkItem
+)
+{
+	WDFDEVICE Device = WdfWorkItemGetParentObject(WorkItem);
+	PtpFilterInputIssueTransportRequest(Device);
+}
+
+VOID
 PtpFilterInputIssueTransportRequest(
 	_In_ WDFDEVICE Device
 )
@@ -152,9 +161,9 @@ PtpFilterInputRequestCompletionCallback(
 
 	// Pre-flight check 1: if size is 0, this is not something we need. Ignore the read, and issue next request.
 	if (responseLength <= 0) {
-		PtpFilterInputIssueTransportRequest(requestContext->DeviceContext->Device);
+		WdfWorkItemEnqueue(requestContext->DeviceContext->HidTransportRecoveryWorkItem);
 		goto cleanup;
-	}	
+	}
 
 	// Pre-flight check 2: the response size should be sane
 	if (responseLength < deviceContext->InputHeaderSize || (responseLength - deviceContext->InputHeaderSize) % deviceContext->InputFingerSize != 0) {
