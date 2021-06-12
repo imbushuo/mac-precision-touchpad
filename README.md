@@ -10,7 +10,7 @@ A few people asked me why I removed donation. My current financial situation doe
 
 ## Official Driver?
 
-Bootcamp 6.1.5 offers official driver for T2-based model and Magic 2 Trackpad. You can also consider using the official driver if you have such Mac. If you have an older model (e.g. MacBooks before 2018/2019), this is the only implementation for these models (yet). 
+Bootcamp 6.1.5 offers official driver for T2-based model and Magic Trackpad 2. You can also consider using the official driver if you have such Mac. If you have an older model (e.g. MacBooks before 2018/2019), this is the only implementation for these models (yet). 
 
 ## Future Plans and feature tracking
 
