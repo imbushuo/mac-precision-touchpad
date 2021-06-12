@@ -210,7 +210,7 @@ PtpFilterInputRequestCompletionCallback(
 		ptpOutputReport.Contacts[i].ContactID = f_type5->OrientationAndOrigin.ContactIdentifier.Id;
 		ptpOutputReport.Contacts[i].X = (USHORT)x;
 		ptpOutputReport.Contacts[i].Y = (USHORT)y;
-		ptpOutputReport.Contacts[i].TipSwitch = ((signed short) (f_type5->TouchMajor) << 1) > 0;
+		ptpOutputReport.Contacts[i].TipSwitch = ((signed short) (f_type5->TouchMajor) << 1) > 125;
 		// The Microsoft spec says reject any input larger than 25mm. This is not ideal
 		// for Magic Trackpad 2 - so we raised the threshold a bit higher.
 		// Or maybe I used the wrong unit? IDK
