@@ -85,7 +85,7 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 
 ## Acknowledgements
 
-**UPDATE 2021/05**: She got a M1 Mac now.
+**UPDATE 2021/05**: She got an M1 Mac now.
 
 People familiar with me know that I don't use Apple MacBook (so development work of this driver occurs on a Surface Pro 4). People probably think it doesn't make sense that I started this project. The motivation behind this project origin from complaints from my girlfriend. Hearing about frequent complains about Dell XPS 13's touchpad (though it passed Precision Touchpad certification), I decided to start this project, so by the time she switches to MacBook Pro, she will have excellent touchpad experience out-of-box, even on Windows. This driver is made for you, but also for everyone.
 
