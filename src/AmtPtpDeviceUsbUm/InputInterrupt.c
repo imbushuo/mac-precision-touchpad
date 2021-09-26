@@ -335,7 +335,7 @@ AmtPtpServiceTouchInputInterrupt(
 			PtpReport.Contacts[i].ContactID = (UCHAR) i;
 			PtpReport.Contacts[i].X = x;
 			PtpReport.Contacts[i].Y = y;
-			PtpReport.Contacts[i].TipSwitch = f->Pressure != 0;
+			PtpReport.Contacts[i].TipSwitch = f->pressure != 0;
 			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f->touch_minor) << 1) > 0;
 
 #ifdef INPUT_CONTENT_TRACE
