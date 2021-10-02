@@ -75,7 +75,7 @@
   </PropertyGroup>
   <!-- They told me this: https://help.github.com/en/articles/software-in-virtual-environments-for-github-actions#windows-server-2019 -->
   <PropertyGroup>
-    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(BuildEnvironment)'=='Github'">
     <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
@@ -216,7 +216,7 @@
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <!-- For release signed config on Azure pipeline, CI pipeline don't sign it. We do that locally -->
-  <PropertyGroup  Condition="'$(Configuration)'=='ReleaseSigned'">
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseSigned'">
     <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
     <ProductionCertificate>$(ProductionCertPath)</ProductionCertificate>
     <SignMode Condition="'$(BuildEnvironment)'!='AzurePipeline'">ProductionSign</SignMode>

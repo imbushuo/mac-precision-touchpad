@@ -65,7 +65,7 @@
     <RootNamespace>AmtPtpDeviceUniversalPkg</RootNamespace>
   </PropertyGroup>
   <PropertyGroup>
-    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(BuildEnvironment)'=='Github'">
     <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
