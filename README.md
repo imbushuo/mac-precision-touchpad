@@ -50,8 +50,9 @@ choco install mac-precision-touchpad
 
 ## For developers
 
-- SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Bluetooth driver uses KMDF Framework 1.15. Windows 10 Driver Development Kit Version 2004 is required for development and testing.
-- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 2004 is required for development and testing.
+- SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Bluetooth driver uses KMDF Framework 1.15. Windows 10 Driver Development Kit Version 2004 or higher is required for development and testing.
+- USB version is a user-mode driver, using UMDF Framework v2.15. Windows 10 Driver Development Kit Version 2004 or higher is required for development and testing.
+- `ReleaseSigned` configuration is reserved for production build only, and it will be rendered as unsigned if you attempt to build using that configuration. (Historically it's signed, but due to EV certificate's requirements, the process has changed.)
 
 ## Device support
 
