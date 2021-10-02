@@ -335,7 +335,7 @@ AmtPtpServiceTouchInputInterrupt(
 			PtpReport.Contacts[i].ContactID = (UCHAR) i;
 			PtpReport.Contacts[i].X = x;
 			PtpReport.Contacts[i].Y = y;
-			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f->touch_major) << 1) >= 200;
+			PtpReport.Contacts[i].TipSwitch = f->pressure != 0;
 			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f->touch_minor) << 1) > 0;
 
 #ifdef INPUT_CONTENT_TRACE
@@ -515,7 +515,7 @@ AmtPtpServiceTouchInputInterruptType5(
 			PtpReport.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
 			PtpReport.Contacts[i].X = (USHORT) x;
 			PtpReport.Contacts[i].Y = (USHORT) y;
-			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f_type5->TouchMajor) << 1) > 0;
+			PtpReport.Contacts[i].TipSwitch = f_type5->Pressure != 0;
 
 			// The Microsoft spec says reject any input larger than 25mm. This is not ideal
 			// for Magic Trackpad 2 - so we raised the threshold a bit higher.
