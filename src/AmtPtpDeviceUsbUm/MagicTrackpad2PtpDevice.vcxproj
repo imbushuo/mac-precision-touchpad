@@ -166,12 +166,14 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -184,12 +186,14 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -202,12 +206,14 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IncludePath>$(DDK_INC_PATH);$(SolutionDir)intermediate\$(Platform)\$(ConfigurationName)\;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
@@ -232,6 +238,9 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <EmbedManagedResourceFile>Resource.res</EmbedManagedResourceFile>
     </Link>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -239,6 +248,9 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <ClCompile>
@@ -256,6 +268,9 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -263,6 +278,9 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">include\trace.h</WppScanConfigurationData>
     </ClCompile>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
     <ClCompile>

@@ -188,12 +188,14 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <!-- For release signed config on Azure pipeline, CI pipeline don't sign it. We do that locally -->
   <PropertyGroup Condition="'$(Configuration)'=='ReleaseSigned'">
@@ -213,12 +215,14 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -231,12 +235,14 @@
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(Platform)\$(ConfigurationName)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\</IntDir>
     <IncludePath>$(SolutionDir)intermediate\$(ProjectName)\$(Platform)\$(ConfigurationName)\;$(IncludePath)</IncludePath>
+    <TimeStampServer>http://timestamp.digicert.com</TimeStampServer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|ARM64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -252,6 +258,9 @@
       <WppKernelMode>true</WppKernelMode>
       <DisableSpecificWarnings>4214</DisableSpecificWarnings>
     </ClCompile>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -261,6 +270,9 @@
       <WppKernelMode>true</WppKernelMode>
       <DisableSpecificWarnings>4214</DisableSpecificWarnings>
     </ClCompile>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|Win32'">
     <ClCompile>
@@ -282,6 +294,9 @@
       <WppKernelMode>true</WppKernelMode>
       <DisableSpecificWarnings>4214</DisableSpecificWarnings>
     </ClCompile>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -291,6 +306,9 @@
       <WppKernelMode>true</WppKernelMode>
       <DisableSpecificWarnings>4214</DisableSpecificWarnings>
     </ClCompile>
+    <DriverSign>
+      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
+    </DriverSign>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSigned|x64'">
     <ClCompile>
