@@ -66,9 +66,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 - [x] New MacBook (12-inch)
 - [x] MacBook Pro 2015, 2016, 2017 (a few SPI devices are in work-in-progress state)
 - [x] T2-based devices: MacBook Air 2018, MacBook Pro 2017/2018/2019/2020: Use default fallback, experience might not be optimal. Open a issue if you encountered dead touch regions.
-- [x] Magic Trackpad 2 (USB)
-- [x] Magic Trackpad 2 (Bluetooth connection)
-- [x] Magic Trackpad 3 (USB)
+- [x] Magic Trackpad 2 & 3 (USB)
+- [x] Magic Trackpad 2 & 3 (Bluetooth connection)
 
 ## Roadmap
 
