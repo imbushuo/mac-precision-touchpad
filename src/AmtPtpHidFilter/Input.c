@@ -135,12 +135,12 @@ PtpFilterInputRequestCompletionCallback(
 	size_t responseLength;
 	PUCHAR responseBuffer;
 
-	LARGE_INTEGER currentTSC;
-	LONGLONG tSCDelta;
-
-	const TRACKPAD_FINGER_TYPE5 *f;
-	size_t raw_n, headerSize, fingerprintSize = 0;
+	UINT32 timestamp;
+	size_t raw_n = 0;
 	INT x, y = 0;
+
+	const TRACKPAD_FINGER_TYPE5* f;
+	const TRACKPAD_REPORT_TYPE5* mt_report;
 
 	UNREFERENCED_PARAMETER(Target);
 	
@@ -148,8 +148,6 @@ PtpFilterInputRequestCompletionCallback(
 	deviceContext = requestContext->DeviceContext;
 	responseLength = (size_t)(LONG)WdfRequestGetInformation(Request);
 	responseBuffer = WdfMemoryGetBuffer(Params->Parameters.Ioctl.Output.Buffer, NULL);
-	headerSize = deviceContext->InputHeaderSize;
-	fingerprintSize = deviceContext->InputFingerSize;
 
 	// Pre-flight check 0: Right now we only have Magic Trackpad 2 (BT and USB)
 	if (deviceContext->VendorID != HID_VID_APPLE_USB && deviceContext->VendorID != HID_VID_APPLE_BT) {
@@ -165,7 +163,7 @@ PtpFilterInputRequestCompletionCallback(
 	}
 
 	// Pre-flight check 2: the response size should be sane
-	if (responseLength < deviceContext->InputHeaderSize || (responseLength - deviceContext->InputHeaderSize) % deviceContext->InputFingerSize != 0) {
+	if (responseLength < sizeof(TRACKPAD_REPORT_TYPE5) || (responseLength - sizeof(TRACKPAD_REPORT_TYPE5)) % sizeof(TRACKPAD_FINGER_TYPE5) != 0) {
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INPUT, "%!FUNC! Malformed input received. Length = %llu. Attempt to reconfigure the device.", responseLength);
 		WdfTimerStart(deviceContext->HidTransportRecoveryTimer, WDF_REL_TIMEOUT_IN_SEC(3));
 		goto cleanup;
@@ -178,24 +176,21 @@ PtpFilterInputRequestCompletionCallback(
 		goto cleanup;
 	}
 
+	mt_report = (TRACKPAD_REPORT_TYPE5*) responseBuffer;
+	timestamp = (mt_report->TimestampHigh << 5) | mt_report->TimestampLow;
+
 	// Report header
 	ptpOutputReport.ReportID = REPORTID_MULTITOUCH;
-	ptpOutputReport.IsButtonClicked = 0;
-
-	// Capture current timestamp and get input delta in 100us unit
-	KeQueryPerformanceCounter(&currentTSC);
-	tSCDelta = (currentTSC.QuadPart - deviceContext->LastReportTime.QuadPart) / 100;
-	ptpOutputReport.ScanTime = (tSCDelta >= 0xFF) ? 0xFF : (USHORT)tSCDelta;
-	deviceContext->LastReportTime.QuadPart = currentTSC.QuadPart;
+	ptpOutputReport.IsButtonClicked = (UCHAR) mt_report->Button;
+	ptpOutputReport.ScanTime = (USHORT) timestamp * 10;
 
 	// Report required content
 	// Touch
-	raw_n = (responseLength - headerSize) / fingerprintSize;
+	raw_n = (responseLength - sizeof(TRACKPAD_REPORT_TYPE5)) / sizeof(TRACKPAD_FINGER_TYPE5);
 	if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 	ptpOutputReport.ContactCount = (UCHAR) raw_n;
 	for (size_t i = 0; i < raw_n; i++) {
-		PUCHAR f_base = responseBuffer + headerSize + deviceContext->InputFingerDelta;
-		f = (const TRACKPAD_FINGER_TYPE5 *)(f_base + i * fingerprintSize);
+		f = &mt_report->Fingers[i];
 
 		// Sign extend
 		x = (SHORT)(f->AbsoluteX << 3) >> 3;
@@ -223,11 +218,6 @@ PtpFilterInputRequestCompletionCallback(
 		// 6 = palm on MT2, 7 = palm on my MBP9,2 (why are these different?)
 		CHAR valid_finger = f->Finger != 6;
 		ptpOutputReport.Contacts[i].Confidence = valid_size && valid_finger;
-	}
-
-	// Button
-	if ((responseBuffer[deviceContext->InputButtonDelta] & 1) != 0) {
-		ptpOutputReport.IsButtonClicked = TRUE;
 	}
 
 	status = WdfRequestRetrieveOutputMemory(ptpRequest, &ptpRequestMemory);

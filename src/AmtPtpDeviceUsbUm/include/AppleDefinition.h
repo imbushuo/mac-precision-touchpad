@@ -141,8 +141,12 @@ __declspec(align(2)) struct TRACKPAD_FINGER {
 	USHORT multi;		/* one finger: varies, more fingers: constant */
 };
 
-/* Trackpad finger structure for type5 (magic trackpad), le16-aligned */
-__declspec(align(2)) struct TRACKPAD_FINGER_TYPE5 
+#pragma pack( push, 1 )
+#pragma warning( push )
+#pragma warning( disable : 4200 )
+
+/* Trackpad finger structure for type5 (magic trackpad) */
+struct TRACKPAD_FINGER_TYPE5 
 {
 	UINT32 AbsoluteX : 13;		/* absolute x coordinate */
 	UINT32 AbsoluteY : 13;		/* absolute y coordinate */
@@ -156,6 +160,37 @@ __declspec(align(2)) struct TRACKPAD_FINGER_TYPE5
 	UCHAR _ : 1;
 	UCHAR Orientation : 3;		/* contact angle */
 };
+
+/* Appended Mouse report on front of MT2 USB reports */
+struct MOUSE_REPORT
+{
+	UCHAR ReportId;
+	UCHAR Button;
+	UCHAR X;
+	UCHAR Y;
+	UCHAR _[4];
+};
+
+/* Multitouch report from MT2 */
+ struct TRACKPAD_REPORT_TYPE5
+{
+	UCHAR ReportId;
+	UINT8 Button : 1;
+	UINT8 _ : 2;
+	UINT8 TimestampLow : 5;
+	UINT16 TimestampHigh;
+	struct TRACKPAD_FINGER_TYPE5 Fingers[];
+};
+
+/* Full trackpad report for mt2 over USB */
+struct TRACKPAD_COMBINED_REPORT_TYPE5
+{
+	struct MOUSE_REPORT Mouse;
+	struct TRACKPAD_REPORT_TYPE5 MTReport;
+};
+
+#pragma warning( pop )
+#pragma pack( pop )
 
 /* device-specific parameters */
 struct BCM5974_PARAM {

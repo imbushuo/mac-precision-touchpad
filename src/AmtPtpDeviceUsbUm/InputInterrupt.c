@@ -418,10 +418,10 @@ AmtPtpServiceTouchInputInterruptType5(
 	WDFREQUEST Request;
 	WDFMEMORY  RequestMemory;
 	PTP_REPORT PtpReport;
-	LARGE_INTEGER CurrentPerfCounter;
-	LONGLONG PerfCounterDelta;
 
-	const struct TRACKPAD_FINGER_TYPE5 *f;
+	const struct TRACKPAD_FINGER_TYPE5* f;
+	const struct TRACKPAD_REPORT_TYPE5* mt_report;
+	const struct TRACKPAD_COMBINED_REPORT_TYPE5* full_report;
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -433,10 +433,9 @@ AmtPtpServiceTouchInputInterruptType5(
 	PtpReport.ReportID = REPORTID_MULTITOUCH;
 	PtpReport.IsButtonClicked = 0;
 
+	UINT timestamp;
 	INT x, y = 0;
 	size_t raw_n, i = 0;
-	size_t headerSize = (unsigned int) DeviceContext->DeviceInfo->tp_header;
-	size_t fingerprintSize = (unsigned int) DeviceContext->DeviceInfo->tp_fsize;
 
 	Status = WdfIoQueueRetrieveNextRequest(
 		DeviceContext->InputQueue,
@@ -466,23 +465,16 @@ AmtPtpServiceTouchInputInterruptType5(
 		goto exit;
 	}
 
-	QueryPerformanceCounter(
-		&CurrentPerfCounter
-	);
+	full_report = (const struct TRACKPAD_COMBINED_REPORT_TYPE5 *) Buffer;
+	mt_report = &full_report->MTReport;
 
-	// Scan time is in 100us
-	PerfCounterDelta = (CurrentPerfCounter.QuadPart - DeviceContext->PerfCounter.QuadPart) / 100;
-	// Only two bytes allocated
-	if (PerfCounterDelta > 0xFF)
-	{
-		PerfCounterDelta = 0xFF;
-	}
-
-	PtpReport.ScanTime = (USHORT) PerfCounterDelta;
+	timestamp = (mt_report->TimestampHigh << 5) | mt_report->TimestampLow;
+	PtpReport.ScanTime = (USHORT) timestamp * 10;
+	PtpReport.IsButtonClicked = (UCHAR) mt_report->Button;
 
 	// Type 5 finger report
 	if (DeviceContext->IsSurfaceReportOn) {
-		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
+		raw_n = (NumBytesTransferred - sizeof(struct TRACKPAD_REPORT_TYPE5)) / sizeof(struct TRACKPAD_FINGER_TYPE5);
 		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 		PtpReport.ContactCount = (UCHAR)raw_n;
 
@@ -497,9 +489,7 @@ AmtPtpServiceTouchInputInterruptType5(
 
 		// Fingers to array
 		for (i = 0; i < raw_n; i++) {
-
-			UCHAR *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
-			f = (const struct TRACKPAD_FINGER_TYPE5*) (f_base + i * fingerprintSize);
+			f = &mt_report->Fingers[i];
 
 			// Sign extend
 			x = (SHORT) (f->AbsoluteX << 3) >> 3;
@@ -545,13 +535,6 @@ AmtPtpServiceTouchInputInterruptType5(
 				f->Orientation
 			);
 #endif
-		}
-	}
-
-	// Button
-	if (DeviceContext->IsButtonReportOn) {
-		if (Buffer[DeviceContext->DeviceInfo->tp_button]) {
-			PtpReport.IsButtonClicked = TRUE;
 		}
 	}
 

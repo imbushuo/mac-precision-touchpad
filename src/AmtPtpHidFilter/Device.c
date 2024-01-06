@@ -320,11 +320,6 @@ PtpFilterConfigureMultiTouch(
     pHidPacket = (PHID_XFER_PACKET) &hidPacketBuffer;
 
     if (deviceContext->VendorID == HID_VID_APPLE_USB) {
-        deviceContext->InputFingerSize = FSIZE_TYPE5;
-        deviceContext->InputHeaderSize = HOFFSET_TYPE_USB_5;
-        deviceContext->InputFingerDelta = FDELTA_TYPE5;
-        deviceContext->InputButtonDelta = BOFFSET_TYPE5;
-
         deviceContext->X.snratio = 250;
         deviceContext->X.min = -3678;
         deviceContext->X.max = 3934;
@@ -341,11 +336,6 @@ PtpFilterConfigureMultiTouch(
         pHidPacket->reportBuffer[3] = 0x00;
     }
     else if (deviceContext->VendorID == HID_VID_APPLE_BT) {
-        deviceContext->InputFingerSize = FSIZE_TYPE5;
-        deviceContext->InputHeaderSize = HOFFSET_TYPE_BTH_5;
-        deviceContext->InputFingerDelta = FDELTA_TYPE5;
-        deviceContext->InputButtonDelta = BOFFSET_TYPE5;
-
         deviceContext->X.snratio = 250;
         deviceContext->X.min = -3678;
         deviceContext->X.max = 3934;
