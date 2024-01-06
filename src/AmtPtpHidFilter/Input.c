@@ -138,8 +138,7 @@ PtpFilterInputRequestCompletionCallback(
 	LARGE_INTEGER currentTSC;
 	LONGLONG tSCDelta;
 
-	const TRACKPAD_FINGER* f;
-	const TRACKPAD_FINGER_TYPE5* f_type5;
+	const TRACKPAD_FINGER_TYPE5 *f;
 	size_t raw_n, headerSize, fingerprintSize = 0;
 	INT x, y = 0;
 
@@ -196,25 +195,34 @@ PtpFilterInputRequestCompletionCallback(
 	ptpOutputReport.ContactCount = (UCHAR) raw_n;
 	for (size_t i = 0; i < raw_n; i++) {
 		PUCHAR f_base = responseBuffer + headerSize + deviceContext->InputFingerDelta;
-		f = (const TRACKPAD_FINGER*)(f_base + i * fingerprintSize);
-		f_type5 = (const TRACKPAD_FINGER_TYPE5*)f;
-		
-		USHORT tmp_x = (*((USHORT*)f_type5)) & 0x1fff;
-		unsigned int tmp_y = (INT)(*((unsigned int*) f_type5));
+		f = (const TRACKPAD_FINGER_TYPE5 *)(f_base + i * fingerprintSize);
 
-		x = (SHORT)(tmp_x << 3) >> 3;
-		y = -(INT)(tmp_y << 6) >> 19;
+		// Sign extend
+		x = (SHORT)(f->AbsoluteX << 3) >> 3;
+		y = -(SHORT)(f->AbsoluteY << 3) >> 3;
 		x = (x - deviceContext->X.min) > 0 ? (x - deviceContext->X.min) : 0;
 		y = (y - deviceContext->Y.min) > 0 ? (y - deviceContext->Y.min) : 0;
 
-		ptpOutputReport.Contacts[i].ContactID = f_type5->OrientationAndOrigin.ContactIdentifier.Id;
+		ptpOutputReport.Contacts[i].ContactID = f->Id;
 		ptpOutputReport.Contacts[i].X = (USHORT)x;
 		ptpOutputReport.Contacts[i].Y = (USHORT)y;
-		ptpOutputReport.Contacts[i].TipSwitch = ((signed short) (f_type5->TouchMajor) << 1) > 0;
+		
+		// 0x1 = Transition between states
+		// 0x2 = Floating finger
+		// 0x4 = Contact/Valid
+		// I've gotten 0x6 if I press on the trackpad and then keep my finger close
+		// Note: These values come from my MBP9,2. These also are valid on my MT2
+		ptpOutputReport.Contacts[i].TipSwitch = (f->State & 0x4) && !(f->State & 0x2);
+
 		// The Microsoft spec says reject any input larger than 25mm. This is not ideal
 		// for Magic Trackpad 2 - so we raised the threshold a bit higher.
 		// Or maybe I used the wrong unit? IDK
-		ptpOutputReport.Contacts[i].Confidence = ((signed short) (f_type5->TouchMinor) << 1) < 345 && ((signed short) (f_type5->TouchMinor) << 1) < 345;
+		CHAR valid_size = ((SHORT)(f->TouchMinor) << 1) < 345 && ((SHORT)(f->TouchMinor) << 1) < 345;
+
+		// 1 = thumb, 2 = index, etc etc
+		// 6 = palm on MT2, 7 = palm on my MBP9,2 (why are these different?)
+		CHAR valid_finger = f->Finger != 6;
+		ptpOutputReport.Contacts[i].Confidence = valid_size && valid_finger;
 	}
 
 	// Button

@@ -144,22 +144,17 @@ __declspec(align(2)) struct TRACKPAD_FINGER {
 /* Trackpad finger structure for type5 (magic trackpad), le16-aligned */
 __declspec(align(2)) struct TRACKPAD_FINGER_TYPE5 
 {
-	UCHAR AbsoluteX;			/* absolute x coodinate */
-	UCHAR AbsoluteXY;			/* absolute x,y coodinate */
-	UCHAR AbsoluteY[2];			/* absolute y coodinate */
+	UINT32 AbsoluteX : 13;		/* absolute x coordinate */
+	UINT32 AbsoluteY : 13;		/* absolute y coordinate */
+	UINT32 Finger : 3;			/* finger type */
+	UINT32 State : 3;			/* finger State */
 	UCHAR TouchMajor;			/* touch area, major axis */
 	UCHAR TouchMinor;			/* touch area, minor axis */
 	UCHAR Size;					/* tool area, size */
 	UCHAR Pressure;				/* pressure on forcetouch touchpad */
-	union 
-	{
-		struct 
-		{
-			UCHAR Id : 4;
-			UCHAR Orientation : 4;
-		} ContactIdentifier;
-		UCHAR RawOrientationAndOrigin;
-	};
+	UCHAR Id : 4;				/* slot id */
+	UCHAR _ : 1;
+	UCHAR Orientation : 3;		/* contact angle */
 };
 
 /* device-specific parameters */

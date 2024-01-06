@@ -66,21 +66,16 @@ typedef struct _TRACKPAD_FINGER {
 /* Trackpad finger structure for type5 (magic trackpad), le16-aligned */
 typedef struct _TRACKPAD_FINGER_TYPE5
 {
-	UCHAR AbsoluteX;			/* absolute x coodinate */
-	UCHAR AbsoluteXY;			/* absolute x,y coodinate */
-	UCHAR AbsoluteY[2];			/* absolute y coodinate */
+	UINT32 AbsoluteX : 13;		/* absolute x coordinate */
+	UINT32 AbsoluteY : 13;		/* absolute y coordinate */
+	UINT32 Finger : 3;			/* finger type */
+	UINT32 State : 3;			/* finger State */
 	UCHAR TouchMajor;			/* touch area, major axis */
 	UCHAR TouchMinor;			/* touch area, minor axis */
 	UCHAR Size;					/* tool area, size */
 	UCHAR Pressure;				/* pressure on forcetouch touchpad */
-	union _ORIDENTATION_AND_ORIGIN
-	{
-		struct _CONTACT_IDENTIFIER
-		{
-			UCHAR Id : 4;
-			UCHAR Orientation : 4;
-		} ContactIdentifier;
-		UCHAR RawValue;
-	} OrientationAndOrigin;
-} TRACKPAD_FINGER_TYPE5, *PTRACKPAD_FINGER_TYPE5;
+	UCHAR Id : 4;				/* slot id */
+	UCHAR _ : 1;
+	UCHAR Orientation : 3;		/* contact angle */
+} TRACKPAD_FINGER_TYPE5;
 #include <poppack.h>
