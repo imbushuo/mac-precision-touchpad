@@ -418,11 +418,10 @@ AmtPtpServiceTouchInputInterruptType5(
 	WDFREQUEST Request;
 	WDFMEMORY  RequestMemory;
 	PTP_REPORT PtpReport;
-	LARGE_INTEGER CurrentPerfCounter;
-	LONGLONG PerfCounterDelta;
 
-	const struct TRACKPAD_FINGER *f;
-	const struct TRACKPAD_FINGER_TYPE5 *f_type5;
+	const struct TRACKPAD_FINGER_TYPE5* f;
+	const struct TRACKPAD_REPORT_TYPE5* mt_report;
+	const struct TRACKPAD_COMBINED_REPORT_TYPE5* full_report;
 
 	TraceEvents(
 		TRACE_LEVEL_INFORMATION, 
@@ -434,10 +433,9 @@ AmtPtpServiceTouchInputInterruptType5(
 	PtpReport.ReportID = REPORTID_MULTITOUCH;
 	PtpReport.IsButtonClicked = 0;
 
+	UINT timestamp;
 	INT x, y = 0;
 	size_t raw_n, i = 0;
-	size_t headerSize = (unsigned int) DeviceContext->DeviceInfo->tp_header;
-	size_t fingerprintSize = (unsigned int) DeviceContext->DeviceInfo->tp_fsize;
 
 	Status = WdfIoQueueRetrieveNextRequest(
 		DeviceContext->InputQueue,
@@ -467,23 +465,16 @@ AmtPtpServiceTouchInputInterruptType5(
 		goto exit;
 	}
 
-	QueryPerformanceCounter(
-		&CurrentPerfCounter
-	);
+	full_report = (const struct TRACKPAD_COMBINED_REPORT_TYPE5 *) Buffer;
+	mt_report = &full_report->MTReport;
 
-	// Scan time is in 100us
-	PerfCounterDelta = (CurrentPerfCounter.QuadPart - DeviceContext->PerfCounter.QuadPart) / 100;
-	// Only two bytes allocated
-	if (PerfCounterDelta > 0xFF)
-	{
-		PerfCounterDelta = 0xFF;
-	}
-
-	PtpReport.ScanTime = (USHORT) PerfCounterDelta;
+	timestamp = (mt_report->TimestampHigh << 5) | mt_report->TimestampLow;
+	PtpReport.ScanTime = (USHORT) timestamp * 10;
+	PtpReport.IsButtonClicked = (UCHAR) mt_report->Button;
 
 	// Type 5 finger report
 	if (DeviceContext->IsSurfaceReportOn) {
-		raw_n = (NumBytesTransferred - headerSize) / fingerprintSize;
+		raw_n = (NumBytesTransferred - sizeof(struct TRACKPAD_REPORT_TYPE5)) / sizeof(struct TRACKPAD_FINGER_TYPE5);
 		if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
 		PtpReport.ContactCount = (UCHAR)raw_n;
 
@@ -498,53 +489,52 @@ AmtPtpServiceTouchInputInterruptType5(
 
 		// Fingers to array
 		for (i = 0; i < raw_n; i++) {
+			f = &mt_report->Fingers[i];
 
-			UCHAR *f_base = Buffer + headerSize + DeviceContext->DeviceInfo->tp_delta;
-			f = (const struct TRACKPAD_FINGER*) (f_base + i * fingerprintSize);
-			f_type5 = (const struct TRACKPAD_FINGER_TYPE5*) f;
-
-			USHORT tmp_x = (*((USHORT*)f_type5)) & 0x1fff;
-			UINT tmp_y = (INT)(*((UINT*)f_type5));
-
-			x = (SHORT) (tmp_x << 3) >> 3;
-			y = -(INT) (tmp_y << 6) >> 19;
+			// Sign extend
+			x = (SHORT) (f->AbsoluteX << 3) >> 3;
+			y = -(SHORT) (f->AbsoluteY << 3) >> 3;
 
 			x = (x - DeviceContext->DeviceInfo->x.min) > 0 ? (x - DeviceContext->DeviceInfo->x.min) : 0;
 			y = (y - DeviceContext->DeviceInfo->y.min) > 0 ? (y - DeviceContext->DeviceInfo->y.min) : 0;
 
-			PtpReport.Contacts[i].ContactID = f_type5->ContactIdentifier.Id;
+			PtpReport.Contacts[i].ContactID = f->Id;
 			PtpReport.Contacts[i].X = (USHORT) x;
 			PtpReport.Contacts[i].Y = (USHORT) y;
-			PtpReport.Contacts[i].TipSwitch = (AmtRawToInteger(f_type5->TouchMajor) << 1) > 0;
+			// 0x1 = Transition between states
+			// 0x2 = Floating finger
+			// 0x4 = Contact/Valid
+			// I've gotten 0x6 if I press on the trackpad and then keep my finger close
+			// Note: These values come from my MBP9,2. These also are valid on my MT2
+			PtpReport.Contacts[i].TipSwitch = (f->State & 0x4) && !(f->State & 0x2);
 
 			// The Microsoft spec says reject any input larger than 25mm. This is not ideal
 			// for Magic Trackpad 2 - so we raised the threshold a bit higher.
 			// Or maybe I used the wrong unit? IDK
-			PtpReport.Contacts[i].Confidence = (AmtRawToInteger(f_type5->TouchMinor) << 1) < 345 && 
-				(AmtRawToInteger(f_type5->TouchMinor) << 1) < 345;
+			BOOL valid_size = (AmtRawToInteger(f->TouchMinor) << 1) < 345 &&
+				(AmtRawToInteger(f->TouchMinor) << 1) < 345;
+
+			// 1 = thumb, 2 = index, etc etc
+			// 6 = palm on MT2, 7 = palm on my MBP9,2 (why are these different?)
+			BOOL valid_finger = f->Finger != 6;
+			PtpReport.Contacts[i].Confidence = valid_size && valid_finger;
 
 #ifdef INPUT_CONTENT_TRACE
 			TraceEvents(
 				TRACE_LEVEL_INFORMATION,
 				TRACE_INPUT,
-				"%!FUNC!: Point %llu, X = %d, Y = %d, TipSwitch = %d, Confidence = %d, tMajor = %d, tMinor = %d, origin = %d",
+				"%!FUNC!: Point %llu, X = %d, Y = %d, TipSwitch = %d, Confidence = %d, tMajor = %d, tMinor = %d, finger type = %d, rotate = %d",
 				i,
 				PtpReport.Contacts[i].X,
 				PtpReport.Contacts[i].Y,
 				PtpReport.Contacts[i].TipSwitch,
 				PtpReport.Contacts[i].Confidence,
-				AmtRawToInteger(f_type5->TouchMajor) << 1,
-				AmtRawToInteger(f_type5->TouchMinor) << 1,
-				f_type5->ContactIdentifier.Id
+				AmtRawToInteger(f->TouchMajor) << 1,
+				AmtRawToInteger(f->TouchMinor) << 1,
+				f->Finger,
+				f->Orientation
 			);
 #endif
-		}
-	}
-
-	// Button
-	if (DeviceContext->IsButtonReportOn) {
-		if (Buffer[DeviceContext->DeviceInfo->tp_button]) {
-			PtpReport.IsButtonClicked = TRUE;
 		}
 	}
 

@@ -33,10 +33,6 @@ typedef struct _DEVICE_CONTEXT
     USHORT VendorID;
     USHORT ProductID;
     USHORT VersionNumber;
-    size_t InputHeaderSize;
-    size_t InputFingerSize;
-    size_t InputFingerDelta;
-    size_t InputButtonDelta;
     BCM5974_PARAM X;
     BCM5974_PARAM Y;
 
