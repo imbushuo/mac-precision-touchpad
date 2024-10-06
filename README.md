@@ -10,7 +10,7 @@ A few people asked me why I removed donation. My current financial situation doe
 
 ## Official Driver?
 
-Bootcamp 6.1.5 offers official driver for T2-based model and Magic Trackpad 2. You can also consider using the official driver if you have such Mac. If you have an older model (e.g. MacBooks before 2018/2019), this is the only implementation for these models (yet). 
+Bootcamp 6.1.5 offers official driver for T2-based model and Magic Trackpad 2. You can also consider using the official driver if you have such Mac. If you have an older model (e.g. MacBooks before 2018/2019), this is the only implementation for these models (yet).
 
 ## Future Plans and feature tracking
 
@@ -48,6 +48,11 @@ The drivers are available as a [Chocolatey package](https://chocolatey.org/packa
 choco install mac-precision-touchpad
 ```
 
+## Frequently Asked Questions (FAQs)
+
+- Q: How can I adjust the scroll (trackpad) sensitivity.
+- A: Go to 'Settings > Bluetooth & devices > Touchpad' and adjust the 'Cursor speed' slider to match your preferences. [screenshot](https://github.com/imbushuo/mac-precision-touchpad/issues/503#issuecomment-1463429222)
+
 ## For developers
 
 - SPI/T2 version is kernel-mode driver, using KMDF Framework v1.23. Bluetooth driver uses KMDF Framework 1.15. Windows 10 Driver Development Kit Version 2004 or higher is required for development and testing.
@@ -58,7 +63,7 @@ choco install mac-precision-touchpad
 
 There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking into it. If you have such device with Windows installed, please contact me so I can look into the issue remotely (as I don't have many devices).
 
-- [x] Non-Retina MacBook 
+- [x] Non-Retina MacBook
 - [x] Some non-Retina MacBook Pro (2011 and 2012)
 - [x] MacBook Pro with Retina Display (MacBookPro 10,1, MacBookPro10,2 & MacBookPro11,1)
 - [x] All recent MacBook Air (Please report if your model is not supported)
@@ -93,9 +98,8 @@ There is a bring-up issue for certain MacBook Pro and MacBook Air. I am looking 
 People familiar with me know that I don't use Apple MacBook (so development work of this driver occurs on a Surface Pro 4). People probably think it doesn't make sense that I started this project. The motivation behind this project origin from complaints from my girlfriend. Hearing about frequent complains about Dell XPS 13's touchpad (though it passed Precision Touchpad certification), I decided to start this project, so by the time she switches to MacBook Pro, she will have excellent touchpad experience out-of-box, even on Windows. This driver is made for you, but also for everyone.
 
 I would like to thank projects like [magictrackpad2-dkms](https://github.com/robbi5/magictrackpad2-dkms) and [macbook12-spi-driver](https://github.com/cb22/macbook12-spi-driver) that inspire me. I would also like to thank my friends for providing me immense help on devices and testing.
- 
+
 ## License
 
 - USB driver is licensed under [GPLv2](LICENSE-GPL.md).
 - SPI driver is licensed under [MIT](LICENSE-MIT.md).
-
