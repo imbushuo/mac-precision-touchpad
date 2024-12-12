@@ -25,9 +25,9 @@ AmtPtpDeviceSpiKm.sys = 1,,
 AmtPtpHidFilter.sys   = 1,,
 
 [Manufacturer]
-%ManufacturerName%=Standard,NT$ARCH$
+%ManufacturerName%=Standard,NT$ARCH$.10.0...18362
 
-[Standard.NT$ARCH$]
+[Standard.NT$ARCH$.10.0...18362]
 ; Apple T2
 %AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0273&MI_02
 %AmtPtpDeviceUsbKm.DeviceDesc%=AmtPtpDeviceUsbKm_Device, USB\Vid_05ac&Pid_0274&MI_02
@@ -110,22 +110,21 @@ AmtPtpDeviceUsbUm.dll
 [SpiKmDrivers_Dir]
 AmtPtpDeviceSpiKm.sys
 
-; Microsoft HID KMDF driver install sections
-[mshidkmdf_Service_Inst]
-ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
-StartType      = 3                  ; SERVICE_DEMAND_START
-ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %10%\System32\Drivers\mshidkmdf.sys
-
 ; PTP filter
 [AmtPtpHidFilter_MiniPortDevice.NT]
 CopyFiles=FilterDriver_Payload
+Include=MsHidKmdf.inf
+Needs=MsHidKmdf_LowerFilter.NT
 
 [AmtPtpHidFilter_MiniPortDevice.NT.Services]
+Include=MsHidKmdf.inf
+Needs=MsHidKmdf_LowerFilter.NT.Services
 AddService = AmtPtpHidFilter,, AmtPtpHidFilter_Service_Inst
-AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst
+;AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst
 
 [AmtPtpHidFilter_MiniPortDevice.NT.HW]
+Include=MsHidKmdf.inf
+Needs=MsHidKmdf_LowerFilter.NT.HW
 AddReg=AmtPtpHidFilter_AddReg
 
 [AmtPtpHidFilter_AddReg]
@@ -148,13 +147,24 @@ KmdfLibraryVersion = $KMDFVERSION$
 ; USB KM
 [AmtPtpDeviceUsbKm_Device.NT]
 CopyFiles=PtpKmDrivers_Dir
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT
+
 
 [AmtPtpDeviceUsbKm_Device.NT.Services]
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.Services
 AddService = AmtPtpDeviceUsbKm,, AmtPtpDeviceUsbKm_Service_Inst
-AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst
+; AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst
 
 [AmtPtpDeviceUsbKm_Device.NT.HW]
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.HW
 AddReg=AmtPtpDeviceUsbKm_AddReg
+
+[AmtPtpDeviceUsbKm_Device.NT.Filters]
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.Filters
 
 [AmtPtpDeviceUsbKm_AddReg]
 HKR,,FriendlyName,,%AmtPtpDeviceUsbKm.DeviceDesc%
@@ -176,14 +186,20 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 ; USB UM
 [AmtPtpDeviceUsbUm_Install.NT]
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT
 CopyFiles=PtpUmDrivers_Dir
 
 [AmtPtpDeviceUsbUm_Install.NT.hw]
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.HW
 AddReg=AmtPtpDeviceUsbUm_AddReg
 
 [AmtPtpDeviceUsbUm_Install.NT.Services]
-AddService=mshidumdf, 0x000001fa, MSHIDUMDF_ServiceInstall ; flag 0x2 sets this as the service for the device
-AddService=WUDFRd,0x000001f8,WUDFRD_ServiceInstall         ; this service is installed because its a filter.
+Include=WUDFRD.inf
+Needs=WUDFRD_LowerFilter.NT.Services
+;AddService=mshidumdf, 0x000001fa, MSHIDUMDF_ServiceInstall ; flag 0x2 sets this as the service for the device
+;AddService=WUDFRd,0x000001f8,WUDFRD_ServiceInstall         ; this service is installed because its a filter.
 
 [AmtPtpDeviceUsbUm_Install.NT.Wdf]
 UmdfDispatcher=NativeUSB
@@ -219,12 +235,18 @@ ServiceBinary = %12%\WUDFRd.sys
 ; SPI KM
 [AmtPtpDeviceSpiKm_Device.NT]
 CopyFiles=SpiKmDrivers_Dir
+Include=MsHidKmdf.inf
+Needs=MsHidKmdf_LowerFilter.NT
 
 [AmtPtpDeviceSpiKm_Device.NT.Services]
+Include=MsHidKmdf.inf
+Needs=MsHidKmdf_LowerFilter.NT.Services
 AddService = AmtPtpDeviceSpiKm,, AmtPtpDeviceSpiKm_Service_Inst
-AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst ;flag 0x2 sets this as the service for the device
+;AddService = mshidkmdf, %SPSVCINST_ASSOCSERVICE%, mshidkmdf_Service_Inst ;flag 0x2 sets this as the service for the device
 
 [AmtPtpDeviceSpiKm_Device.NT.HW]
+Include=MsHidKmdf.inf
+Needs=MsHidKmdf_LowerFilter.NT.HW
 AddReg = AmtPtpDeviceSpiKm_Device.NT.AddReg
 
 [AmtPtpDeviceSpiKm_Device.NT.AddReg]
