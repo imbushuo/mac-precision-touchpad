@@ -70,6 +70,9 @@
     <ClInclude Include="include\Diagnostics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Metadata\MagicTrackpad1.h">
+      <Filter>Device Specific Metadata Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\Metadata\MagicTrackpad2.h">
       <Filter>Device Specific Metadata Files</Filter>
     </ClInclude>

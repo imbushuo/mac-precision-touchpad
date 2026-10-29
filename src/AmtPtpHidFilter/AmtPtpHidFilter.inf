@@ -41,6 +41,8 @@ AmtPtpHidFilter.sys  = 1,,
 ; Some high-level patches involved to modify the underlying driver IO handlers.
 %AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col01
 %AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&0265&Col01
+; Magic Trackpad 1 (Bluetooth only) exposes a single mouse collection, so there is no ColXX suffix
+%AmtPtpHidFilter.DeviceDesc%=AmtPtpHidFilter_MiniPortDevice, HID\{00001124-0000-1000-8000-00805f9b34fb}_VID&000205ac_PID&030e
 ; To avoid confusions to OS, disable any other collections.
 %AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col02
 %AmtPtpHidFilter.NullDeviceDesc%=AmtPtpHidFilter_NullDevice, HID\VID_05AC&PID_0265&REV_0855&MI_01&Col03

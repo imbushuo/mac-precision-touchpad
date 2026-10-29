@@ -305,12 +305,13 @@ PtpFilterConfigureMultiTouch(
     
     // Check if this device is supported for configuration.
     // So far in this prototype, we support Magic Trackpad 2 in USB (05AC:0265) or Bluetooth mode (004c:0265)
+    // and Magic Trackpad 1, which is Bluetooth-only but reports USB vendor ID (05AC:030E)
     if (deviceContext->VendorID != HID_VID_APPLE_USB && deviceContext->VendorID != HID_VID_APPLE_BT) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Vendor not supported: 0x%x", deviceContext->VendorID);
         status = STATUS_NOT_SUPPORTED;
         goto exit;
     }
-    if (deviceContext->ProductID != HID_PID_MAGIC_TRACKPAD_2) {
+    if (deviceContext->ProductID != HID_PID_MAGIC_TRACKPAD_2 && deviceContext->ProductID != HID_PID_MAGIC_TRACKPAD_1) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Product not supported: 0x%x", deviceContext->ProductID);
         status = STATUS_NOT_SUPPORTED;
         goto exit;
@@ -319,7 +320,27 @@ PtpFilterConfigureMultiTouch(
     RtlZeroMemory(hidPacketBuffer, sizeof(hidPacketBuffer));
     pHidPacket = (PHID_XFER_PACKET) &hidPacketBuffer;
 
-    if (deviceContext->VendorID == HID_VID_APPLE_USB) {
+    if (deviceContext->ProductID == HID_PID_MAGIC_TRACKPAD_1) {
+        // Same framing as Magic Trackpad 2 over Bluetooth: 4 bytes of header, then 9 bytes per finger
+        deviceContext->InputFingerSize = FSIZE_TYPE5;
+        deviceContext->InputHeaderSize = HOFFSET_TYPE_BTH_5;
+        deviceContext->InputFingerDelta = FDELTA_TYPE5;
+        deviceContext->InputButtonDelta = BOFFSET_TYPE5;
+
+        deviceContext->X.snratio = 250;
+        deviceContext->X.min = -2909;
+        deviceContext->X.max = 3167;
+        deviceContext->Y.snratio = 250;
+        deviceContext->Y.min = -2456;
+        deviceContext->Y.max = 2565;
+
+        pHidPacket->reportId = 0xD7;
+        pHidPacket->reportBufferLen = 0x02;
+        pHidPacket->reportBuffer = (PUCHAR)pHidPacket + sizeof(HID_XFER_PACKET);
+        pHidPacket->reportBuffer[0] = 0xD7;
+        pHidPacket->reportBuffer[1] = 0x01;
+    }
+    else if (deviceContext->VendorID == HID_VID_APPLE_USB) {
         deviceContext->InputFingerSize = FSIZE_TYPE5;
         deviceContext->InputHeaderSize = HOFFSET_TYPE_USB_5;
         deviceContext->InputFingerDelta = FDELTA_TYPE5;

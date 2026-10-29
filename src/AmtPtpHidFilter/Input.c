@@ -116,6 +116,63 @@ PtpFilterInputIssueTransportRequest(
 	}
 }
 
+// Fill ContactCount and Contacts of Report from one validated multi-touch report of the device
+static VOID
+PtpFilterInputParseContacts(
+	_In_ PDEVICE_CONTEXT deviceContext,
+	_In_ PUCHAR responseBuffer,
+	_In_ size_t responseLength,
+	_Out_ PPTP_REPORT Report
+)
+{
+	const TRACKPAD_FINGER* f;
+	const TRACKPAD_FINGER_TYPE5* f_type5;
+	const TRACKPAD_FINGER_MT1* f_mt1;
+	size_t raw_n, headerSize, fingerprintSize = 0;
+	INT x, y = 0;
+
+	headerSize = deviceContext->InputHeaderSize;
+	fingerprintSize = deviceContext->InputFingerSize;
+
+	raw_n = (responseLength - headerSize) / fingerprintSize;
+	if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
+	Report->ContactCount = (UCHAR) raw_n;
+	for (size_t i = 0; i < raw_n; i++) {
+		PUCHAR f_base = responseBuffer + headerSize + deviceContext->InputFingerDelta;
+		f = (const TRACKPAD_FINGER*)(f_base + i * fingerprintSize);
+		f_type5 = (const TRACKPAD_FINGER_TYPE5*)f;
+
+		USHORT tmp_x = (*((USHORT*)f_type5)) & 0x1fff;
+		unsigned int tmp_y = (INT)(*((unsigned int*) f_type5));
+
+		x = (SHORT)(tmp_x << 3) >> 3;
+		y = -(INT)(tmp_y << 6) >> 19;
+		x = (x - deviceContext->X.min) > 0 ? (x - deviceContext->X.min) : 0;
+		y = (y - deviceContext->Y.min) > 0 ? (y - deviceContext->Y.min) : 0;
+
+		Report->Contacts[i].X = (USHORT)x;
+		Report->Contacts[i].Y = (USHORT)y;
+
+		if (deviceContext->ProductID == HID_PID_MAGIC_TRACKPAD_1) {
+			// X/Y share the Magic Trackpad 2 bit layout, the rest is shifted (Linux hid-magicmouse.c)
+			f_mt1 = (const TRACKPAD_FINGER_MT1*)f;
+			Report->Contacts[i].ContactID = ((f_mt1->IdAndOrientation << 2) | (f_mt1->SizeAndId >> 6)) & 0xf;
+			Report->Contacts[i].TipSwitch = (f_mt1->State & MT1_TOUCH_STATE_MASK) != MT1_TOUCH_STATE_NONE;
+			// No palm rejection: captured TouchMajor of a thumb (172-216) and a palm (180-252) overlap, a size
+			// threshold either marks the thumb of every pinch as a palm (no zoom) or lets most palms through
+			Report->Contacts[i].Confidence = 1;
+			continue;
+		}
+
+		Report->Contacts[i].ContactID = f_type5->OrientationAndOrigin.ContactIdentifier.Id;
+		Report->Contacts[i].TipSwitch = ((signed short) (f_type5->TouchMajor) << 1) > 0;
+		// The Microsoft spec says reject any input larger than 25mm. This is not ideal
+		// for Magic Trackpad 2 - so we raised the threshold a bit higher.
+		// Or maybe I used the wrong unit? IDK
+		Report->Contacts[i].Confidence = ((signed short) (f_type5->TouchMinor) << 1) < 345 && ((signed short) (f_type5->TouchMinor) << 1) < 345;
+	}
+}
+
 VOID
 PtpFilterInputRequestCompletionCallback(
 	_In_ WDFREQUEST Request,
@@ -136,12 +193,12 @@ PtpFilterInputRequestCompletionCallback(
 	PUCHAR responseBuffer;
 
 	LARGE_INTEGER currentTSC;
-	LONGLONG tSCDelta;
+	LARGE_INTEGER tSCFrequency;
 
-	const TRACKPAD_FINGER* f;
-	const TRACKPAD_FINGER_TYPE5* f_type5;
-	size_t raw_n, headerSize, fingerprintSize = 0;
-	INT x, y = 0;
+	PUCHAR mt1FirstReport = NULL;
+	size_t mt1FirstLength = 0;
+	PTP_REPORT mt1FirstOutput;
+	size_t headerSize, fingerprintSize = 0;
 
 	UNREFERENCED_PARAMETER(Target);
 	
@@ -165,6 +222,28 @@ PtpFilterInputRequestCompletionCallback(
 		goto cleanup;
 	}
 
+	// Pre-flight check 1a: Magic Trackpad 1 packs two multi-touch reports into one 0xF7 report now and then
+	// (Linux hid-magicmouse.c). Continue with the second one, the first is merged in below.
+	if (deviceContext->ProductID == HID_PID_MAGIC_TRACKPAD_1 && responseBuffer[0] == HID_REPORTID_MAGIC_TRACKPAD_1_DOUBLE &&
+		responseLength > 2 && (size_t)2 + responseBuffer[1] < responseLength) {
+		mt1FirstReport = responseBuffer + 2;
+		mt1FirstLength = responseBuffer[1];
+		responseBuffer = mt1FirstReport + mt1FirstLength;
+		responseLength -= 2 + mt1FirstLength;
+		if (mt1FirstReport[0] != HID_REPORTID_MAGIC_TRACKPAD_1 || mt1FirstLength < headerSize ||
+			(mt1FirstLength - headerSize) % fingerprintSize != 0) {
+			mt1FirstReport = NULL;
+		}
+	}
+
+	// Pre-flight check 1b: Magic Trackpad 1 also sends other reports (e.g. battery),
+	// skip everything except the multi-touch one and ask for the next read.
+	if (deviceContext->ProductID == HID_PID_MAGIC_TRACKPAD_1 && responseBuffer[0] != HID_REPORTID_MAGIC_TRACKPAD_1) {
+		TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_INPUT, "%!FUNC! Skipping report 0x%x, length = %llu", responseBuffer[0], responseLength);
+		WdfWorkItemEnqueue(requestContext->DeviceContext->HidTransportRecoveryWorkItem);
+		goto cleanup;
+	}
+
 	// Pre-flight check 2: the response size should be sane
 	if (responseLength < deviceContext->InputHeaderSize || (responseLength - deviceContext->InputHeaderSize) % deviceContext->InputFingerSize != 0) {
 		TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INPUT, "%!FUNC! Malformed input received. Length = %llu. Attempt to reconfigure the device.", responseLength);
@@ -179,42 +258,37 @@ PtpFilterInputRequestCompletionCallback(
 		goto cleanup;
 	}
 
-	// Report header
+	// Report header. Zeroed so the padding bits do not carry kernel stack contents to user mode
+	RtlZeroMemory(&ptpOutputReport, sizeof(ptpOutputReport));
+	RtlZeroMemory(&mt1FirstOutput, sizeof(mt1FirstOutput));
 	ptpOutputReport.ReportID = REPORTID_MULTITOUCH;
 	ptpOutputReport.IsButtonClicked = 0;
 
-	// Capture current timestamp and get input delta in 100us unit
-	KeQueryPerformanceCounter(&currentTSC);
-	tSCDelta = (currentTSC.QuadPart - deviceContext->LastReportTime.QuadPart) / 100;
-	ptpOutputReport.ScanTime = (tSCDelta >= 0xFF) ? 0xFF : (USHORT)tSCDelta;
+	// Capture current timestamp
+	// The argument receives the counter frequency, the counter itself is returned. PTP wants a running
+	// clock in 100us units that wraps at 16 bits, not a delta: Windows derives gesture speed from it.
+	currentTSC = KeQueryPerformanceCounter(&tSCFrequency);
+	ptpOutputReport.ScanTime = (USHORT)(currentTSC.QuadPart / max(tSCFrequency.QuadPart / 10000, 1));
 	deviceContext->LastReportTime.QuadPart = currentTSC.QuadPart;
 
 	// Report required content
 	// Touch
-	raw_n = (responseLength - headerSize) / fingerprintSize;
-	if (raw_n >= PTP_MAX_CONTACT_POINTS) raw_n = PTP_MAX_CONTACT_POINTS;
-	ptpOutputReport.ContactCount = (UCHAR) raw_n;
-	for (size_t i = 0; i < raw_n; i++) {
-		PUCHAR f_base = responseBuffer + headerSize + deviceContext->InputFingerDelta;
-		f = (const TRACKPAD_FINGER*)(f_base + i * fingerprintSize);
-		f_type5 = (const TRACKPAD_FINGER_TYPE5*)f;
-		
-		USHORT tmp_x = (*((USHORT*)f_type5)) & 0x1fff;
-		unsigned int tmp_y = (INT)(*((unsigned int*) f_type5));
+	PtpFilterInputParseContacts(deviceContext, responseBuffer, responseLength, &ptpOutputReport);
 
-		x = (SHORT)(tmp_x << 3) >> 3;
-		y = -(INT)(tmp_y << 6) >> 19;
-		x = (x - deviceContext->X.min) > 0 ? (x - deviceContext->X.min) : 0;
-		y = (y - deviceContext->Y.min) > 0 ? (y - deviceContext->Y.min) : 0;
-
-		ptpOutputReport.Contacts[i].ContactID = f_type5->OrientationAndOrigin.ContactIdentifier.Id;
-		ptpOutputReport.Contacts[i].X = (USHORT)x;
-		ptpOutputReport.Contacts[i].Y = (USHORT)y;
-		ptpOutputReport.Contacts[i].TipSwitch = ((signed short) (f_type5->TouchMajor) << 1) > 0;
-		// The Microsoft spec says reject any input larger than 25mm. This is not ideal
-		// for Magic Trackpad 2 - so we raised the threshold a bit higher.
-		// Or maybe I used the wrong unit? IDK
-		ptpOutputReport.Contacts[i].Confidence = ((signed short) (f_type5->TouchMinor) << 1) < 345 && ((signed short) (f_type5->TouchMinor) << 1) < 345;
+	// Magic Trackpad 1 double report: the second (newest) report is sent, fingers lifted in the first one
+	// are missing from it, carry them over so Windows does not keep a stale contact
+	if (mt1FirstReport != NULL) {
+		PtpFilterInputParseContacts(deviceContext, mt1FirstReport, mt1FirstLength, &mt1FirstOutput);
+		for (UCHAR i = 0; i < mt1FirstOutput.ContactCount && ptpOutputReport.ContactCount < PTP_MAX_CONTACT_POINTS; i++) {
+			BOOLEAN present = FALSE;
+			if (mt1FirstOutput.Contacts[i].TipSwitch) continue;
+			for (UCHAR j = 0; j < ptpOutputReport.ContactCount; j++) {
+				if (ptpOutputReport.Contacts[j].ContactID == mt1FirstOutput.Contacts[i].ContactID) present = TRUE;
+			}
+			if (!present) {
+				ptpOutputReport.Contacts[ptpOutputReport.ContactCount++] = mt1FirstOutput.Contacts[i];
+			}
+		}
 	}
 
 	// Button

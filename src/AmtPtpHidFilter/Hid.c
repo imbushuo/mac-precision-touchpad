@@ -33,6 +33,13 @@ PtpFilterGetHidDescriptor(
 			pSelectedHidDescriptor = &PtpDefaultHidDescriptorMagicTrackpad2;
 			break;
 		}
+		case HID_PID_MAGIC_TRACKPAD_1:
+		{
+			TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HID, "%!FUNC! Request HID Report Descriptor for Apple Magic Trackpad 1");
+			hidDescriptorSize = PtpDefaultHidDescriptorMagicTrackpad1.bLength;
+			pSelectedHidDescriptor = &PtpDefaultHidDescriptorMagicTrackpad1;
+			break;
+		}
 	}
 
 	if (pSelectedHidDescriptor != NULL && hidDescriptorSize > 0) {
@@ -115,6 +122,12 @@ PtpFilterGetReportDescriptor(
 		{
 			hidDescriptorSize = PtpDefaultHidDescriptorMagicTrackpad2.DescriptorList[0].wReportLength;
 			selectedHidDescriptor = PtpReportDescriptorMagicTrackpad2;
+			break;
+		}
+		case HID_PID_MAGIC_TRACKPAD_1:
+		{
+			hidDescriptorSize = PtpDefaultHidDescriptorMagicTrackpad1.DescriptorList[0].wReportLength;
+			selectedHidDescriptor = PtpReportDescriptorMagicTrackpad1;
 			break;
 		}
 	}

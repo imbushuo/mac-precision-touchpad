@@ -83,4 +83,19 @@ typedef struct _TRACKPAD_FINGER_TYPE5
 		UCHAR RawValue;
 	} OrientationAndOrigin;
 } TRACKPAD_FINGER_TYPE5, *PTRACKPAD_FINGER_TYPE5;
+/* Trackpad finger structure for Magic Trackpad 1, see Linux hid-magicmouse.c */
+typedef struct _TRACKPAD_FINGER_MT1
+{
+	UCHAR AbsoluteX;			/* absolute x coodinate */
+	UCHAR AbsoluteXY;			/* absolute x,y coodinate */
+	UCHAR AbsoluteY[2];			/* absolute y coodinate, low 2 bits of [1] */
+	UCHAR TouchMajor;			/* touch area, major axis */
+	UCHAR TouchMinor;			/* touch area, minor axis */
+	UCHAR SizeAndId;			/* bits 0-5: size, bits 6-7: id low bits */
+	UCHAR IdAndOrientation;		/* bits 0-1: id high bits, bits 2-7: orientation */
+	UCHAR State;				/* bits 4-7: touch state */
+} TRACKPAD_FINGER_MT1, *PTRACKPAD_FINGER_MT1;
+
+#define MT1_TOUCH_STATE_MASK	0xf0
+#define MT1_TOUCH_STATE_NONE	0x00
 #include <poppack.h>

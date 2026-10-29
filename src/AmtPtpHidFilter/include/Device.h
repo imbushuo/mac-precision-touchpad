@@ -13,7 +13,13 @@ DEFINE_GUID(GUID_DEVICEINTERFACE_AmtPtpHidFilter,
 
 #define HID_VID_APPLE_USB 0x05ac
 #define HID_VID_APPLE_BT  0x004c
+#define HID_PID_MAGIC_TRACKPAD_1 0x030e
 #define HID_PID_MAGIC_TRACKPAD_2 0x0265
+
+// Magic Trackpad 1 sends multi-touch data in this report once switched with feature D7 01
+#define HID_REPORTID_MAGIC_TRACKPAD_1 0x28
+// Two multi-touch reports in one packet: [F7][length of the first][first report][second report]
+#define HID_REPORTID_MAGIC_TRACKPAD_1_DOUBLE 0xF7
 
 /* device-specific parameters */
 typedef struct _BCM5974_PARAM {
